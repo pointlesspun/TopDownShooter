@@ -9,6 +9,8 @@ public class TitleScreenStateBehaviour : MonoBehaviour, IGameState {
     public GameObject inGameState;
     public GameObject titleScreenUI;
 
+    public bool isFireButtonUp = false;
+
     public GameStateType State
     {
         get
@@ -32,6 +34,7 @@ public class TitleScreenStateBehaviour : MonoBehaviour, IGameState {
             gameObject.SetActive(true);
         }
 
+        isFireButtonUp = false;
         _state = GameStateType.Started;
         titleScreenUI.SetActive(true);
     }
@@ -43,9 +46,17 @@ public class TitleScreenStateBehaviour : MonoBehaviour, IGameState {
 
     void Update ()
     {
-	    if (_state == GameStateType.Started && Input.GetButton("Fire1"))
+        if (!isFireButtonUp)
         {
-            StopGameState();
-        }	
+            isFireButtonUp = !Input.GetButton("Fire1");
+        }
+        
+        if (isFireButtonUp)
+        {
+            if (_state == GameStateType.Started && Input.GetButton("Fire1"))
+            {
+                StopGameState();
+            }
+        }
 	}
 }
