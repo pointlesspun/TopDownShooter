@@ -5,7 +5,5 @@ Although the end-goal is build a "Gauntlet*" style, single player game, the main
 
 To overcome this problem a lot more tracking of the state of the project is required, task lists, open bugs and so on. However the tracking should still be as minimal and as effective as possible to limit the 'drag' of the overhead.  
 
-## Build 2 (v0.01) Task list
-
 ---
 Other inspirations include "Nuclear Throne", "Binding of Isaac", "Enter the Gungeon"
