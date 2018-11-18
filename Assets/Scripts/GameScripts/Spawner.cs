@@ -12,6 +12,11 @@ public class Spawner : MonoBehaviour {
 
     private float _lastSpawnTime = 0;
 
+    private void Start()
+    {
+        _lastSpawnTime = Time.time;
+    }
+
     void Update () {
 
 		if ( Time.time - _lastSpawnTime > _spawnInterval )

@@ -6,6 +6,8 @@ using UnityEngine;
 
 public class InGameStateBehaviour : MonoBehaviour, IGameState
 {
+    public static GameObject _inGameStateObject;
+
     private GameStateType _state = GameStateType.NotStarted;
 
     public GameObject titleScreenGameState;
@@ -41,6 +43,11 @@ public class InGameStateBehaviour : MonoBehaviour, IGameState
         Destroy(_level);
         titleScreenGameState.GetComponent<IGameState>().StartGameState();
         gameObject.SetActive(false);
+    }
+
+    public void Start()
+    {
+        _inGameStateObject = gameObject;
     }
 
     public void Update()

@@ -19,7 +19,14 @@ public class RangedWeapon : WeaponBase
 
         bullet.transform.localScale *= bulletScale;
         bullet.transform.position = transform.position;
-        bullet.transform.parent = transform;
+        bullet.name = "bullet " + gameObject.name;
+
+        if (InGameStateBehaviour._inGameStateObject != null)
+        {
+            // assign bullet to the in game state, so when the game state is destroyed
+            // all the bullets are removed as well.
+            bullet.transform.parent = InGameStateBehaviour._inGameStateObject.transform.parent;
+        }
 
         bulletBehaviour.velocity = bulletSpeed;
         bulletBehaviour.direction = attackDescription.direction;
