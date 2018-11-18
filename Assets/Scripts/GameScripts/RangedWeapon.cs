@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class RangedWeapon : WeaponBase
 {
-    public GameObject prefab;
+    public GameObject _bulletPrefab;
 
     public float bulletSpeed = 1.0f;
     public float bulletLifeTime = 2.0f;
@@ -14,7 +10,7 @@ public class RangedWeapon : WeaponBase
 
     protected override bool ExecuteAttack(AttackParameters attackDescription)
     {
-        var bullet = GameObject.Instantiate<GameObject>(prefab);
+        var bullet = Instantiate<GameObject>(_bulletPrefab);
         var bulletBehaviour = bullet.GetComponent<BulletBehaviour>();
 
         bullet.transform.localScale *= bulletScale;
@@ -34,5 +30,8 @@ public class RangedWeapon : WeaponBase
 
         return true;
     }
+
+  
+
 }
 

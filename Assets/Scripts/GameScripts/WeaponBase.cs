@@ -9,6 +9,7 @@ public abstract class WeaponBase : MonoBehaviour
     public float _range = -1.0f;
     public float _cooldown = 1.0f;
     public int _damage = 1;
+    public float _offsetFromOwner = 0.3f;
 
     private float _lastAttackTime = -1.0f;
 
@@ -19,7 +20,8 @@ public abstract class WeaponBase : MonoBehaviour
 
     public virtual bool IsInRange(GameObject target)
     {
-        return (target.transform.position - transform.position).sqrMagnitude < _range * _range;
+        var distance = (target.transform.position - transform.position).sqrMagnitude;
+        return distance < _range * _range;
     }
 
     public void Attack(AttackParameters attackDescription)

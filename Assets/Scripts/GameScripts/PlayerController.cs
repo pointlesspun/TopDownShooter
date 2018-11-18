@@ -21,7 +21,7 @@ public class PlayerController : MonoBehaviour {
         _body = GetComponent<Rigidbody2D>();
 
         _camera = Camera.main;
-        _weapon = GetComponent<WeaponBase>();
+        _weapon = SelectWeapon();
 
     }
 	
@@ -48,16 +48,42 @@ public class PlayerController : MonoBehaviour {
         
         _body.velocity = magnitude * direction;
 
+        var mouseScreenPosition = Input.mousePosition;
+        var mouseWorldPosition = _camera.ScreenToWorldPoint(new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, _camera.nearClipPlane));
+        
+        mouseWorldPosition.z = 0;
+
+        var attackDirection = (mouseWorldPosition - transform.position).normalized;
+        _weapon.transform.position = transform.position + attackDirection  * _weapon._offsetFromOwner;
+
         if (Input.GetButton("Fire1") && _weapon != null && _weapon.IsCooldownOver())
         {
-            var mouseScreenPosition = Input.mousePosition;
-            var mouseWorldPosition = _camera.ScreenToWorldPoint(new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, _camera.nearClipPlane));
-
-            mouseWorldPosition.z = 0;
-
-            _attackDescription.direction = (mouseWorldPosition - transform.position).normalized;
-
+        
+            _attackDescription.direction = attackDirection;
             _weapon.Attack(_attackDescription);
         }
+    }
+
+
+    private WeaponBase SelectWeapon()
+    {
+        WeaponBase result = null;
+
+        for (int i = 0; i < transform.childCount; ++i)
+        {
+            var child = transform.GetChild(i).gameObject;
+
+            if (child.tag == "Weapon")
+            {
+                result = child.GetComponent<WeaponBase>();
+
+                if (result != null)
+                {
+                    break;
+                }
+            }
+        }
+
+        return result;
     }
 }

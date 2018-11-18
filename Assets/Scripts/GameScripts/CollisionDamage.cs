@@ -21,10 +21,12 @@ public class CollisionDamage : MonoBehaviour {
                 gameObject.SendMessage("OnDamage", damage, SendMessageOptions.RequireReceiver);
             }
 
-            if ( destroyOnCollision )
-            {
-                Destroy(gameObject);
-            } 
         }
+
+        if (destroyOnCollision)
+        {
+            Destroy(gameObject);
+        }
+
     }
 }
