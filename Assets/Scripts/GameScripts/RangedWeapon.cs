@@ -1,31 +1,65 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-
-public class RangedWeapon : WeaponBase
+﻿/*
+ * TDS (c) 2018 by Another Pointless Pun
+ * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
+ * You should have received a copy of the license along with this work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
+ */
+namespace Tds.GameScripts
 {
-    public GameObject prefab;
+    using UnityEngine;
+    using Tds.GameStateScripts;
 
-    public float bulletSpeed = 1.0f;
-    public float bulletLifeTime = 2.0f;
-    public float bulletScale = 1.0f;
-
-    protected override bool ExecuteAttack(AttackParameters attackDescription)
+    /// <summary>
+    /// Implementation of a generic ranged weapon
+    /// </summary>
+    public class RangedWeapon : WeaponBase
     {
-        var bullet = GameObject.Instantiate<GameObject>(prefab);
-        var bulletBehaviour = bullet.GetComponent<BulletBehaviour>();
+        /// <summary>
+        /// Game object spawned when weapon is fired
+        /// </summary>
+        public GameObject _bulletPrefab;
 
-        bullet.transform.localScale *= bulletScale;
-        bullet.transform.position = transform.position;
-        bullet.transform.parent = transform;
+        /// <summary>
+        /// Speed with which the bullet will be ejected
+        /// </summary>
+        public float _bulletSpeed = 1.0f;
 
-        bulletBehaviour.velocity = bulletSpeed;
-        bulletBehaviour.direction = attackDescription.direction;
-        bulletBehaviour.lifetime = bulletLifeTime;
+        /// <summary>
+        /// Life time in seconds of the bullet
+        /// </summary>
+        public float _bulletLifeTime = 2.0f;
 
-        return true;
+        /// <summary>
+        /// Size of the bullet
+        /// </summary>
+        public float _bulletScale = 1.0f;
+
+        /// <summary>
+        /// Override from WeaponBase outlining what is meant to happen, in this case a bullet
+        /// will be spawned in the direction indicated by the attackDescription.
+        /// </summary>
+        /// <param name="attackDescription"></param>
+        /// <returns></returns>
+        protected override bool ExecuteAttack(AttackParameters attackDescription)
+        {
+            var bullet = Instantiate<GameObject>(_bulletPrefab);
+            var bulletBehaviour = bullet.GetComponent<BulletBehaviour>();
+
+            bullet.transform.localScale *= _bulletScale;
+            bullet.transform.position = transform.position;
+            bullet.name = "bullet " + gameObject.name;
+
+            if (InGameStateBehaviour._inGameStateObject != null)
+            {
+                // assign bullet to the in game state, so when the game state is destroyed
+                // all the bullets are removed as well.
+                bullet.transform.parent = InGameStateBehaviour._inGameStateObject.transform;
+            }
+
+            bulletBehaviour._velocity = _bulletSpeed;
+            bulletBehaviour._direction = attackDescription._direction;
+            bulletBehaviour._lifetime = _bulletLifeTime;
+
+            return true;
+        }
     }
 }
-
