@@ -28,6 +28,16 @@ namespace Tds.GameScripts
         public float _velocity;
 
         /// <summary>
+        /// Potential damage caused to the colliding party
+        /// </summary>
+        public int _damage = 1;
+
+        /// <summary>
+        /// No damage will be triggered on objects with this tag.
+        /// </summary>
+        public string _friendlyTag = GameTags.Player;
+
+        /// <summary>
         /// Reference to the rigid body
         /// </summary>
         private Rigidbody2D _body;
@@ -51,6 +61,16 @@ namespace Tds.GameScripts
             {
                 Destroy(gameObject);
             }
+        }
+
+        void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (collision.gameObject.tag != _friendlyTag)
+            {
+                collision.gameObject.SendMessage(MessageNames.OnDamage, _damage, SendMessageOptions.RequireReceiver);
+            }
+
+            Destroy(gameObject);
         }
     }
 }

@@ -5,9 +5,10 @@
  */
 namespace Tds.GameStateScripts
 {
-    using Tds.GameScripts;
     using UnityEngine;
     using UnityEngine.SceneManagement;
+
+    using Tds.GameScripts;
 
     /// <summary>
     /// Expressed the behavior of the state when in game. Will track the state of the player.

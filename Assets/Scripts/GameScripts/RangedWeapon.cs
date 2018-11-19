@@ -42,14 +42,16 @@ namespace Tds.GameScripts
         {
             var bullet = Instantiate<GameObject>(_bulletPrefab);
             var bulletBehaviour = bullet.GetComponent<BulletBehaviour>();
-
+            
             bullet.transform.localScale *= _bulletScale;
             bullet.transform.position = transform.position;
             bullet.name = "bullet " + gameObject.name;
 
+            bulletBehaviour._friendlyTag = gameObject.tag;
             bulletBehaviour._velocity = _bulletSpeed;
             bulletBehaviour._direction = attackDescription._direction;
             bulletBehaviour._lifetime = _bulletLifeTime;
+            bulletBehaviour._damage = _damage;
 
             return true;
         }
