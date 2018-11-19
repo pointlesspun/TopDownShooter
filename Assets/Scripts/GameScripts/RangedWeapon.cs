@@ -6,7 +6,6 @@
 namespace Tds.GameScripts
 {
     using UnityEngine;
-    using Tds.GameStateScripts;
 
     /// <summary>
     /// Implementation of a generic ranged weapon
@@ -47,13 +46,6 @@ namespace Tds.GameScripts
             bullet.transform.localScale *= _bulletScale;
             bullet.transform.position = transform.position;
             bullet.name = "bullet " + gameObject.name;
-
-            if (InGameStateBehaviour._inGameStateObject != null)
-            {
-                // assign bullet to the in game state, so when the game state is destroyed
-                // all the bullets are removed as well.
-                bullet.transform.parent = InGameStateBehaviour._inGameStateObject.transform;
-            }
 
             bulletBehaviour._velocity = _bulletSpeed;
             bulletBehaviour._direction = attackDescription._direction;

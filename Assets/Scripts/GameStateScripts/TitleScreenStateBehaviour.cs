@@ -7,69 +7,31 @@ namespace Tds.GameStateScripts
 {
     using UnityEngine;
     using Tds.GameScripts;
+    using UnityEngine.SceneManagement;
 
     /// <summary>
     /// Expressed the behavior of the state when in the title screen. When the player presses the
     /// fire button, the game will start.
-    /// 
-    /// xxx move to scene
     /// </summary>
-    public class TitleScreenStateBehaviour : MonoBehaviour, IGameState
-    {
-        private GameStateType _state = GameStateType.NotStarted;
+    public class TitleScreenStateBehaviour : MonoBehaviour
+    {        
+        public string _nextSceneName = "";
 
-        public GameObject inGameState;
-        public GameObject titleScreenUI;
+        private bool _IsFireButtonDown = false;
 
-        public bool isFireButtonUp = false;
 
-        public GameStateType State
+        public void Update()
         {
-            get
+            // check if the user clicks the firebutton - if so go to the next scene
+            if (_IsFireButtonDown)
             {
-                return _state;
-            }
-        }
-
-        public void StopGameState()
-        {
-            _state = GameStateType.Stopped;
-            titleScreenUI.SetActive(false);
-            inGameState.GetComponent<IGameState>().StartGameState();
-            gameObject.SetActive(false);
-        }
-
-        public void StartGameState()
-        {
-            if (!gameObject.activeInHierarchy)
-            {
-                gameObject.SetActive(true);
-            }
-
-            isFireButtonUp = false;
-            _state = GameStateType.Started;
-            titleScreenUI.SetActive(true);
-        }
-
-        void Start()
-        {
-            StartGameState();
-        }
-
-        void Update()
-        {
-            if (!isFireButtonUp)
-            {
-                isFireButtonUp = !Input.GetButton(InputNames.Fire1);
-            }
-
-            if (isFireButtonUp)
-            {
-                if (_state == GameStateType.Started && Input.GetButton(InputNames.Fire1))
+                if (!Input.GetButton(InputNames.Fire1))
                 {
-                    StopGameState();
+                    SceneManager.LoadScene(_nextSceneName, LoadSceneMode.Single);
                 }
             }
+
+            _IsFireButtonDown = Input.GetButton(InputNames.Fire1);
         }
     }
 }
