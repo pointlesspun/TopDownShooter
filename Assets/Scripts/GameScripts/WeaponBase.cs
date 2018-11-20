@@ -28,7 +28,7 @@ namespace Tds.GameScripts
         /// Damage done by the weapon 
         /// (xxx todo: move to floats)
         /// </summary>
-        public int _damage = 1;
+        public float _damage = 1;
 
         /// <summary>
         /// Distance from the owner at which the weapon will attack from

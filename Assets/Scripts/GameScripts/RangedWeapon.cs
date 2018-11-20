@@ -41,17 +41,19 @@ namespace Tds.GameScripts
         protected override bool ExecuteAttack(AttackParameters attackDescription)
         {
             var bullet = Instantiate<GameObject>(_bulletPrefab);
-            var bulletBehaviour = bullet.GetComponent<BulletBehaviour>();
             
             bullet.transform.localScale *= _bulletScale;
             bullet.transform.position = transform.position;
             bullet.name = "bullet " + gameObject.name;
 
-            bulletBehaviour._friendlyTag = gameObject.tag;
-            bulletBehaviour._velocity = _bulletSpeed;
-            bulletBehaviour._direction = attackDescription._direction;
-            bulletBehaviour._lifetime = _bulletLifeTime;
-            bulletBehaviour._damage = _damage;
+            var bulletSettings = bullet.GetComponent<BulletBehaviour>();
+
+            bulletSettings._friendlyTag = gameObject.tag;
+            bulletSettings._velocity = _bulletSpeed;
+            bulletSettings._direction = attackDescription._direction;
+            bulletSettings._lifetime = _bulletLifeTime;
+            bulletSettings._damage = _damage;
+            bulletSettings._maxRange = _range;
 
             return true;
         }

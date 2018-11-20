@@ -15,7 +15,7 @@ namespace Tds.GameScripts
         /// <summary>
         /// Max hitpoints, current hitpoints should never exceed this
         /// </summary>
-        public int _maxHitpoints = 5;
+        public float _maxHitpoints = 5;
 
         /// <summary>
         /// Flag when set to true will ignore all damage taken
@@ -25,9 +25,9 @@ namespace Tds.GameScripts
         /// <summary>
         /// Current hitpoints, if this drops to 0 or below, the gameojbect associated with this 
         /// </summary>
-        public int _hitpoints = 5;
+        public float _hitpoints = 5;
 
-        void OnDamage(int damage)
+        void OnDamage(float damage)
         {
             if (!_isInvulnerable)
             {
