@@ -38,6 +38,7 @@ namespace Tds.GameScripts
 
                 if (_deadZone <= 0 || positionDifference.sqrMagnitude > _deadZone * _deadZone)
                 {
+                    // change the new position to make sure the target is in the dead zone
                     var newPosition = _target.transform.position + positionDifference.normalized * Mathf.Max(0, _deadZone);
                     newPosition.z = transform.position.z;
                     transform.position = newPosition;
