@@ -7,8 +7,16 @@ namespace Tds.GameScripts
 {
     using UnityEngine;
 
+    /// <summary>
+    /// Behaviour following a given target's position
+    /// </summary>
     public class FollowTargetBehaviour : MonoBehaviour
     {
+        /// <summary>
+        /// If the distance to the target exceeds this value, the behaviour will start following the target
+        /// </summary>
+        public float _deadZone = 1.0f;
+
         /// <summary>
         /// Object to follow
         /// </summary>
@@ -24,9 +32,16 @@ namespace Tds.GameScripts
             // match the target's position as long as the target is alive and active
             if (_target != null && _target.activeInHierarchy)
             {
-                var position = _target.transform.position;
-                position.z = transform.position.z;
-                transform.position = position;
+                var positionDifference = transform.position - _target.transform.position;
+
+                positionDifference.z = 0;
+
+                if (_deadZone <= 0 || positionDifference.sqrMagnitude > _deadZone * _deadZone)
+                {
+                    var newPosition = _target.transform.position + positionDifference.normalized * Mathf.Max(0, _deadZone);
+                    newPosition.z = transform.position.z;
+                    transform.position = newPosition;
+                }
             }
         }
     }
