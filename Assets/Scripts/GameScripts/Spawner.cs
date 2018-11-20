@@ -8,8 +8,6 @@ namespace Tds.GameScripts
     using System.Collections.Generic;
     using UnityEngine;
 
-    using Tds.GameStateScripts;
-
     /// <summary>
     /// Game object which will spawn other game objects (monsters most often).
     /// </summary>
@@ -51,11 +49,6 @@ namespace Tds.GameScripts
                     var spawn = GameObject.Instantiate<GameObject>(_prefab);
                     _spawnedObjects.Add(spawn);
                     spawn.transform.position = transform.position;
-
-                    if (InGameStateBehaviour._inGameStateObject != null)
-                    {
-                        spawn.transform.parent = InGameStateBehaviour._inGameStateObject.transform;
-                    }
                 }
 
                 _lastSpawnTime = Time.time;

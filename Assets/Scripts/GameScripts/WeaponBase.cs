@@ -15,7 +15,7 @@ namespace Tds.GameScripts
         /// <summary>
         /// Range in Unity units at which the weapon can be fired. This is just an
         /// indication for the AI at the moment as the range will not be enforced
-        /// on the actual bullet (xxx todo)
+        /// on the actual bullet 
         /// </summary>
         public float _range = -1.0f;
 
@@ -26,9 +26,8 @@ namespace Tds.GameScripts
 
         /// <summary>
         /// Damage done by the weapon 
-        /// (xxx todo: move to floats)
         /// </summary>
-        public int _damage = 1;
+        public float _damage = 1;
 
         /// <summary>
         /// Distance from the owner at which the weapon will attack from

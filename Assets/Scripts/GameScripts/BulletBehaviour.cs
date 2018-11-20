@@ -28,6 +28,22 @@ namespace Tds.GameScripts
         public float _velocity;
 
         /// <summary>
+        /// Potential damage caused to the colliding party
+        /// </summary>
+        public float _damage = 1;
+
+        /// <summary>
+        /// No damage will be triggered on objects with this tag.
+        /// </summary>
+        public string _friendlyTag = GameTags.Player;
+
+        /// <summary>
+        /// Range in Unity units, after which the gameobject is destroyed. If set to -1 
+        /// the bullet has no maxrange.
+        /// </summary>
+        public float _maxRange = -1;
+
+        /// <summary>
         /// Reference to the rigid body
         /// </summary>
         private Rigidbody2D _body;
@@ -37,11 +53,17 @@ namespace Tds.GameScripts
         /// </summary>
         private float _startTime;
 
+        /// <summary>
+        /// Point at which the was spawned, used to calculate the range check.
+        /// </summary>
+        private Vector3 _startPoint;
+
         void Start()
         {
             _body = GetComponent<Rigidbody2D>();
             _body.velocity = _direction * _velocity;
             _startTime = Time.time;
+            _startPoint = transform.position;
         }
 
         void Update()
@@ -51,6 +73,21 @@ namespace Tds.GameScripts
             {
                 Destroy(gameObject);
             }
+            // check max range condition
+            else if (_maxRange > 0 && ((transform.position - _startPoint).sqrMagnitude > _maxRange * _maxRange))
+            {
+                Destroy(gameObject);
+            }
+        }
+
+        void OnCollisionEnter2D(Collision2D collision)
+        {
+            if (collision.gameObject.tag != _friendlyTag)
+            {
+                collision.gameObject.SendMessage(MessageNames.OnDamage, _damage, SendMessageOptions.RequireReceiver);
+            }
+
+            Destroy(gameObject);
         }
     }
 }

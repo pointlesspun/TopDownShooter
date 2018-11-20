@@ -151,7 +151,7 @@ MonoBehaviour:
   _cooldown: 1
   _damage: 1
   _offsetFromOwner: 0.5
-  _bulletPrefab: {fileID: 1186393398076656, guid: 5b1f6053672c122488c1cdd1805aefc7,
+  _bulletPrefab: {fileID: 1474087171358050, guid: b0af31779834fe7499103aedd2ac94f2,
     type: 2}
   _bulletSpeed: 6
   _bulletLifeTime: 2
