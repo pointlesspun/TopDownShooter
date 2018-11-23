@@ -27,11 +27,24 @@ namespace Tds.GameScripts
         /// Cached object containing the information required to attack
         private AttackParameters _attackDescription = new AttackParameters();
 
+        /// <summary>
+        /// Object holding the animation controller
+        /// </summary>
+        public GameObject _animatorControllerObject;
+
+        /// <summary>
+        /// Cached animator
+        /// </summary>
+        private Animator _animator;
+
         public void Start()
         {
             _player = GameObject.FindGameObjectWithTag(GameTags.Player);
             _body = GetComponent<Rigidbody2D>();
             _weapon = GetComponent<WeaponBase>();
+
+            _animator = _animatorControllerObject.GetComponent<Animator>();
+
         }
 
         public void Update()
@@ -68,6 +81,9 @@ namespace Tds.GameScripts
                     }
                 }
             }
+
+            var animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, _player.transform.position, _body.velocity, 0.4f);
+            _animator.SetInteger(AnimatorParameterNames.AnimationState, animationState);
         }
 
         private void AttackPlayer()
