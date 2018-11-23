@@ -33,6 +33,16 @@ namespace Tds.GameScripts
         public float _velocityIncrease = 32;
 
         /// <summary>
+        /// Object holding the animation controller
+        /// </summary>
+        public GameObject _animatorControllerObject;
+
+        /// <summary>
+        /// Speed at which the character is considered idle.
+        /// </summary>
+        public float _idleSpeed = 0.4f;
+
+        /// <summary>
         /// Reference to the body
         /// </summary>
         private Rigidbody2D _body;
@@ -52,9 +62,18 @@ namespace Tds.GameScripts
         /// </summary>
         private AttackParameters _attackDescription = new AttackParameters();
 
+        /// <summary>
+        /// Cached animator
+        /// </summary>
+        private Animator _animator;
+
         void Start()
         {
+            Contract.RequiresComponent<Rigidbody2D>(gameObject, "The player is required to have a RigidBody2D component.");
+            Contract.Requires(_animatorControllerObject != null, "The player object is required to have the _animatorControllerObject parameter set.");
+
             _body = GetComponent<Rigidbody2D>();
+            _animator = _animatorControllerObject.GetComponent<Animator>();
 
             _camera = Camera.main;
             _weapon = SelectWeapon();
@@ -62,11 +81,16 @@ namespace Tds.GameScripts
 
         void Update()
         {
-            UpdateVelocity();
-            UpdateAttack();
+            var cursorPosition = GetCursorPosition();
+            var velocity = UpdateVelocity();
+            var animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, cursorPosition, velocity, _idleSpeed);
+
+            UpdateAttack(cursorPosition);
+
+            _animator.SetInteger(AnimatorParameterNames.AnimationState, animationState);
         }
 
-        private void UpdateVelocity()
+        private Vector3 UpdateVelocity()
         {
             var velocity = _body.velocity;
 
@@ -90,25 +114,33 @@ namespace Tds.GameScripts
             }
 
             _body.velocity = magnitude * direction;
+
+            return _body.velocity;
         }
 
-        private void UpdateAttack()
+        private Vector3 GetCursorPosition()
         {
             var mouseScreenPosition = Input.mousePosition;
-            var mouseWorldPosition = _camera.ScreenToWorldPoint(new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, _camera.nearClipPlane));
+            var result = _camera.ScreenToWorldPoint(new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, _camera.nearClipPlane));
 
-            mouseWorldPosition.z = 0;
+            result.z = 0;
 
-            var attackDirection = (mouseWorldPosition - transform.position).normalized;
+            return result;
+        }
+
+        private void UpdateAttack(Vector3 cursorPosition)
+        {
+
+            var attackDirection = (cursorPosition - transform.position).normalized;
             _weapon.transform.position = transform.position + attackDirection * _weapon._offsetFromOwner;
 
             if (Input.GetButton(InputNames.Fire1) && _weapon != null && _weapon.IsCooldownOver())
             {
-
                 _attackDescription._direction = attackDirection;
                 _weapon.Attack(_attackDescription);
             }
         }
+
 
         /// <summary>
         /// Simple weapon select implementation, will change in forthcoming builds
