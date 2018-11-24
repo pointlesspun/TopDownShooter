@@ -13,7 +13,7 @@ AnimatorController:
     m_DefaultFloat: 0
     m_DefaultInt: 0
     m_DefaultBool: 0
-    m_Controller: {fileID: 0}
+    m_Controller: {fileID: 9100000}
   m_AnimatorLayers:
   - serializedVersion: 5
     m_Name: Base Layer
@@ -440,7 +440,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 7adb171bbc8a6c744af73d875ce1a1b2, type: 2}
+  m_Motion: {fileID: 7400000, guid: 946e895d6b2d88649af463d502ae71ef, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -452,7 +452,7 @@ AnimatorState:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Run-Right-Backwards
+  m_Name: Run right backwards
   m_Speed: -1
   m_CycleOffset: 0
   m_Transitions:
@@ -466,7 +466,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 946e895d6b2d88649af463d502ae71ef, type: 2}
+  m_Motion: {fileID: 7400000, guid: 7adb171bbc8a6c744af73d875ce1a1b2, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -478,7 +478,7 @@ AnimatorState:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: LookRight
+  m_Name: Look right
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -504,7 +504,7 @@ AnimatorState:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: Run-Right
+  m_Name: Run right
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
@@ -518,7 +518,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 7adb171bbc8a6c744af73d875ce1a1b2, type: 2}
+  m_Motion: {fileID: 7400000, guid: 946e895d6b2d88649af463d502ae71ef, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -575,7 +575,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 946e895d6b2d88649af463d502ae71ef, type: 2}
+  m_Motion: {fileID: 7400000, guid: 7adb171bbc8a6c744af73d875ce1a1b2, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
@@ -587,7 +587,7 @@ AnimatorState:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_Name: LookLeft
+  m_Name: Look left
   m_Speed: 1
   m_CycleOffset: 0
   m_Transitions:
