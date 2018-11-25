@@ -39,16 +39,18 @@ namespace Tds.GameScripts
 
         public void Start()
         {
-            _player = GameObject.FindGameObjectWithTag(GameTags.Player);
+            _player = GlobalGameState._playerObject;
+
             _body = GetComponent<Rigidbody2D>();
             _weapon = GetComponent<WeaponBase>();
 
             _animator = _animatorControllerObject.GetComponent<Animator>();
-
         }
 
         public void Update()
         {
+            var animationState = AnimationState.MovingBackwardFacingRight;
+
             _body.velocity = Vector3.zero;
 
             // only do something if the player is alive
@@ -80,9 +82,10 @@ namespace Tds.GameScripts
                         _body.velocity = movementDirection * _maxSpeed;
                     }
                 }
+
+                animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, _player.transform.position, _body.velocity, 0.4f);
             }
 
-            var animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, _player.transform.position, _body.velocity, 0.4f);
             _animator.SetInteger(AnimatorParameterNames.AnimationState, animationState);
         }
 
