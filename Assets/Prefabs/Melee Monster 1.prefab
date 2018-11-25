@@ -410,13 +410,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dec147be147e644d97da8dfb3292328, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveLeftClipName: RunLeft
+  moveLeftClipName: PlayerRunLeft
   moveLeft: {fileID: 7400000, guid: 039bb2dc8cf768b4e9164d10d7d229be, type: 2}
-  moveRightClipName: RunRight
+  moveRightClipName: PlayerRunRight
   moveRight: {fileID: 7400000, guid: 31d320a24bcdafe4ea9154407bdc2f06, type: 2}
-  idleLeftClipName: StandLeft
+  idleLeftClipName: PlayerIdleLeft
   idleLeft: {fileID: 7400000, guid: 07b01d3f157d27d4d8eefb2c8f9daa9e, type: 2}
-  idleRightClipName: StandRight
+  idleRightClipName: PlayerIdleRight
   idleRight: {fileID: 7400000, guid: 62b241977e5e3564aa42b32bbe4fcc9d, type: 2}
 --- !u!114 &114419297549255398
 MonoBehaviour:

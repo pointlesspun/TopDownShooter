@@ -83,7 +83,6 @@ namespace Tds.GameScripts
             {
                 for (int y = 0; y < _height; y++)
                 {
-                    var cloneBase = _floorPrefab;
                     var element = (GameObject)null;
 
                     if (_addWallBorder  && _horizontalWallPrefab != null && ( x == 0 || x == _width - 1 ))
