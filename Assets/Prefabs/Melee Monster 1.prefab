@@ -324,7 +324,7 @@ Transform:
   m_GameObject: {fileID: 1141413182277166}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -4.7432528, y: -4.066817, z: 0}
-  m_LocalScale: {x: 2, y: 2, z: 2}
+  m_LocalScale: {x: 1.6, y: 1.6, z: 1.75}
   m_Children:
   - {fileID: 4906102992131858}
   - {fileID: 4046427333212170}
@@ -459,7 +459,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _maxHitpoints: 10
   _isInvulnerable: 0
-  _hitpoints: 5
+  _hitpoints: 3
 --- !u!210 &210203508681828030
 SortingGroup:
   m_ObjectHideFlags: 1

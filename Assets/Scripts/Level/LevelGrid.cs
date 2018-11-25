@@ -18,9 +18,14 @@ namespace Tds.GameScripts
         public GameObject _floorPrefab;
 
         /// <summary>
-        /// GameObject prefab which contains the behaviour of a wall element
+        /// GameObject prefab which contains the behaviour of a horizontal wall element
         /// </summary>
-        public GameObject _wallPrefab;
+        public GameObject _horizontalWallPrefab;
+
+        /// <summary>
+        /// GameObject prefab which contains the behaviour of a vertical wall element
+        /// </summary>
+        public GameObject _verticalWallPrefab;
 
         /// <summary>
         /// Sprites from which the floor generation can choose to create a level from
@@ -63,6 +68,9 @@ namespace Tds.GameScripts
         /// </summary>
         public bool _buildAroundCenter = true;
 
+        /// <summary>
+        /// If true adds a border around the level space
+        /// </summary>
         public bool _addWallBorder = true;
 
         void Start()
@@ -78,10 +86,15 @@ namespace Tds.GameScripts
                     var cloneBase = _floorPrefab;
                     var element = (GameObject)null;
 
-                    if (_addWallBorder  && _wallPrefab != null && (x == 0 || y == 0 || x == _width - 1 || y == _height -1))
+                    if (_addWallBorder  && _horizontalWallPrefab != null && ( x == 0 || x == _width - 1 ))
                     {
-                        element = Instantiate<GameObject>(_wallPrefab);
-                        element.name = "wall " + x + ", " + y;
+                        element = Instantiate<GameObject>(_verticalWallPrefab);
+                        element.name = "h-wall " + x + ", " + y;
+                    }
+                    else if (_addWallBorder && _verticalWallPrefab != null && (y == 0 || y == _height - 1))
+                    {
+                        element = Instantiate<GameObject>(_horizontalWallPrefab);
+                        element.name = "v-wall " + x + ", " + y;
                     }
                     else
                     {
