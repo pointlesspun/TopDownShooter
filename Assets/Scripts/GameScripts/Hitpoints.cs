@@ -5,6 +5,7 @@
  */
 namespace Tds.GameScripts
 {
+    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
@@ -12,6 +13,12 @@ namespace Tds.GameScripts
     /// </summary>
     public class Hitpoints : MonoBehaviour
     {
+        private class SpriteRendereColorInformation
+        {
+            public SpriteRenderer _renderer;
+            public Color          _originalColor;
+        }
+
         /// <summary>
         /// Max hitpoints, current hitpoints should never exceed this
         /// </summary>
@@ -27,16 +34,62 @@ namespace Tds.GameScripts
         /// </summary>
         public float _hitpoints = 5;
 
+        public Color _onHitColor = Color.white;
+
+        public float _onHitDuration = 0.25f;
+
+        private List<SpriteRendereColorInformation> _renderers = new List<SpriteRendereColorInformation>();
+
+        private float _lastHitTime = 0;
+
+        public void Start()
+        {
+            CollectSpriteRenderers(gameObject, _renderers);
+        }
+
+        public void Update()
+        {
+            if ( Time.time - _lastHitTime < _onHitDuration )
+            {
+                var value = ((Time.time - _lastHitTime) / _onHitDuration);
+
+                foreach ( var info in _renderers)
+                {
+                    info._renderer.color = Color.Lerp(_onHitColor, info._originalColor, value);
+                }
+            }
+        }
+
         void OnDamage(float damage)
         {
             if (!_isInvulnerable)
             {
                 _hitpoints -= damage;
+                _lastHitTime = Time.time;
 
                 if (_hitpoints <= 0)
                 {
                     Destroy(gameObject);
                 }
+            }
+        }
+
+        private void CollectSpriteRenderers(GameObject obj, List<SpriteRendereColorInformation> result)
+        {
+            var renderer = obj.GetComponent<SpriteRenderer>();
+
+            if (renderer != null)
+            {
+                result.Add(new SpriteRendereColorInformation()
+                {
+                    _originalColor = renderer.color,
+                    _renderer = renderer
+                });
+            }
+
+            for ( int i = 0; i < obj.transform.childCount; i++)
+            {
+                CollectSpriteRenderers(obj.transform.GetChild(i).gameObject, result);
             }
         }
     }

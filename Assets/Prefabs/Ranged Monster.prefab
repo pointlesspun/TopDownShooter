@@ -414,6 +414,8 @@ MonoBehaviour:
   _maxHitpoints: 10
   _isInvulnerable: 0
   _hitpoints: 5
+  _onHitColor: {r: 1, g: 1, b: 1, a: 1}
+  _onHitDuration: 0.15
 --- !u!114 &114619761625793336
 MonoBehaviour:
   m_ObjectHideFlags: 1
