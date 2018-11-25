@@ -84,7 +84,7 @@ namespace Tds.GameScripts
         {
             if (collision.gameObject.tag != _friendlyTag)
             {
-                collision.gameObject.SendMessage(MessageNames.OnDamage, _damage, SendMessageOptions.RequireReceiver);
+                collision.gameObject.SendMessage(MessageNames.OnDamage, _damage, SendMessageOptions.DontRequireReceiver);
             }
 
             Destroy(gameObject);

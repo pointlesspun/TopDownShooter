@@ -203,7 +203,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _nextSceneName: InGameScene
-  isFireButtonUp: 0
 --- !u!4 &560143033
 Transform:
   m_ObjectHideFlags: 0
@@ -284,7 +283,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: "\r\nV0.001, Build 002 \r\nVery much work in progress\r\nFor more information
+  m_Text: "\r\nV0.001, Build 004 \r\nVery much work in progress\r\nFor more information
     see https://github.com/pointlesspun/TopDownShooter/projects/1\r\n"
 --- !u!222 &660406652
 CanvasRenderer:

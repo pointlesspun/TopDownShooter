@@ -63,6 +63,8 @@ namespace Tds.GameScripts
         /// </summary>
         public bool _buildAroundCenter = true;
 
+        public bool _addWallBorder = true;
+
         void Start()
         {
             var offsetX = _buildAroundCenter ? (_width * _tileWidth) * -0.5f : 0;
@@ -73,15 +75,29 @@ namespace Tds.GameScripts
             {
                 for (int y = 0; y < _height; y++)
                 {
-                    var element = Instantiate<GameObject>(_floorPrefab);
+                    var cloneBase = _floorPrefab;
+                    var element = (GameObject)null;
+
+                    if (_addWallBorder  && _wallPrefab != null && (x == 0 || y == 0 || x == _width - 1 || y == _height -1))
+                    {
+                        element = Instantiate<GameObject>(_wallPrefab);
+                        element.name = "wall " + x + ", " + y;
+                    }
+                    else
+                    {
+                        element = Instantiate<GameObject>(_floorPrefab);
+
+                        var spriteRenderer = element.GetComponent<SpriteRenderer>();
+
+                        spriteRenderer.sprite = _floorSprites[Random.Range(0, _floorSprites.Length)];
+                        spriteRenderer.color = _floorColors[Random.Range(0, _floorColors.Length)];
+                        spriteRenderer.sortingOrder = _floorSortingOrder;
+                        element.name = "floor " + x + ", " + y;
+                    }
+
                     element.transform.parent = transform;
                     element.transform.position = offset + new Vector3(x * _tileWidth, y * _tileHeight, 0);
 
-                    var spriteRenderer = element.GetComponent<SpriteRenderer>();
-
-                    spriteRenderer.sprite = _floorSprites[Random.Range(0, _floorSprites.Length)];
-                    spriteRenderer.color = _floorColors[Random.Range(0, _floorColors.Length)];
-                    spriteRenderer.sortingOrder = _floorSortingOrder;
                 }
             }
         }

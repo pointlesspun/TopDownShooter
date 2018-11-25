@@ -23,6 +23,7 @@ GameObject:
   - component: {fileID: 58884745808353100}
   - component: {fileID: 50149375720828798}
   - component: {fileID: 212679253683755990}
+  - component: {fileID: 210433568771753186}
   m_Layer: 10
   m_Name: Bullet
   m_TagString: Untagged
@@ -95,6 +96,16 @@ MonoBehaviour:
   _damage: 1
   _friendlyTag: Player
   _maxRange: -1
+--- !u!210 &210433568771753186
+SortingGroup:
+  m_ObjectHideFlags: 1
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 100100000}
+  m_GameObject: {fileID: 1474087171358050}
+  m_Enabled: 1
+  m_SortingLayerID: 598794205
+  m_SortingLayer: 1
+  m_SortingOrder: 0
 --- !u!212 &212679253683755990
 SpriteRenderer:
   m_ObjectHideFlags: 1
