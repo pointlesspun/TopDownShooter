@@ -16,12 +16,21 @@ namespace Tds.GameStateScripts
     /// </summary>
     public class InGameStateBehaviour : MonoBehaviour
     {
+        /// <summary>
+        /// Name of the scene containing the title page (for game over situations)
+        /// </summary>
         public string _titleScreenScene;
+
+        /// <summary>
+        /// Player object- if this is null or not active, assumes it's a game over state and
+        /// will load the title screen
+        /// </summary>
         private GameObject _player;
 
         public void Start()
         {
             _player = GameObject.FindGameObjectWithTag(GameTags.Player);
+            GlobalGameState._playerObject = _player;
         }
 
         public void Update()
