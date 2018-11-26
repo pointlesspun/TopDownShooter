@@ -22,6 +22,11 @@ namespace Tds.GameStateScripts
         public string _titleScreenScene;
 
         /// <summary>
+        /// Name of the scene containing the next level
+        /// </summary>
+        public string _nextLevelScene;
+
+        /// <summary>
         /// Player object- if this is null or not active, assumes it's a game over state and
         /// will load the title screen
         /// </summary>
@@ -39,6 +44,16 @@ namespace Tds.GameStateScripts
             {
                 SceneManager.LoadScene(_titleScreenScene);
             }
+        }
+
+        /// <summary>
+        /// Callback when the player reaches the next scene
+        /// </summary>
+        public void OnPlayerReachesExit()
+        {
+            GlobalGameState._level++;
+            SceneManager.LoadScene(_nextLevelScene);
+
         }
     }
 }

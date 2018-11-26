@@ -21,5 +21,9 @@ namespace Tds
         /// </summary>
         public static GameObject _playerObject;
 
+        /// <summary>
+        /// Current level
+        /// </summary>
+        public static int _level = 0;
     }
 }

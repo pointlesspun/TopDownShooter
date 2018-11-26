@@ -11,5 +11,6 @@ namespace Tds.GameScripts
     public static class MessageNames
     {
         public static string OnDamage = "OnDamage";
+        public static string OnPlayerReachesExit = "OnPlayerReachesExit";
     }
 }

@@ -15,10 +15,12 @@ namespace Tds.GameStateScripts
     /// </summary>
     public class TitleScreenStateBehaviour : MonoBehaviour
     {        
+        /// <summary>
+        /// Name of the next scene to spawn
+        /// </summary>
         public string _nextSceneName = "";
 
         private bool _IsFireButtonDown = false;
-
 
         public void Update()
         {
@@ -27,6 +29,7 @@ namespace Tds.GameStateScripts
             {
                 if (!Input.GetButton(InputNames.Fire1))
                 {
+                    GlobalGameState._level = 0;
                     SceneManager.LoadScene(_nextSceneName, LoadSceneMode.Single);
                 }
             }

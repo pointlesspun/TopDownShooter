@@ -34,8 +34,14 @@ namespace Tds.GameScripts
         /// </summary>
         public float _hitpoints = 5;
 
+        /// <summary>
+        /// Color applied when the character loses hitpoints
+        /// </summary>
         public Color _onHitColor = Color.white;
 
+        /// <summary>
+        /// Length of the on hit color animation
+        /// </summary>
         public float _onHitDuration = 0.25f;
 
         private List<SpriteRendereColorInformation> _renderers = new List<SpriteRendereColorInformation>();

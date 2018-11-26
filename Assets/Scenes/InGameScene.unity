@@ -277,7 +277,7 @@ GameObject:
   - component: {fileID: 214655993}
   m_Layer: 0
   m_Name: InGameState
-  m_TagString: Untagged
+  m_TagString: InGameState
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -309,6 +309,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _titleScreenScene: TitleScreenScene
+  _nextLevelScene: InGameScene
 --- !u!1 &382751866
 GameObject:
   m_ObjectHideFlags: 0
@@ -817,7 +818,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 991304338}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.3, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 0.19999999, y: 0.19999999, z: 1}
   m_Children: []
   m_Father: {fileID: 890976468}
@@ -885,7 +886,7 @@ MonoBehaviour:
   _range: 4
   _cooldown: 0.2
   _damage: 1
-  _offsetFromOwner: 0.5
+  _offsetFromOwner: 0.36
   _bulletPrefab: {fileID: 1474087171358050, guid: b0af31779834fe7499103aedd2ac94f2,
     type: 2}
   _bulletSpeed: 8
@@ -1233,6 +1234,8 @@ MonoBehaviour:
   _horizontalWallPrefab: {fileID: 1519310321278836, guid: c6536752b1d3b2a479ae26122ead47c9,
     type: 2}
   _verticalWallPrefab: {fileID: 1234374881730766, guid: 434f77ac5d0049641ab175b50dd781e8,
+    type: 2}
+  _exitLevelPrefab: {fileID: 1731099387608354, guid: cca009ef6577a7645906df1df79bbd7d,
     type: 2}
   _floorSprites:
   - {fileID: 21300000, guid: 8429889319da2a344ab6cd4ee9c2d1e6, type: 3}
@@ -1815,7 +1818,7 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
+  m_Offset: {x: 0, y: 0.1}
   serializedVersion: 2
   m_Radius: 0.32
 --- !u!1 &1954983905
@@ -1891,7 +1894,7 @@ Transform:
   m_GameObject: {fileID: 1998363063}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 0.3, y: 0.3, z: 1}
+  m_LocalScale: {x: 0.35, y: 0.35, z: 1}
   m_Children:
   - {fileID: 496912189}
   - {fileID: 1630001238}
