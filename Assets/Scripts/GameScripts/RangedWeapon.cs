@@ -5,6 +5,7 @@
  */
 namespace Tds.GameScripts
 {
+    using System;
     using UnityEngine;
 
     /// <summary>
@@ -33,6 +34,12 @@ namespace Tds.GameScripts
         public float _bulletScale = 1.0f;
 
         /// <summary>
+        /// Level scaling for the bullets. When set above 0 allows enemies to shoot faster bullets as levels progress.
+        /// </summary>
+        public float _speedScalingPerLevel = 0;
+
+      
+        /// <summary>
         /// Override from WeaponBase outlining what is meant to happen, in this case a bullet
         /// will be spawned in the direction indicated by the attackDescription.
         /// </summary>
@@ -47,9 +54,10 @@ namespace Tds.GameScripts
             bullet.name = "bullet " + gameObject.name;
 
             var bulletSettings = bullet.GetComponent<BulletBehaviour>();
+            var levelScale = GlobalGameState._levelScale;
 
             bulletSettings._friendlyTag = gameObject.tag;
-            bulletSettings._velocity = _bulletSpeed;
+            bulletSettings._velocity = _bulletSpeed + levelScale * _speedScalingPerLevel;
             bulletSettings._direction = attackDescription._direction;
             bulletSettings._lifetime = _bulletLifeTime;
             bulletSettings._damage = _damage;

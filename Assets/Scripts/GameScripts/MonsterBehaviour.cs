@@ -33,6 +33,12 @@ namespace Tds.GameScripts
         public GameObject _animatorControllerObject;
 
         /// <summary>
+        /// Scaling of the movement speed per level (if set to 0 no scaling will apply). Eg. this will
+        /// make monsters faster as the user goes through the levels. 
+        /// </summary>
+        public float _maxSpeedScaling = 0;
+
+        /// <summary>
         /// Cached animator
         /// </summary>
         private Animator _animator;
@@ -45,6 +51,9 @@ namespace Tds.GameScripts
             _weapon = GetComponent<WeaponBase>();
 
             _animator = _animatorControllerObject.GetComponent<Animator>();
+
+            // scale movement speed off the level
+            _maxSpeed = _maxSpeed + GlobalGameState._levelScale * _maxSpeedScaling;
         }
 
         public void Update()
@@ -98,6 +107,10 @@ namespace Tds.GameScripts
             _weapon.Attack(_attackDescription);
         }
 
+        /// <summary>
+        /// Simple selection placeholder which just uses the first weapon found in the game object's hierarchy
+        /// </summary>
+        /// <returns></returns>
         private WeaponBase SelectWeapon()
         {
             WeaponBase result = null;
@@ -106,7 +119,7 @@ namespace Tds.GameScripts
             {
                 var child = transform.GetChild(i).gameObject;
 
-                if (child.tag == "Weapon")
+                if (child.tag == GameTags.Weapon)
                 {
                     result = child.GetComponent<WeaponBase>();
 

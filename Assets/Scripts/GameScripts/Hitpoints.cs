@@ -5,6 +5,7 @@
  */
 namespace Tds.GameScripts
 {
+    using System;
     using System.Collections.Generic;
     using UnityEngine;
 
@@ -44,17 +45,35 @@ namespace Tds.GameScripts
         /// </summary>
         public float _onHitDuration = 0.25f;
 
+        /// <summary>
+        /// Scaling which allows enemies to gain more hit points as the elvesl increase
+        /// </summary>
+        public float _hitpointsScalePerLevel = 0;
+
+        /// <summary>
+        /// Cached renderers which make up this game object so we can color them if the 
+        /// gameobject takes damage.
+        /// </summary>        
         private List<SpriteRendereColorInformation> _renderers = new List<SpriteRendereColorInformation>();
 
+        /// <summary>
+        /// Last time this gameobject took damage.
+        /// </summary>
         private float _lastHitTime = 0;
 
-        public void Start()
+        public virtual void Start()
         {
+            var levelScaling = GlobalGameState._levelScale;
             CollectSpriteRenderers(gameObject, _renderers);
+
+            // scale the hitpoints per level
+            _maxHitpoints = _maxHitpoints + _hitpointsScalePerLevel * levelScaling;
+            _hitpoints = _hitpoints + _hitpointsScalePerLevel * levelScaling;
         }
 
         public void Update()
         {
+            // update the hit cue if it applies
             if ( Time.time - _lastHitTime < _onHitDuration )
             {
                 var value = ((Time.time - _lastHitTime) / _onHitDuration);
@@ -66,7 +85,11 @@ namespace Tds.GameScripts
             }
         }
 
-        void OnDamage(float damage)
+        /// <summary>
+        /// OnDamage reduce the hitpoints and give a visual cue
+        /// </summary>
+        /// <param name="damage"></param>
+        public void OnDamage(float damage)
         {
             if (!_isInvulnerable)
             {
@@ -75,6 +98,7 @@ namespace Tds.GameScripts
 
                 if (_hitpoints <= 0)
                 {
+                    // no more hitpoints... so die
                     Destroy(gameObject);
                 }
             }

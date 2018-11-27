@@ -446,6 +446,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _maxSpeed: 2
   _animatorControllerObject: {fileID: 1189338669044176}
+  _maxSpeedScaling: 0.3
 --- !u!114 &114806360172399820
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -457,11 +458,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c53031dc1b008746ab82fe778ae07ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxHitpoints: 10
+  _maxHitpoints: 2
   _isInvulnerable: 0
-  _hitpoints: 3
+  _hitpoints: 2
   _onHitColor: {r: 1, g: 1, b: 1, a: 1}
   _onHitDuration: 0.2
+  _hitpointsScalePerLevel: 1
 --- !u!210 &210203508681828030
 SortingGroup:
   m_ObjectHideFlags: 1

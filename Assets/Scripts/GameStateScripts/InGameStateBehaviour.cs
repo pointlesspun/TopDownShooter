@@ -42,18 +42,18 @@ namespace Tds.GameStateScripts
         {
             if (_player == null || !_player.activeInHierarchy)
             {
+                // game over...
                 SceneManager.LoadScene(_titleScreenScene);
             }
         }
 
         /// <summary>
-        /// Callback when the player reaches the next scene
+        /// Callback when the player reaches the exit so the game needs to transition to the next scene.
         /// </summary>
         public void OnPlayerReachesExit()
         {
-            GlobalGameState._level++;
+            GlobalGameState.IncreaseLevel(_player.GetComponent<PlayerHitpoints>()._hitpoints);
             SceneManager.LoadScene(_nextLevelScene);
-
         }
     }
 }

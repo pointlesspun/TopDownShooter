@@ -29,7 +29,7 @@ namespace Tds.GameStateScripts
             {
                 if (!Input.GetButton(InputNames.Fire1))
                 {
-                    GlobalGameState._level = 0;
+                    GlobalGameState.StartGame();
                     SceneManager.LoadScene(_nextSceneName, LoadSceneMode.Single);
                 }
             }

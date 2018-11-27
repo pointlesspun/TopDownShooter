@@ -38,7 +38,6 @@ namespace Tds.GameScripts
         /// </summary>
         private Image     _hitpointsBar;
 
-
         public void Start() {
 
             SetTarget(_target);
