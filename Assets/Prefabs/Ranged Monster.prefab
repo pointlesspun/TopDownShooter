@@ -462,17 +462,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _range: 5
-  _cooldown: 1
+  _cooldown: 2
   _damage: 1
   _offsetFromOwner: 0.5
+  _cooldownLevelScaling: 0.5
+  _damageScalingPerLevel: 0.333
+  _rangeScalingPerLevel: 0.5
+  _miniumCooldown: 0.1
   _bulletPrefab: {fileID: 1276374740757074, guid: e5c6706a0001a0848b0380e8b5223072,
     type: 2}
   _bulletSpeed: 6
   _bulletLifeTime: 2
   _bulletScale: 0.5
   _speedScalingPerLevel: 0.75
-  _rangeScalingPerLevel: 0.5
-  _damageScalingPerLevel: 0.333
 --- !u!210 &210512884219893714
 SortingGroup:
   m_ObjectHideFlags: 1

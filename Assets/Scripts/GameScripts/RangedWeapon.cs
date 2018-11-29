@@ -5,7 +5,6 @@
  */
 namespace Tds.GameScripts
 {
-    using System;
     using UnityEngine;
 
     /// <summary>
@@ -13,6 +12,11 @@ namespace Tds.GameScripts
     /// </summary>
     public class RangedWeapon : WeaponBase
     {
+
+        public int _bullets = -1;
+
+        public bool _destroyWhenOutOfBullets = false;
+
         /// <summary>
         /// Game object spawned when weapon is fired
         /// </summary>
@@ -38,7 +42,6 @@ namespace Tds.GameScripts
         /// </summary>
         public float _speedScalingPerLevel = 0;
 
-      
         /// <summary>
         /// Override from WeaponBase outlining what is meant to happen, in this case a bullet
         /// will be spawned in the direction indicated by the attackDescription.
@@ -47,6 +50,11 @@ namespace Tds.GameScripts
         /// <returns></returns>
         protected override bool ExecuteAttack(AttackParameters attackDescription)
         {
+            if ( _bullets == 0 )
+            {
+                return false;
+            } 
+
             var bullet = Instantiate<GameObject>(_bulletPrefab);
             
             bullet.transform.localScale *= _bulletScale;
@@ -62,6 +70,27 @@ namespace Tds.GameScripts
             bulletSettings._lifetime = _bulletLifeTime;
             bulletSettings._damage = _damage;
             bulletSettings._maxRange = _range;
+
+            if ( attackDescription._direction != Vector3.zero)
+            {
+                float angle = Mathf.Atan2(attackDescription._direction.y, attackDescription._direction.x) * Mathf.Rad2Deg;
+                bullet.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            }
+
+            if (_bullets > -1)
+            {
+                _bullets--;
+
+                if (_bullets == 0 && _destroyWhenOutOfBullets)
+                {
+                    if ( transform.parent != null)
+                    {
+                        transform.parent.gameObject.SendMessage(MessageNames.OnWeaponDestroyed);
+                    }
+
+                    GameObject.Destroy(gameObject);
+                }
+            }
 
             return true;
         }

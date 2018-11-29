@@ -12,6 +12,8 @@ namespace Tds.GameScripts
     /// </summary>
     public abstract class WeaponBase : MonoBehaviour
     {
+        public int _priority = 0;
+
         /// <summary>
         /// Range in Unity units at which the weapon can be fired. This is just an
         /// indication for the AI at the moment as the range will not be enforced

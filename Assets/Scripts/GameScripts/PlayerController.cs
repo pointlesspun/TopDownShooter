@@ -6,6 +6,7 @@
 namespace Tds.GameScripts
 {
     using UnityEngine;
+    using UnityEngine.SceneManagement;
 
     /// <summary>
     /// Behaviour handling the player's input
@@ -43,6 +44,11 @@ namespace Tds.GameScripts
         public float _idleSpeed = 0.4f;
 
         /// <summary>
+        /// If set to true, the player is being controlled by another entity
+        /// </summary>
+        public bool _isPuppet = false;
+
+        /// <summary>
         /// Reference to the body
         /// </summary>
         private Rigidbody2D _body;
@@ -77,17 +83,75 @@ namespace Tds.GameScripts
 
             _camera = Camera.main;
             _weapon = SelectWeapon();
+
+
+            Contract.Requires(_camera != null, "The player object is required to be able to access the camera.");
         }
 
-        void Update()
+        public void OnEnable()
         {
-            var cursorPosition = GetCursorPosition();
-            var velocity = UpdateVelocity();
-            var animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, cursorPosition, velocity, _idleSpeed);
+            SceneManager.sceneLoaded += this.OnLoadCallback;
+        }
 
+        public void OnDisable()
+        {
+            SceneManager.sceneLoaded -= this.OnLoadCallback;
+        }
+
+        public void OnLoadCallback(Scene scene, LoadSceneMode sceneMode)
+        {
+            _camera = Camera.main;
+            Contract.Requires(_camera != null, "The player object is required to be able to access the camera.");
+        }
+
+        public void Update()
+        {
+            if (_weapon == null)
+            {
+                _weapon = SelectWeapon();
+            }
+
+            if (_isPuppet)
+            {
+                UpdatePuppetState();
+            }
+            else
+            {
+                UpdatePlayerControlledState();
+            }
+        }
+
+        private void UpdatePlayerControlledState()
+        {          
+            var velocity = UpdateVelocity();
+            var cursorPosition = GetCursorPosition();
+
+            var animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, cursorPosition, velocity, _idleSpeed);
             UpdateAttack(cursorPosition);
 
             _animator.SetInteger(AnimatorParameterNames.AnimationState, animationState);
+        }
+
+        private void UpdatePuppetState()
+        {           
+            var velocity = new Vector3(_body.velocity.x, _body.velocity.y, 0);
+
+            // in puppet mode the player's 'cursor' is in the direction the player is walking            
+            var cursorPosition = transform.position + velocity;
+
+            var animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, cursorPosition, velocity, _idleSpeed);
+            
+            _animator.SetInteger(AnimatorParameterNames.AnimationState, animationState);
+        }
+
+        public void OnWeaponDestroyed()
+        { 
+            _weapon = null;
+        }
+
+        public void SetVelocity(Vector3 velocity)
+        {
+            _body.velocity = velocity;
         }
 
         private Vector3 UpdateVelocity()
@@ -141,14 +205,16 @@ namespace Tds.GameScripts
             }
         }
 
-
         /// <summary>
         /// Simple weapon select implementation, will change in forthcoming builds
         /// </summary>
         /// <returns></returns>
         private WeaponBase SelectWeapon()
         {
-            WeaponBase result = null;
+            var bestPriority = 0;
+            WeaponBase bestWeapon = null;
+                 
+            WeaponBase weapon = null;
 
             for (int i = 0; i < transform.childCount; ++i)
             {
@@ -156,16 +222,17 @@ namespace Tds.GameScripts
 
                 if (child.tag == GameTags.Weapon)
                 {
-                    result = child.GetComponent<WeaponBase>();
+                    weapon = child.GetComponent<WeaponBase>();
 
-                    if (result != null)
+                    if (weapon != null && (bestWeapon == null || weapon._priority > bestPriority))
                     {
-                        break;
+                        bestWeapon = weapon;
+                        bestPriority = weapon._priority;
                     }
                 }
             }
 
-            return result;
+            return bestWeapon;
         }
     }
 }

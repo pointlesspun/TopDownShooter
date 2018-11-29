@@ -18,6 +18,8 @@ namespace Tds.GameScripts
         /// </summary>
         public GameObject _target;
 
+        public string _targetTag;
+
         /// <summary>
         /// Object holding the image for the healthbar
         /// </summary>
@@ -39,6 +41,11 @@ namespace Tds.GameScripts
         private Image     _hitpointsBar;
 
         public void Start() {
+
+            if (_target == null )
+            {
+                _target = GameObject.FindGameObjectWithTag(GameTags.Player);
+            }
 
             SetTarget(_target);
         }
