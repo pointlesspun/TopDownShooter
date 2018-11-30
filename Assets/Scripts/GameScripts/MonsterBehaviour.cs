@@ -43,6 +43,7 @@ namespace Tds.GameScripts
         /// </summary>
         private Animator _animator;
 
+
         public void Start()
         {
             _player = GlobalGameState._playerObject;
@@ -54,6 +55,8 @@ namespace Tds.GameScripts
 
             // scale movement speed off the level
             _maxSpeed = _maxSpeed + GlobalGameState._levelScale * _maxSpeedScaling;
+
+         
         }
 
         public void Update()

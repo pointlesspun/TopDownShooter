@@ -5,6 +5,8 @@
  */
 namespace Tds.GameScripts
 {
+    using UnityEngine;
+
     /// <summary>
     /// Weapon which will cause damage to the target directly iff the target is in range
     /// </summary>
@@ -20,6 +22,11 @@ namespace Tds.GameScripts
             }
 
             return false;
+        }
+
+        public override void Merge(WeaponBase other)
+        {
+            // do nothing
         }
     }
 }

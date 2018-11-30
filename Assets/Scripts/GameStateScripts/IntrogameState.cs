@@ -9,6 +9,9 @@ namespace Tds.GameStateScripts
     using Tds.GameScripts;
     using UnityEngine.SceneManagement;
 
+    /// <summary>
+    /// 
+    /// </summary>
     public class IntrogameState : MonoBehaviour
     {
         /// <summary>

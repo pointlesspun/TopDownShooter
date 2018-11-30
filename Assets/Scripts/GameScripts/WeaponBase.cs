@@ -95,5 +95,8 @@ namespace Tds.GameScripts
 
         // to be implemented by subclasses
         protected abstract bool ExecuteAttack(AttackParameters attackDescription);
+
+        // what happens if a similar weapon has been picked up
+        public abstract void Merge(WeaponBase other);
     }
 }

@@ -5,6 +5,7 @@
  */
 namespace Tds.GameScripts
 {
+    using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.SceneManagement;
 
@@ -56,7 +57,8 @@ namespace Tds.GameScripts
         /// <summary>
         /// Reference to the weapon
         /// </summary>
-        private WeaponBase _weapon;
+        private List<WeaponBase> _weapons = new List<WeaponBase>();
+        private int _currentWeaponIndex = -1;
 
         /// <summary>
         /// Reference to the camera
@@ -73,6 +75,7 @@ namespace Tds.GameScripts
         /// </summary>
         private Animator _animator;
 
+
         void Start()
         {
             Contract.RequiresComponent<Rigidbody2D>(gameObject, "The player is required to have a RigidBody2D component.");
@@ -82,7 +85,9 @@ namespace Tds.GameScripts
             _animator = _animatorControllerObject.GetComponent<Animator>();
 
             _camera = Camera.main;
-            _weapon = SelectWeapon();
+            _weapons = new List<WeaponBase>(GetComponentsInChildren<WeaponBase>());
+
+            _currentWeaponIndex = SelectWeapon();
 
 
             Contract.Requires(_camera != null, "The player object is required to be able to access the camera.");
@@ -106,9 +111,9 @@ namespace Tds.GameScripts
 
         public void Update()
         {
-            if (_weapon == null)
+            if (_currentWeaponIndex == -1)
             {
-                _weapon = SelectWeapon();
+                _currentWeaponIndex = SelectWeapon();
             }
 
             if (_isPuppet)
@@ -127,7 +132,11 @@ namespace Tds.GameScripts
             var cursorPosition = GetCursorPosition();
 
             var animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, cursorPosition, velocity, _idleSpeed);
-            UpdateAttack(cursorPosition);
+
+            if (_currentWeaponIndex != -1)
+            {
+                UpdateAttack(cursorPosition, _weapons[_currentWeaponIndex]);
+            }
 
             _animator.SetInteger(AnimatorParameterNames.AnimationState, animationState);
         }
@@ -146,7 +155,37 @@ namespace Tds.GameScripts
 
         public void OnWeaponDestroyed()
         { 
-            _weapon = null;
+            _weapons.RemoveAt(_currentWeaponIndex);
+            _currentWeaponIndex = -1;
+        }
+
+        public void OnPickupItem(object prefab)
+        {
+            var instance = GameObject.Instantiate(prefab as GameObject);
+            var component = instance.GetComponent<WeaponBase>();
+
+            if (component != null)
+            {
+                var existing = _weapons.Find((w) => component.name == w.name);
+                if (existing != null)
+                {
+                    existing.Merge(component);
+                }
+                else
+                {
+                    instance.transform.parent = transform;
+
+                    _weapons.Add(component);
+
+                    if (_currentWeaponIndex == -1 || component._priority > _weapons[_currentWeaponIndex]._priority)
+                    {
+                        _currentWeaponIndex = _weapons.Count - 1;
+                    }
+                }
+            } else
+            {
+                Debug.LogWarning("Unknown item picked up: " + instance.name + "::" + component.name);
+            }
         }
 
         public void SetVelocity(Vector3 velocity)
@@ -192,16 +231,15 @@ namespace Tds.GameScripts
             return result;
         }
 
-        private void UpdateAttack(Vector3 cursorPosition)
+        private void UpdateAttack(Vector3 cursorPosition, WeaponBase weapon)
         {
-
             var attackDirection = (cursorPosition - transform.position).normalized;
-            _weapon.transform.position = transform.position + attackDirection * _weapon._offsetFromOwner;
+            weapon.transform.position = transform.position + attackDirection * weapon._offsetFromOwner;
 
-            if (Input.GetButton(InputNames.Fire1) && _weapon != null && _weapon.IsCooldownOver())
+            if (Input.GetButton(InputNames.Fire1) && _weapons != null && weapon.IsCooldownOver())
             {
                 _attackDescription._direction = attackDirection;
-                _weapon.Attack(_attackDescription);
+                weapon.Attack(_attackDescription);
             }
         }
 
@@ -209,26 +247,21 @@ namespace Tds.GameScripts
         /// Simple weapon select implementation, will change in forthcoming builds
         /// </summary>
         /// <returns></returns>
-        private WeaponBase SelectWeapon()
+        private int SelectWeapon()
         {
             var bestPriority = 0;
-            WeaponBase bestWeapon = null;
+            int bestWeapon = -1;
                  
             WeaponBase weapon = null;
 
-            for (int i = 0; i < transform.childCount; ++i)
+            for (int i = 0; i < _weapons.Count; ++i)
             {
-                var child = transform.GetChild(i).gameObject;
+                weapon = _weapons[i];
 
-                if (child.tag == GameTags.Weapon)
+                if (weapon != null && (bestWeapon == -1|| weapon._priority > bestPriority))
                 {
-                    weapon = child.GetComponent<WeaponBase>();
-
-                    if (weapon != null && (bestWeapon == null || weapon._priority > bestPriority))
-                    {
-                        bestWeapon = weapon;
-                        bestPriority = weapon._priority;
-                    }
+                    bestWeapon = i;
+                    bestPriority = weapon._priority;
                 }
             }
 

@@ -26,7 +26,7 @@ namespace Tds.GameScripts
         {
             _inGameScriptObject = GameObject.FindGameObjectWithTag(_inGameScriptTag);
 
-            Contract.Requires(_inGameScriptObject != null, "No in game state beahaviour defined in ExitBehaviour." );
+            Contract.Requires(_inGameScriptObject != null, "No in game state behaviour defined in ExitBehaviour." );
         }
 
 

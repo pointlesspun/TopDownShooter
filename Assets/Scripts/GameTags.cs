@@ -10,7 +10,16 @@ namespace Tds
     /// </summary>
     public static class GameTags
     {
+        /// <summary>
+        /// Tag used to identify a player
+        /// </summary>
         public static string Player = "Player";
+
+        /// <summary>
+        /// Tag used to identify a weapon
+        /// </summary>
         public static string Weapon = "Weapon";
+
+        public static string ItemSpawner = "ItemSpawner";
     }
 }

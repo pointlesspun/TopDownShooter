@@ -94,5 +94,13 @@ namespace Tds.GameScripts
 
             return true;
         }
+
+        public override void Merge(WeaponBase other)
+        {
+            if ( other is RangedWeapon)
+            {
+                _bullets += ((RangedWeapon)other)._bullets;
+            }
+        }
     }
 }

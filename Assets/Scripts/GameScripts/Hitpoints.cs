@@ -14,11 +14,7 @@ namespace Tds.GameScripts
     /// </summary>
     public class Hitpoints : MonoBehaviour
     {
-        private class SpriteRendereColorInformation
-        {
-            public SpriteRenderer _renderer;
-            public Color          _originalColor;
-        }
+       
 
         /// <summary>
         /// Max hitpoints, current hitpoints should never exceed this
@@ -61,14 +57,25 @@ namespace Tds.GameScripts
         /// </summary>
         private float _lastHitTime = 0;
 
+
+        private ItemSpawnBehaviour _itemSpawner;
+
+
         public virtual void Start()
         {
             var levelScaling = GlobalGameState._levelScale;
-            CollectSpriteRenderers(gameObject, _renderers);
+            SpriteRendererExtensions.CollectSpriteRenderers(gameObject, _renderers);
 
             // scale the hitpoints per level
             _maxHitpoints = _maxHitpoints + _hitpointsScalePerLevel * levelScaling;
             _hitpoints = _hitpoints + _hitpointsScalePerLevel * levelScaling;
+
+            var spawner = GameObject.FindGameObjectWithTag(GameTags.ItemSpawner);
+
+            if (spawner != null)
+            {
+                _itemSpawner = spawner.GetComponent<ItemSpawnBehaviour>();
+            }
         }
 
         public void Update()
@@ -78,10 +85,7 @@ namespace Tds.GameScripts
             {
                 var value = ((Time.time - _lastHitTime) / _onHitDuration);
 
-                foreach ( var info in _renderers)
-                {
-                    info._renderer.color = Color.Lerp(_onHitColor, info._originalColor, value);
-                }
+                SpriteRendererExtensions.LerpColor(_renderers, _onHitColor, value);
             }
         }
 
@@ -98,28 +102,14 @@ namespace Tds.GameScripts
 
                 if (_hitpoints <= 0)
                 {
+                    if ( _itemSpawner != null)
+                    {
+                        _itemSpawner.OnCharacterDied(gameObject);
+                    }
+
                     // no more hitpoints... so die
                     Destroy(gameObject);
                 }
-            }
-        }
-
-        private void CollectSpriteRenderers(GameObject obj, List<SpriteRendereColorInformation> result)
-        {
-            var renderer = obj.GetComponent<SpriteRenderer>();
-
-            if (renderer != null)
-            {
-                result.Add(new SpriteRendereColorInformation()
-                {
-                    _originalColor = renderer.color,
-                    _renderer = renderer
-                });
-            }
-
-            for ( int i = 0; i < obj.transform.childCount; i++)
-            {
-                CollectSpriteRenderers(obj.transform.GetChild(i).gameObject, result);
             }
         }
     }

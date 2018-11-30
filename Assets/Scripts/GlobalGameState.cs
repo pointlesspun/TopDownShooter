@@ -20,7 +20,7 @@ namespace Tds
         /// Object holding the player
         /// </summary>
         public static GameObject _playerObject;
-
+        
         /// <summary>
         /// Current level
         /// </summary>
