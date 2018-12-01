@@ -119,12 +119,13 @@ namespace Tds.GameScripts
             var x = Random.Range(1 + xQuadrant * halfWidth, (xQuadrant + 1) * halfWidth - 1);
             var y = Random.Range(1+ yQuadrant * halfHeight, (yQuadrant + 1) * halfHeight - 1);
 
-            var position = GlobalGameState._playerObject.transform.position;
+            var player = GameObject.FindGameObjectWithTag(GameTags.Player);
+            var position = player.transform.position;
 
             position.x = x + 0.5f;
             position.y = y + 0.5f;
 
-            GlobalGameState._playerObject.transform.position = position + _offset;
+            player.transform.position = position + _offset;
         }
 
         /// <summary>

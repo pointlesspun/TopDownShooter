@@ -12,7 +12,6 @@ namespace Tds.GameScripts
     /// </summary>
     public class RangedWeapon : WeaponBase
     {
-
         public int _bullets = -1;
 
         public bool _destroyWhenOutOfBullets = false;
@@ -62,7 +61,7 @@ namespace Tds.GameScripts
             bullet.name = "bullet " + gameObject.name;
 
             var bulletSettings = bullet.GetComponent<BulletBehaviour>();
-            var levelScale = GlobalGameState._levelScale;
+            var levelScale = _gameState._levelScale;
 
             bulletSettings._friendlyTag = gameObject.tag;
             bulletSettings._velocity = _bulletSpeed + levelScale * _speedScalingPerLevel;

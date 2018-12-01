@@ -61,9 +61,13 @@ namespace Tds.GameScripts
         /// </summary>
         public float _miniumCooldown = 0.1f;
 
+        protected GameStateBehaviour _gameState;
+
         public virtual void Start()
         {
-            var levelScale = GlobalGameState._levelScale;
+            _gameState = GameObject.FindGameObjectWithTag(GameTags.GameState).GetComponent<GameStateBehaviour>();
+
+            var levelScale = _gameState._levelScale;
 
             _cooldown = Mathf.Max(_miniumCooldown, _cooldown - _cooldownLevelScaling * levelScale);
             _damage = _damage + levelScale * _damageScalingPerLevel;

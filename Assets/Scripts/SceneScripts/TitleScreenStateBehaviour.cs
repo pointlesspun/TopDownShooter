@@ -3,12 +3,10 @@
  * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
  * You should have received a copy of the license along with this work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
  */
-namespace Tds.GameStateScripts
+namespace Tds.SceneScripts
 {
     using UnityEngine;
-    using Tds.GameScripts;
     using UnityEngine.SceneManagement;
-    using Tds.Util;
 
     /// <summary>
     /// Expressed the behavior of the state when in the title screen. When the player presses the
@@ -23,7 +21,6 @@ namespace Tds.GameStateScripts
 
         public void OnFireButton()
         {
-            GlobalGameState.StartGame();
             SceneManager.LoadScene(_nextSceneName, LoadSceneMode.Single);
         }
     }

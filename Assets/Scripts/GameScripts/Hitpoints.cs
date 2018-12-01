@@ -59,18 +59,19 @@ namespace Tds.GameScripts
 
         public virtual void Start()
         {
-            var levelScaling = GlobalGameState._levelScale;
+            var gameStateObject = GameObject.FindGameObjectWithTag(GameTags.GameState);
+            var levelScaling = gameStateObject.GetComponent<GameStateBehaviour>()._levelScale;
             SpriteRendererExtensions.CollectSpriteRenderers(gameObject, _renderers);
 
             // scale the hitpoints per level
             _maxHitpoints = _maxHitpoints + _hitpointsScalePerLevel * levelScaling;
             _hitpoints = _hitpoints + _hitpointsScalePerLevel * levelScaling;
 
-            var spawner = GameObject.FindGameObjectWithTag(GameTags.ItemSpawner);
+            var itemSpawnerObject = GameObject.FindGameObjectWithTag(GameTags.ItemSpawner);
 
-            if (spawner != null)
+            if (itemSpawnerObject != null)
             {
-                _itemSpawner = spawner.GetComponent<ItemDropBehaviour>();
+                _itemSpawner = itemSpawnerObject.GetComponent<ItemDropBehaviour>();
             }
         }
 

@@ -43,10 +43,9 @@ namespace Tds.GameScripts
         /// </summary>
         private Animator _animator;
 
-
         public void Start()
         {
-            _player = GlobalGameState._playerObject;
+            _player = GameObject.FindGameObjectWithTag(GameTags.Player);
 
             _body = GetComponent<Rigidbody2D>();
             _weapon = GetComponent<WeaponBase>();
@@ -54,9 +53,10 @@ namespace Tds.GameScripts
             _animator = _animatorControllerObject.GetComponent<Animator>();
 
             // scale movement speed off the level
-            _maxSpeed = _maxSpeed + GlobalGameState._levelScale * _maxSpeedScaling;
-
-         
+            _maxSpeed = _maxSpeed + GameObject.FindGameObjectWithTag(GameTags.GameState)
+                                                .GetComponent<GameStateBehaviour>()
+                                                ._levelScale * _maxSpeedScaling;
+        
         }
 
         public void Update()

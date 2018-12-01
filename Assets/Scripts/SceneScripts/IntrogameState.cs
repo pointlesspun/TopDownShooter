@@ -3,13 +3,11 @@
  * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
  * You should have received a copy of the license along with this work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
  */
-namespace Tds.GameStateScripts
+namespace Tds.SceneScripts
 {
     using UnityEngine;
-    using Tds.GameScripts;
     using UnityEngine.SceneManagement;
-    using Tds.Util;
-
+    
     /// <summary>
     /// Game state setting up all the persistent objects (currently only the player)
     /// </summary>

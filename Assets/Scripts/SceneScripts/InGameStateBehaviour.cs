@@ -3,12 +3,10 @@
  * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
  * You should have received a copy of the license along with this work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
  */
-namespace Tds.GameStateScripts
+namespace Tds.SceneScripts
 {
     using UnityEngine;
     using UnityEngine.SceneManagement;
-
-    using Tds.GameScripts;
 
     /// <summary>
     /// Expressed the behavior of the state when in game. Will track the state of the player.
@@ -35,7 +33,6 @@ namespace Tds.GameStateScripts
         public void Start()
         {
             _player = GameObject.FindGameObjectWithTag(GameTags.Player);
-            GlobalGameState._playerObject = _player;
         }
 
         public void Update()
@@ -52,7 +49,6 @@ namespace Tds.GameStateScripts
         /// </summary>
         public void OnPlayerReachesExit()
         {
-            GlobalGameState.IncreaseLevel();
             SceneManager.LoadScene(_nextLevelScene);
         }
     }

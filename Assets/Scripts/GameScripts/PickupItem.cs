@@ -7,6 +7,9 @@ namespace Tds.GameScripts
 {
     using UnityEngine;
 
+    /// <summary>
+    /// Describes what is being picked up. 
+    /// </summary>
     public enum ItemCategory
     {
         Item,
@@ -19,8 +22,15 @@ namespace Tds.GameScripts
     public class PickupItem : MonoBehaviour
     {
         public ItemCategory _category = ItemCategory.Item;
+
+        /// <summary>
+        /// Item to give in case the category is item
+        /// </summary>
         public GameObject _itemPrefab;
 
+        /// <summary>
+        /// Amount applies when the category is health (or bullets)
+        /// </summary>
         public float _amount;
 
         void OnCollisionEnter2D(Collision2D collision)

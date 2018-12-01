@@ -20,6 +20,14 @@ namespace Tds
         /// </summary>
         public static string Weapon = "Weapon";
 
+        /// <summary>
+        /// Object regulating level scaling.
+        /// </summary>
+        public static string GameState = "GameState";
+
+        /// <summary>
+        /// Object regulating item spawning.
+        /// </summary>
         public static string ItemSpawner = "ItemSpawner";
     }
 }
