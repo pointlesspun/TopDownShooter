@@ -7,19 +7,40 @@ namespace Tds.GameScripts
 {
     using UnityEngine;
 
+    public enum ItemCategory
+    {
+        Item,
+        Health
+    }
+
     /// <summary>
     /// Behaviour for items which can be picked up by a player
     /// </summary>
     public class PickupItem : MonoBehaviour
     {
+        public ItemCategory _category = ItemCategory.Item;
         public GameObject _itemPrefab;
+
+        public float _amount;
 
         void OnCollisionEnter2D(Collision2D collision)
         {
             // if the player collides with the exit, it will trigger a message to the in game state behaviour
             if (collision.gameObject.tag == GameTags.Player)
             {
-                collision.gameObject.SendMessage(MessageNames.OnPickupItem, Instantiate(_itemPrefab), SendMessageOptions.RequireReceiver);
+                switch( _category )
+                {
+                    case ItemCategory.Item:
+                        collision.gameObject.SendMessage(MessageNames.OnPickupItem, Instantiate(_itemPrefab), SendMessageOptions.RequireReceiver);
+                        break;
+
+                    case ItemCategory.Health:
+                        collision.gameObject.SendMessage(MessageNames.OnPickupHealth, _amount, SendMessageOptions.RequireReceiver);
+                        break;
+
+                    default:
+                        break;
+                }
                 Destroy(gameObject);
             }
         }

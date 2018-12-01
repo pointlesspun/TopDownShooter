@@ -174,6 +174,7 @@ namespace Tds.GameScripts
             _currentWeaponIndex = -1;
         }
 
+
         /// <summary>
         /// Callback when an item is picked up
         /// </summary>

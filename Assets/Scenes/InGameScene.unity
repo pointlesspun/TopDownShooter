@@ -844,8 +844,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _commonItemPrefabs:
   - {fileID: 1444162232487730, guid: 07661778af6fb664fa99b0639ff55a4c, type: 2}
+  - {fileID: 1937891874787886, guid: 0643a1d3cb5f5894fb4c175a66db3543, type: 2}
   _commonChance: 0
-  _commonIncrement: 0.25
+  _commonIncrement: 0.1
+  _minimumCommonThreshold: 0.2
 --- !u!4 &1778868881
 Transform:
   m_ObjectHideFlags: 0

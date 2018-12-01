@@ -76,7 +76,7 @@ namespace Tds.GameScripts
 
         public void Update()
         {
-            // update the hit cue if it applies
+            // update the hit cue (coloring) if it applies
             if ( Time.time - _lastHitTime < _onHitDuration )
             {
                 var value = ((Time.time - _lastHitTime) / _onHitDuration);
@@ -84,6 +84,16 @@ namespace Tds.GameScripts
                 SpriteRendererExtensions.LerpColor(_renderers, _onHitColor, value);
             }
         }
+
+        /// <summary>
+        /// Callback if the character picks up a health item
+        /// </summary>
+        /// <param name="amount"></param>
+        public void OnPickupHealth(float amount)
+        {
+            _hitpoints = Mathf.Min(_maxHitpoints, _hitpoints + amount * _maxHitpoints);
+        }
+
 
         /// <summary>
         /// OnDamage reduce the hitpoints and give a visual cue
