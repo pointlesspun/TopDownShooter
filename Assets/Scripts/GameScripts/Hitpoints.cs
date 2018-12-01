@@ -5,17 +5,15 @@
  */
 namespace Tds.GameScripts
 {
-    using System;
     using System.Collections.Generic;
     using UnityEngine;
+    using Tds.CommonBehaviours;
 
     /// <summary>
     /// Component capturing the behaviour of a gamepoint with hitpoints. 
     /// </summary>
     public class Hitpoints : MonoBehaviour
     {
-       
-
         /// <summary>
         /// Max hitpoints, current hitpoints should never exceed this
         /// </summary>
@@ -50,16 +48,14 @@ namespace Tds.GameScripts
         /// Cached renderers which make up this game object so we can color them if the 
         /// gameobject takes damage.
         /// </summary>        
-        private List<SpriteRendereColorInformation> _renderers = new List<SpriteRendereColorInformation>();
+        private List<SpriteRendererColorInformation> _renderers = new List<SpriteRendererColorInformation>();
 
         /// <summary>
         /// Last time this gameobject took damage.
         /// </summary>
         private float _lastHitTime = 0;
 
-
-        private ItemSpawnBehaviour _itemSpawner;
-
+        private ItemDropBehaviour _itemSpawner;
 
         public virtual void Start()
         {
@@ -74,7 +70,7 @@ namespace Tds.GameScripts
 
             if (spawner != null)
             {
-                _itemSpawner = spawner.GetComponent<ItemSpawnBehaviour>();
+                _itemSpawner = spawner.GetComponent<ItemDropBehaviour>();
             }
         }
 

@@ -16,5 +16,9 @@ namespace Tds
 
         public static string OnPointReached = "OnPointReached";
         public static string OnPathComplete = "OnPathComplete";
+
+        public static string OnPickupItem = "OnPickupItem";
+
+        public static string OnFireButton = "OnFireButton";
     }
 }

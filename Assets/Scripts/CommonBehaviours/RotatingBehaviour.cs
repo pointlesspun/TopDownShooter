@@ -7,11 +7,17 @@ namespace Tds.GameScripts
 {
     using UnityEngine;
 
-    public class PersistentObjectBehaviour : MonoBehaviour
+    /// <summary>
+    /// Behaviour which rotates the gameobject over a given axis
+    /// </summary>
+    public class RotatingBehaviour : MonoBehaviour
     {
-        public void Awake()
+        public Vector3 _axis;
+        public float _degreesPerSecond;
+
+        public void Update()
         {
-            DontDestroyOnLoad(gameObject);
+            transform.rotation *= Quaternion.AngleAxis(_degreesPerSecond * Time.deltaTime, _axis);
         }
     }
 }

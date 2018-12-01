@@ -52,7 +52,7 @@ namespace Tds.GameStateScripts
         /// </summary>
         public void OnPlayerReachesExit()
         {
-            GlobalGameState.IncreaseLevel(_player.GetComponent<PlayerHitpoints>()._hitpoints);
+            GlobalGameState.IncreaseLevel();
             SceneManager.LoadScene(_nextLevelScene);
         }
     }

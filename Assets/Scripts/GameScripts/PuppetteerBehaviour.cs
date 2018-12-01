@@ -7,38 +7,76 @@ namespace Tds.GameScripts
 {
     using UnityEngine;
 
+    /// <summary>
+    /// Contains information of a path
+    /// </summary>
     public class PathPointInfo
     {
+        /// <summary>
+        /// Current object in the path to go to
+        /// </summary>
         public int _index;
+
+        /// <summary>
+        /// Game object which children make up a path
+        /// </summary>
         public GameObject _path;
     }
 
+    /// <summary>
+    /// Behaviour which can take control of an object, controlling their movements
+    /// </summary>
     public class PuppetteerBehaviour : MonoBehaviour
     {
-        public GameObject _player;
+        /// <summary>
+        /// Controlled game object (must be a player in this implementation)
+        /// </summary>
+        public GameObject _puppet;
 
+        /// <summary>
+        /// Path to follow
+        /// </summary>
         public GameObject _path;
+
+        /// <summary>
+        /// Index of the child which is the first point int the path
+        /// </summary>
         public int _firstPointIndex = 0;
 
+        /// <summary>
+        /// Game object listening for path objects
+        /// </summary>
         public GameObject _pathListener;
 
+        /// <summary>
+        /// Velocity of the object following the path
+        /// </summary>
         public float _velocity = 1;
+
+        /// <summary>
+        /// Distance to pathpoints which causes the next path to go to 
+        /// </summary>
         public float _pathProgressionPointDistance = 0.25f;
-
         
-
+        /// <summary>
+        /// Current index in the path
+        /// </summary>
         private int _currentIndex;
+
+        /// <summary>
+        /// Current path point to go to
+        /// </summary>
         public GameObject _currentPoint;
 
         private PlayerController _playerController;
 
         void Start()
         {
-            _playerController = _player.GetComponent<PlayerController>();
+            _playerController = _puppet.GetComponent<PlayerController>();
             _playerController._isPuppet = true;
             _currentIndex = _firstPointIndex;
             _currentPoint = _path.transform.GetChild(_firstPointIndex).gameObject;
-            _playerController.SetVelocity((_currentPoint.transform.position - _player.transform.position).normalized * _velocity);
+            _playerController.SetVelocity((_currentPoint.transform.position - _puppet.transform.position).normalized * _velocity);
         }
 
         void Update()
@@ -56,7 +94,7 @@ namespace Tds.GameScripts
 
         public void UpdateVelocity()
         {
-            var distanceToPoint = (_currentPoint.transform.position - _player.transform.position).magnitude;
+            var distanceToPoint = (_currentPoint.transform.position - _puppet.transform.position).magnitude;
             
             if (distanceToPoint < _pathProgressionPointDistance )
             {
@@ -74,7 +112,7 @@ namespace Tds.GameScripts
                         }, SendMessageOptions.DontRequireReceiver);
                     }
 
-                    _playerController.SetVelocity((_currentPoint.transform.position - _player.transform.position).normalized * _velocity);
+                    _playerController.SetVelocity((_currentPoint.transform.position - _puppet.transform.position).normalized * _velocity);
 
                 }
                 else

@@ -33,12 +33,6 @@ namespace Tds
         public static float _levelScale = 0;
 
         /// <summary>
-        /// Current player health. The game will basically 'restart' every level, to move the player's
-        /// health throughout the levels the current health of the player is stored in this static property.
-        /// </summary>
-        public static float _playerHealth = -1;
-
-        /// <summary>
         /// Updates the current Level scaling following an x-y curve which fits (x,y) = 1,1 / 3,2 / 6,3 / 10, 4 and so on
         /// Some usefull links:
         /// https://mycurvefit.com/
@@ -55,8 +49,6 @@ namespace Tds
         /// </summary>
         public static void StartGame()
         {
-            // set health to 0, the player will then override this
-            _playerHealth = -1;
             _level = 0;
         }
 
@@ -64,9 +56,8 @@ namespace Tds
         /// Progress to the next level, capturing the current health and increasing the level and current level scale.
         /// </summary>
         /// <param name="currentPlayerHealth"></param>
-        public static void IncreaseLevel(float currentPlayerHealth)
+        public static void IncreaseLevel()
         {
-            _playerHealth = currentPlayerHealth;
             _level++;
             UpdateLevelScaling();
         }

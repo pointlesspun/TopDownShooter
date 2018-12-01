@@ -7,6 +7,9 @@ namespace Tds.GameScripts
 {
     using UnityEngine;
 
+    /// <summary>
+    /// Behaviour for items which can be picked up by a player
+    /// </summary>
     public class PickupItem : MonoBehaviour
     {
         public GameObject _itemPrefab;
@@ -16,8 +19,8 @@ namespace Tds.GameScripts
             // if the player collides with the exit, it will trigger a message to the in game state behaviour
             if (collision.gameObject.tag == GameTags.Player)
             {
-                collision.gameObject.SendMessage("OnPickupItem", _itemPrefab, SendMessageOptions.RequireReceiver);
-                GameObject.Destroy(gameObject);
+                collision.gameObject.SendMessage(MessageNames.OnPickupItem, Instantiate(_itemPrefab), SendMessageOptions.RequireReceiver);
+                Destroy(gameObject);
             }
         }
     }

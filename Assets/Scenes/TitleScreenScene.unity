@@ -184,6 +184,7 @@ GameObject:
   m_Component:
   - component: {fileID: 560143033}
   - component: {fileID: 560143032}
+  - component: {fileID: 560143034}
   m_Layer: 0
   m_Name: TitleScreenState
   m_TagString: Untagged
@@ -216,6 +217,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &560143034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 560143031}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8cc3503ecc5aea249802a388a5463d91, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _inputStateListener: {fileID: 0}
 --- !u!1 &660406649
 GameObject:
   m_ObjectHideFlags: 0

@@ -75,7 +75,6 @@ namespace Tds.GameScripts
         /// </summary>
         private Animator _animator;
 
-
         void Start()
         {
             Contract.RequiresComponent<Rigidbody2D>(gameObject, "The player is required to have a RigidBody2D component.");
@@ -93,11 +92,17 @@ namespace Tds.GameScripts
             Contract.Requires(_camera != null, "The player object is required to be able to access the camera.");
         }
 
+        /// <summary>
+        /// Callback when the player gets enabled, starts listening to sceneloaded events
+        /// </summary>
         public void OnEnable()
         {
             SceneManager.sceneLoaded += this.OnLoadCallback;
         }
 
+        /// <summary>
+        /// Callback when the player gets disabled, stops listening to sceneloaded events
+        /// </summary>
         public void OnDisable()
         {
             SceneManager.sceneLoaded -= this.OnLoadCallback;
@@ -126,6 +131,9 @@ namespace Tds.GameScripts
             }
         }
 
+        /// <summary>
+        /// Update the state where the player is in control of the character
+        /// </summary>
         private void UpdatePlayerControlledState()
         {          
             var velocity = UpdateVelocity();
@@ -141,6 +149,9 @@ namespace Tds.GameScripts
             _animator.SetInteger(AnimatorParameterNames.AnimationState, animationState);
         }
 
+        /// <summary>
+        /// Update the state in which the player gets controlled  by another entity than the player
+        /// </summary>
         private void UpdatePuppetState()
         {           
             var velocity = new Vector3(_body.velocity.x, _body.velocity.y, 0);
@@ -153,30 +164,43 @@ namespace Tds.GameScripts
             _animator.SetInteger(AnimatorParameterNames.AnimationState, animationState);
         }
 
+        /// <summary>
+        /// Callback from when a weapon gets destroyed
+        /// </summary>
         public void OnWeaponDestroyed()
         { 
+            // assumotion is that the player is holding the weapon
             _weapons.RemoveAt(_currentWeaponIndex);
             _currentWeaponIndex = -1;
         }
 
-        public void OnPickupItem(object prefab)
+        /// <summary>
+        /// Callback when an item is picked up
+        /// </summary>
+        /// <param name="prefab"></param>
+        public void OnPickupItem(GameObject item)
         {
-            var instance = GameObject.Instantiate(prefab as GameObject);
-            var component = instance.GetComponent<WeaponBase>();
+            var component = item.GetComponent<WeaponBase>();
 
+            // right now we only deal with weapons
             if (component != null)
             {
+                // check if the player is already carrying the same weapon
                 var existing = _weapons.Find((w) => component.name == w.name);
+
                 if (existing != null)
                 {
+                    // same weapon is already in the inventory, merge the two
                     existing.Merge(component);
                 }
                 else
                 {
-                    instance.transform.parent = transform;
+                    // no existing item, add the item to the player
+                    item.transform.parent = transform;
 
                     _weapons.Add(component);
 
+                    // if the weapon is better, equip it
                     if (_currentWeaponIndex == -1 || component._priority > _weapons[_currentWeaponIndex]._priority)
                     {
                         _currentWeaponIndex = _weapons.Count - 1;
@@ -184,15 +208,24 @@ namespace Tds.GameScripts
                 }
             } else
             {
-                Debug.LogWarning("Unknown item picked up: " + instance.name + "::" + component.name);
+                // reminder that we need to have code 
+                Debug.LogWarning("Unknown item picked up: " + item.name + "::" + component.name);
             }
         }
 
+        /// <summary>
+        /// Sets the movement direction of the player
+        /// </summary>
+        /// <param name="velocity"></param>
         public void SetVelocity(Vector3 velocity)
         {
             _body.velocity = velocity;
         }
 
+        /// <summary>
+        /// Update the velocity / movement of the player
+        /// </summary>
+        /// <returns></returns>
         private Vector3 UpdateVelocity()
         {
             var velocity = _body.velocity;

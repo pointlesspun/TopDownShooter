@@ -3,7 +3,7 @@
  * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
  * You should have received a copy of the license along with this work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
  */
-namespace Tds.GameScripts
+namespace Tds.CommonBehaviours
 {
     using System.Collections.Generic;
     using UnityEngine;
@@ -11,7 +11,7 @@ namespace Tds.GameScripts
     /// <summary>
     /// Game object which will spawn other game objects (monsters most often).
     /// </summary>
-    public class Spawner : MonoBehaviour
+    public class SpawningBehaviour : MonoBehaviour
     {
         /// <summary>
         /// Object spawned by this spawner

@@ -8,9 +8,10 @@ namespace Tds.GameStateScripts
     using UnityEngine;
     using Tds.GameScripts;
     using UnityEngine.SceneManagement;
+    using Tds.Util;
 
     /// <summary>
-    /// 
+    /// Game state setting up all the persistent objects (currently only the player)
     /// </summary>
     public class IntrogameState : MonoBehaviour
     {
@@ -18,21 +19,10 @@ namespace Tds.GameStateScripts
         /// Name of the scene containing the next level
         /// </summary>
         public string _nextSceneName;
-
-        private bool _IsFireButtonDown = false;
-
-        public void Update()
+        
+        public void OnFireButton()
         {
-            // check if the user clicks the firebutton - if so go to the next scene
-            if (_IsFireButtonDown)
-            {
-                if (!Input.GetButton(InputNames.Fire1))
-                {
-                    SceneManager.LoadScene(_nextSceneName, LoadSceneMode.Single);
-                }
-            }
-
-            _IsFireButtonDown = Input.GetButton(InputNames.Fire1);
+            SceneManager.LoadScene(_nextSceneName, LoadSceneMode.Single);
         }
 
         public void OnPathComplete()

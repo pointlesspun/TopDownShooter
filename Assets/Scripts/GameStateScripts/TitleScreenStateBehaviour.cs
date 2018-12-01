@@ -8,6 +8,7 @@ namespace Tds.GameStateScripts
     using UnityEngine;
     using Tds.GameScripts;
     using UnityEngine.SceneManagement;
+    using Tds.Util;
 
     /// <summary>
     /// Expressed the behavior of the state when in the title screen. When the player presses the
@@ -20,21 +21,10 @@ namespace Tds.GameStateScripts
         /// </summary>
         public string _nextSceneName = "";
 
-        private bool _IsFireButtonDown = false;
-
-        public void Update()
+        public void OnFireButton()
         {
-            // check if the user clicks the firebutton - if so go to the next scene
-            if (_IsFireButtonDown)
-            {
-                if (!Input.GetButton(InputNames.Fire1))
-                {
-                    GlobalGameState.StartGame();
-                    SceneManager.LoadScene(_nextSceneName, LoadSceneMode.Single);
-                }
-            }
-
-            _IsFireButtonDown = Input.GetButton(InputNames.Fire1);
+            GlobalGameState.StartGame();
+            SceneManager.LoadScene(_nextSceneName, LoadSceneMode.Single);
         }
     }
 }
