@@ -5,7 +5,10 @@
  */
 namespace Tds.GameScripts
 {
+    using System.Collections.Generic;
+    using Tds.Util;
     using UnityEngine;
+    using UnityEngine.SceneManagement;
 
     /// <summary>
     /// Behaviour handling the player's input
@@ -43,6 +46,11 @@ namespace Tds.GameScripts
         public float _idleSpeed = 0.4f;
 
         /// <summary>
+        /// If set to true, the player is being controlled by another entity
+        /// </summary>
+        public bool _isPuppet = false;
+
+        /// <summary>
         /// Reference to the body
         /// </summary>
         private Rigidbody2D _body;
@@ -50,7 +58,8 @@ namespace Tds.GameScripts
         /// <summary>
         /// Reference to the weapon
         /// </summary>
-        private WeaponBase _weapon;
+        private List<WeaponBase> _weapons = new List<WeaponBase>();
+        private int _currentWeaponIndex = -1;
 
         /// <summary>
         /// Reference to the camera
@@ -76,20 +85,149 @@ namespace Tds.GameScripts
             _animator = _animatorControllerObject.GetComponent<Animator>();
 
             _camera = Camera.main;
-            _weapon = SelectWeapon();
+            _weapons = new List<WeaponBase>(GetComponentsInChildren<WeaponBase>());
+
+            _currentWeaponIndex = SelectWeapon();
+
+
+            Contract.Requires(_camera != null, "The player object is required to be able to access the camera.");
         }
 
-        void Update()
+        /// <summary>
+        /// Callback when the player gets enabled, starts listening to sceneloaded events
+        /// </summary>
+        public void OnEnable()
         {
-            var cursorPosition = GetCursorPosition();
+            SceneManager.sceneLoaded += this.OnLoadCallback;
+        }
+
+        /// <summary>
+        /// Callback when the player gets disabled, stops listening to sceneloaded events
+        /// </summary>
+        public void OnDisable()
+        {
+            SceneManager.sceneLoaded -= this.OnLoadCallback;
+        }
+
+        public void OnLoadCallback(Scene scene, LoadSceneMode sceneMode)
+        {
+            _camera = Camera.main;
+            Contract.Requires(_camera != null, "The player object is required to be able to access the camera.");
+        }
+
+        public void Update()
+        {
+            if (_currentWeaponIndex == -1)
+            {
+                _currentWeaponIndex = SelectWeapon();
+            }
+
+            if (_isPuppet)
+            {
+                UpdatePuppetState();
+            }
+            else
+            {
+                UpdatePlayerControlledState();
+            }
+        }
+
+        /// <summary>
+        /// Update the state where the player is in control of the character
+        /// </summary>
+        private void UpdatePlayerControlledState()
+        {          
             var velocity = UpdateVelocity();
+            var cursorPosition = GetCursorPosition();
+
             var animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, cursorPosition, velocity, _idleSpeed);
 
-            UpdateAttack(cursorPosition);
+            if (_currentWeaponIndex != -1)
+            {
+                UpdateAttack(cursorPosition, _weapons[_currentWeaponIndex]);
+            }
 
             _animator.SetInteger(AnimatorParameterNames.AnimationState, animationState);
         }
 
+        /// <summary>
+        /// Update the state in which the player gets controlled  by another entity than the player
+        /// </summary>
+        private void UpdatePuppetState()
+        {           
+            var velocity = new Vector3(_body.velocity.x, _body.velocity.y, 0);
+
+            // in puppet mode the player's 'cursor' is in the direction the player is walking            
+            var cursorPosition = transform.position + velocity;
+
+            var animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, cursorPosition, velocity, _idleSpeed);
+            
+            _animator.SetInteger(AnimatorParameterNames.AnimationState, animationState);
+        }
+
+        /// <summary>
+        /// Callback from when a weapon gets destroyed
+        /// </summary>
+        public void OnWeaponDestroyed()
+        { 
+            // assumotion is that the player is holding the weapon
+            _weapons.RemoveAt(_currentWeaponIndex);
+            _currentWeaponIndex = -1;
+        }
+
+
+        /// <summary>
+        /// Callback when an item is picked up
+        /// </summary>
+        /// <param name="prefab"></param>
+        public void OnPickupItem(GameObject item)
+        {
+            var component = item.GetComponent<WeaponBase>();
+
+            // right now we only deal with weapons
+            if (component != null)
+            {
+                // check if the player is already carrying the same weapon
+                var existing = _weapons.Find((w) => component.name == w.name);
+
+                if (existing != null)
+                {
+                    // same weapon is already in the inventory, merge the two
+                    existing.Merge(component);
+                }
+                else
+                {
+                    // no existing item, add the item to the player
+                    item.transform.parent = transform;
+
+                    _weapons.Add(component);
+
+                    // if the weapon is better, equip it
+                    if (_currentWeaponIndex == -1 || component._priority > _weapons[_currentWeaponIndex]._priority)
+                    {
+                        _currentWeaponIndex = _weapons.Count - 1;
+                    }
+                }
+            } else
+            {
+                // reminder that we need to have code 
+                Debug.LogWarning("Unknown item picked up: " + item.name + "::" + component.name);
+            }
+        }
+
+        /// <summary>
+        /// Sets the movement direction of the player
+        /// </summary>
+        /// <param name="velocity"></param>
+        public void SetVelocity(Vector3 velocity)
+        {
+            _body.velocity = velocity;
+        }
+
+        /// <summary>
+        /// Update the velocity / movement of the player
+        /// </summary>
+        /// <returns></returns>
         private Vector3 UpdateVelocity()
         {
             var velocity = _body.velocity;
@@ -128,44 +266,41 @@ namespace Tds.GameScripts
             return result;
         }
 
-        private void UpdateAttack(Vector3 cursorPosition)
+        private void UpdateAttack(Vector3 cursorPosition, WeaponBase weapon)
         {
-
             var attackDirection = (cursorPosition - transform.position).normalized;
-            _weapon.transform.position = transform.position + attackDirection * _weapon._offsetFromOwner;
+            weapon.transform.position = transform.position + attackDirection * weapon._offsetFromOwner;
 
-            if (Input.GetButton(InputNames.Fire1) && _weapon != null && _weapon.IsCooldownOver())
+            if (Input.GetButton(InputNames.Fire1) && _weapons != null && weapon.IsCooldownOver())
             {
                 _attackDescription._direction = attackDirection;
-                _weapon.Attack(_attackDescription);
+                weapon.Attack(_attackDescription);
             }
         }
-
 
         /// <summary>
         /// Simple weapon select implementation, will change in forthcoming builds
         /// </summary>
         /// <returns></returns>
-        private WeaponBase SelectWeapon()
+        private int SelectWeapon()
         {
-            WeaponBase result = null;
+            var bestPriority = 0;
+            int bestWeapon = -1;
+                 
+            WeaponBase weapon = null;
 
-            for (int i = 0; i < transform.childCount; ++i)
+            for (int i = 0; i < _weapons.Count; ++i)
             {
-                var child = transform.GetChild(i).gameObject;
+                weapon = _weapons[i];
 
-                if (child.tag == GameTags.Weapon)
+                if (weapon != null && (bestWeapon == -1|| weapon._priority > bestPriority))
                 {
-                    result = child.GetComponent<WeaponBase>();
-
-                    if (result != null)
-                    {
-                        break;
-                    }
+                    bestWeapon = i;
+                    bestPriority = weapon._priority;
                 }
             }
 
-            return result;
+            return bestWeapon;
         }
     }
 }

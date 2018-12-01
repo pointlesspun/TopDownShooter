@@ -215,7 +215,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1809274413251934}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -3.083, y: -1.49929, z: 0}
+  m_LocalPosition: {x: 400.18024, y: 641.3019, z: 0}
   m_LocalScale: {x: 2, y: 2, z: 2}
   m_Children:
   - {fileID: 4408653778010018}
@@ -411,9 +411,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c53031dc1b008746ab82fe778ae07ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxHitpoints: 10
+  _maxHitpoints: 3
   _isInvulnerable: 0
-  _hitpoints: 5
+  _hitpoints: 3
+  _onHitColor: {r: 1, g: 1, b: 1, a: 1}
+  _onHitDuration: 0.15
+  _hitpointsScalePerLevel: 1.5
 --- !u!114 &114619761625793336
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -425,13 +428,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8dec147be147e644d97da8dfb3292328, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  moveLeftClipName: RunLeft
+  moveLeftClipName: PlayerRunLeft
   moveLeft: {fileID: 7400000, guid: 039bb2dc8cf768b4e9164d10d7d229be, type: 2}
-  moveRightClipName: RunRight
+  moveRightClipName: PlayerRunRight
   moveRight: {fileID: 7400000, guid: 31d320a24bcdafe4ea9154407bdc2f06, type: 2}
-  idleLeftClipName: StandLeft
+  idleLeftClipName: PlayerIdleLeft
   idleLeft: {fileID: 7400000, guid: 07b01d3f157d27d4d8eefb2c8f9daa9e, type: 2}
-  idleRightClipName: StandRight
+  idleRightClipName: PlayerIdleRight
   idleRight: {fileID: 7400000, guid: 62b241977e5e3564aa42b32bbe4fcc9d, type: 2}
 --- !u!114 &114734939790029940
 MonoBehaviour:
@@ -446,6 +449,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _maxSpeed: 2
   _animatorControllerObject: {fileID: 1767152869437204}
+  _maxSpeedScaling: 0.2
 --- !u!114 &114782970273646998
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -458,14 +462,19 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _range: 5
-  _cooldown: 1
+  _cooldown: 2
   _damage: 1
   _offsetFromOwner: 0.5
-  _bulletPrefab: {fileID: 1474087171358050, guid: b0af31779834fe7499103aedd2ac94f2,
+  _cooldownLevelScaling: 0.5
+  _damageScalingPerLevel: 0.333
+  _rangeScalingPerLevel: 0.5
+  _miniumCooldown: 0.1
+  _bulletPrefab: {fileID: 1276374740757074, guid: e5c6706a0001a0848b0380e8b5223072,
     type: 2}
   _bulletSpeed: 6
   _bulletLifeTime: 2
   _bulletScale: 0.5
+  _speedScalingPerLevel: 0.75
 --- !u!210 &210512884219893714
 SortingGroup:
   m_ObjectHideFlags: 1

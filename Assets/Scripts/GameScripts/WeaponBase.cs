@@ -12,6 +12,8 @@ namespace Tds.GameScripts
     /// </summary>
     public abstract class WeaponBase : MonoBehaviour
     {
+        public int _priority = 0;
+
         /// <summary>
         /// Range in Unity units at which the weapon can be fired. This is just an
         /// indication for the AI at the moment as the range will not be enforced
@@ -39,6 +41,39 @@ namespace Tds.GameScripts
         /// </summary>
         private float _lastAttackTime = -1.0f;
 
+        /// <summary>
+        /// Cooldown scaling for the bullets. When set above 0 decreases enemy cooldowns as levels progress.
+        /// </summary>
+        public float _cooldownLevelScaling = 0;
+
+        /// <summary>
+        /// Damage scaling for the bullets. When set above 0 increases enemy damage as levels progress.
+        /// </summary>
+        public float _damageScalingPerLevel = 0;
+
+        /// <summary>
+        /// Range scaling for the bullets. When set above 0 allows enemies to shoot bullets further as levels progress.
+        /// </summary>
+        public float _rangeScalingPerLevel = 0;
+
+        /// <summary>
+        /// Weapon cooldowns cannot drop below this value
+        /// </summary>
+        public float _miniumCooldown = 0.1f;
+
+        protected GameStateBehaviour _gameState;
+
+        public virtual void Start()
+        {
+            _gameState = GameObject.FindGameObjectWithTag(GameTags.GameState).GetComponent<GameStateBehaviour>();
+
+            var levelScale = _gameState._levelScale;
+
+            _cooldown = Mathf.Max(_miniumCooldown, _cooldown - _cooldownLevelScaling * levelScale);
+            _damage = _damage + levelScale * _damageScalingPerLevel;
+            _range = _range + levelScale * _rangeScalingPerLevel;
+        }
+
         public virtual bool IsCooldownOver()
         {
             return _lastAttackTime < 0 || Time.time - _lastAttackTime > _cooldown;
@@ -64,5 +99,8 @@ namespace Tds.GameScripts
 
         // to be implemented by subclasses
         protected abstract bool ExecuteAttack(AttackParameters attackDescription);
+
+        // what happens if a similar weapon has been picked up
+        public abstract void Merge(WeaponBase other);
     }
 }

@@ -12,6 +12,10 @@ namespace Tds.GameScripts
     /// </summary>
     public class RangedWeapon : WeaponBase
     {
+        public int _bullets = -1;
+
+        public bool _destroyWhenOutOfBullets = false;
+
         /// <summary>
         /// Game object spawned when weapon is fired
         /// </summary>
@@ -33,6 +37,11 @@ namespace Tds.GameScripts
         public float _bulletScale = 1.0f;
 
         /// <summary>
+        /// Level scaling for the bullets. When set above 0 allows enemies to shoot faster bullets as levels progress.
+        /// </summary>
+        public float _speedScalingPerLevel = 0;
+
+        /// <summary>
         /// Override from WeaponBase outlining what is meant to happen, in this case a bullet
         /// will be spawned in the direction indicated by the attackDescription.
         /// </summary>
@@ -40,6 +49,11 @@ namespace Tds.GameScripts
         /// <returns></returns>
         protected override bool ExecuteAttack(AttackParameters attackDescription)
         {
+            if ( _bullets == 0 )
+            {
+                return false;
+            } 
+
             var bullet = Instantiate<GameObject>(_bulletPrefab);
             
             bullet.transform.localScale *= _bulletScale;
@@ -47,15 +61,45 @@ namespace Tds.GameScripts
             bullet.name = "bullet " + gameObject.name;
 
             var bulletSettings = bullet.GetComponent<BulletBehaviour>();
+            var levelScale = _gameState._levelScale;
 
             bulletSettings._friendlyTag = gameObject.tag;
-            bulletSettings._velocity = _bulletSpeed;
+            bulletSettings._velocity = _bulletSpeed + levelScale * _speedScalingPerLevel;
             bulletSettings._direction = attackDescription._direction;
             bulletSettings._lifetime = _bulletLifeTime;
             bulletSettings._damage = _damage;
             bulletSettings._maxRange = _range;
 
+            if ( attackDescription._direction != Vector3.zero)
+            {
+                float angle = Mathf.Atan2(attackDescription._direction.y, attackDescription._direction.x) * Mathf.Rad2Deg;
+                bullet.transform.rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+            }
+
+            if (_bullets > -1)
+            {
+                _bullets--;
+
+                if (_bullets == 0 && _destroyWhenOutOfBullets)
+                {
+                    if ( transform.parent != null)
+                    {
+                        transform.parent.gameObject.SendMessage(MessageNames.OnWeaponDestroyed);
+                    }
+
+                    GameObject.Destroy(gameObject);
+                }
+            }
+
             return true;
+        }
+
+        public override void Merge(WeaponBase other)
+        {
+            if ( other is RangedWeapon)
+            {
+                _bullets += ((RangedWeapon)other)._bullets;
+            }
         }
     }
 }
