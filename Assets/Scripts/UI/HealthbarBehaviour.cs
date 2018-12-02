@@ -44,12 +44,20 @@ namespace Tds.UI
 
         public void Start() {
 
-            if (_target == null )
+            if (_target == null)
             {
                 _target = GameObject.FindGameObjectWithTag(GameTags.Player);
-            }
+            } 
 
-            SetTarget(_target);
+
+            if (_target != null)
+            {
+                SetTarget(_target);
+            }
+            else
+            {
+                gameObject.SetActive(false);
+            }
         }
 
         /// <summary>
@@ -74,9 +82,12 @@ namespace Tds.UI
         }
 
         void Update() {
-            var scale = _hitpointsBar.rectTransform.localScale;
-            scale.x = _maxHitbarXScale * Mathf.Max(0, (_hitpointBehaviour._hitpoints / _hitpointBehaviour._maxHitpoints));
-            _hitpointsBar.rectTransform.localScale = scale;  
+            if (_target != null && _hitpointBehaviour != null)
+            {
+                var scale = _hitpointsBar.rectTransform.localScale;
+                scale.x = _maxHitbarXScale * Mathf.Max(0, (_hitpointBehaviour._hitpoints / _hitpointBehaviour._maxHitpoints));
+                _hitpointsBar.rectTransform.localScale = scale;
+            }
         }
     }
 }

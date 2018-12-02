@@ -5,6 +5,7 @@
  */
 namespace Tds.GameScripts
 {
+    using System;
     using UnityEngine;
 
     /// <summary>
@@ -13,39 +14,24 @@ namespace Tds.GameScripts
     public class LevelGrid : MonoBehaviour
     {
         /// <summary>
-        /// GameObject prefab which contains the behaviour of a floor element
+        /// Definitions for the floor
         /// </summary>
-        public GameObject _floorPrefab;
+        private static int FloorTileIndex = 0;
 
         /// <summary>
         /// GameObject prefab which contains the behaviour of a horizontal wall element
         /// </summary>
-        public GameObject _horizontalWallPrefab;
+        private static int HorizontalWallIndex = 1;
 
         /// <summary>
         /// GameObject prefab which contains the behaviour of a vertical wall element
         /// </summary>
-        public GameObject _verticalWallPrefab;
+        private static int VerticalWallIndex = 2;
 
         /// <summary>
         /// Prefab which contains the exit prefab
         /// </summary>
-        public GameObject _exitLevelPrefab;
-
-        /// <summary>
-        /// Sprites from which the floor generation can choose to create a level from
-        /// </summary>
-        public Sprite[] _floorSprites;
-
-        /// <summary>
-        /// Colors from which the floor generation can choose to assign to the floor sprite
-        /// </summary>
-        public Color[] _floorColors;
-
-        /// <summary>
-        /// Sorting order of the floor
-        /// </summary>
-        public int _floorSortingOrder = 0;
+        private static int ExitIndex = 3;
 
         /// <summary>
         /// Width in units of the level
@@ -78,16 +64,33 @@ namespace Tds.GameScripts
         /// </summary>
         public bool _addWallBorder = true;
 
+        /// <summary>
+        /// Definitions for the level elements. Work in progress
+        /// </summary>
+        public LevelSpritePoolDefinition[] _levelDefinitions;
+
         private Vector3 _offset;
+
+        /// <summary>
+        /// Objects managing the sprite pools and the variations
+        /// </summary>
+        private SpriteProvider[] _spriteProviders;
 
         void Start()
         {
+            _spriteProviders = new SpriteProvider[_levelDefinitions.Length];
+
+            for (int i = 0; i < _spriteProviders.Length; ++i)
+            {
+                _spriteProviders[i] = _levelDefinitions[i].CreateProvider();
+            }
+
             var offsetX = _buildAroundCenter ? (_width * _tileWidth) * -0.5f : 0;
             var offsetY = _buildAroundCenter ? (_height * _tileHeight) * -0.5f : 0;
             _offset = new Vector3(offsetX, offsetY, transform.position.z);
 
-            var exitX = Random.Range(1, _width - 2);
-            var exitY = Random.Range(1, _height - 2);
+            var exitX = UnityEngine.Random.Range(1, _width - 2);
+            var exitY = UnityEngine.Random.Range(1, _height - 2);
 
             DeterminePlayerStartPosition(exitX, exitY);
 
@@ -96,8 +99,11 @@ namespace Tds.GameScripts
                 for (int y = 0; y < _height; y++)
                 {
                     var element = DeterminePrefab(x, y, exitX, exitY);
-                    element.transform.parent = transform;
-                    element.transform.position = _offset + new Vector3(x * _tileWidth, y * _tileHeight, 0);
+                    if (element != null)
+                    {
+                        element.transform.parent = transform;
+                        element.transform.position = _offset + new Vector3(x * _tileWidth, y * _tileHeight, 0);
+                    }
                 }
             }
         }
@@ -116,16 +122,19 @@ namespace Tds.GameScripts
             int xQuadrant = exitX / halfWidth > 0 ? 0 : 1;
             int yQuadrant = exitY / halfHeight > 0 ? 0 : 1; 
 
-            var x = Random.Range(1 + xQuadrant * halfWidth, (xQuadrant + 1) * halfWidth - 1);
-            var y = Random.Range(1+ yQuadrant * halfHeight, (yQuadrant + 1) * halfHeight - 1);
+            var x = UnityEngine.Random.Range(1 + xQuadrant * halfWidth, (xQuadrant + 1) * halfWidth - 1);
+            var y = UnityEngine.Random.Range(1+ yQuadrant * halfHeight, (yQuadrant + 1) * halfHeight - 1);
 
             var player = GameObject.FindGameObjectWithTag(GameTags.Player);
-            var position = player.transform.position;
+            if (player != null)
+            {
+                var position = player.transform.position;
 
-            position.x = x + 0.5f;
-            position.y = y + 0.5f;
+                position.x = x + 0.5f;
+                position.y = y + 0.5f;
 
-            player.transform.position = position + _offset;
+                player.transform.position = position + _offset;
+            }
         }
 
         /// <summary>
@@ -140,37 +149,47 @@ namespace Tds.GameScripts
         {
             var result = (GameObject)null;
 
-            if (_exitLevelPrefab != null && x == exitX && y == exitY)
+            if (x == exitX && y == exitY)
             {
-                result = Instantiate(_exitLevelPrefab);
-                result.name = "exit " + x + ", " + y;
-                return result;
+                return Obtain(ExitIndex, "exit", x, y);
             }
 
-            if (_addWallBorder && _horizontalWallPrefab != null && (x == 0 || x == _width - 1))
+            if (_addWallBorder && (y == 0 || y == _height - 1))
             {
-                result = Instantiate(_verticalWallPrefab);
-                result.name = "h-wall " + x + ", " + y;
+                result = Obtain(HorizontalWallIndex, "h-wall", x, y);
             }
-            else if (_addWallBorder && _verticalWallPrefab != null && (y == 0 || y == _height - 1))
+            else if (_addWallBorder && (x == 0 || x == _width - 1))
             {
-                result = Instantiate(_horizontalWallPrefab);
-                result.name = "v-wall " + x + ", " + y;
+                result = Obtain(VerticalWallIndex, "v-wall", x, y);
             }
             else
             {
-                result = Instantiate(_floorPrefab);
-
-                var spriteRenderer = result.GetComponent<SpriteRenderer>();
-
-                spriteRenderer.sprite = _floorSprites[Random.Range(0, _floorSprites.Length)];
-                spriteRenderer.color = _floorColors[Random.Range(0, _floorColors.Length)];
-                spriteRenderer.sortingOrder = _floorSortingOrder;
-                result.name = "floor " + x + ", " + y;
+                result = Obtain(FloorTileIndex, "floor", x, y);
             }
 
             return result;
         }
 
+        /// <summary>
+        /// Wrapper getting a pool object. Intermediate method until pools actually
+        /// get their elements returned to them.
+        /// </summary>
+        /// <param name="elementIndex"></param>
+        /// <param name="name"></param>
+        /// <param name="x"></param>
+        /// <param name="y"></param>
+        /// <returns></returns>
+        private GameObject Obtain(int elementIndex, string name, int x, int y)
+        {
+            var poolObject = _spriteProviders[elementIndex].Obtain();
+
+            if (poolObject != null)
+            {
+                poolObject ._obj.name = name + " " + x + ", " + y;
+                return poolObject._obj;
+            }
+
+            return null;
+        }
     }
 }

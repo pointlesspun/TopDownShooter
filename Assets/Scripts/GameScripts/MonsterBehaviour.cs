@@ -53,10 +53,13 @@ namespace Tds.GameScripts
             _animator = _animatorControllerObject.GetComponent<Animator>();
 
             // scale movement speed off the level
-            _maxSpeed = _maxSpeed + GameObject.FindGameObjectWithTag(GameTags.GameState)
-                                                .GetComponent<GameStateBehaviour>()
-                                                ._levelScale * _maxSpeedScaling;
-        
+            var gameStateObject = GameObject.FindGameObjectWithTag(GameTags.GameState);
+
+            if (gameStateObject != null)
+            {
+                _maxSpeed = _maxSpeed + gameStateObject.GetComponent<GameStateBehaviour>()
+                                                                ._levelScale * _maxSpeedScaling;
+            }
         }
 
         public void Update()

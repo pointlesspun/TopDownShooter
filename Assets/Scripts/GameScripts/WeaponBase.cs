@@ -65,13 +65,19 @@ namespace Tds.GameScripts
 
         public virtual void Start()
         {
-            _gameState = GameObject.FindGameObjectWithTag(GameTags.GameState).GetComponent<GameStateBehaviour>();
+            var gameStateObject = GameObject.FindGameObjectWithTag(GameTags.GameState);
 
-            var levelScale = _gameState._levelScale;
+            if (gameStateObject != null)
+            {
+                _gameState = gameStateObject.GetComponent<GameStateBehaviour>();
 
-            _cooldown = Mathf.Max(_miniumCooldown, _cooldown - _cooldownLevelScaling * levelScale);
-            _damage = _damage + levelScale * _damageScalingPerLevel;
-            _range = _range + levelScale * _rangeScalingPerLevel;
+                var levelScale = _gameState._levelScale;
+
+                _cooldown = Mathf.Max(_miniumCooldown, _cooldown - _cooldownLevelScaling * levelScale);
+                _damage = _damage + levelScale * _damageScalingPerLevel;
+                _range = _range + levelScale * _rangeScalingPerLevel;
+            }
+
         }
 
         public virtual bool IsCooldownOver()

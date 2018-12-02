@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 61799455470143972}
   - component: {fileID: 210937550258632554}
   m_Layer: 0
-  m_Name: VericalBlandStoneWallPrefab
+  m_Name: VerticalBlandStoneWallPrefab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
