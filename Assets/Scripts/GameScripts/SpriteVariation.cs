@@ -22,9 +22,19 @@ namespace Tds.GameScripts
             return _spriteVariations[UnityEngine.Random.Range(0, _spriteVariations.Length)];
         }
 
+        public Sprite GetRandomSprite(int randomRoll)
+        {
+            return _spriteVariations[randomRoll % _spriteVariations.Length];
+        }
+
         public Color GetRandomColor()
         {
-            return _colorVariations[UnityEngine.Random.Range(0, _colorVariations.Length)];
+            return  _colorVariations[UnityEngine.Random.Range(0, _colorVariations.Length)];
+        }
+
+        public Color GetRandomColor(int randomRoll)
+        {
+            return _colorVariations[randomRoll % _colorVariations.Length];
         }
     } 
 }

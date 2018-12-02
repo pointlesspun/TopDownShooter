@@ -5,8 +5,24 @@
  */
 namespace Tds.GameScripts
 {
-    using System;
+    using System.Collections.Generic;
+    using Tds.Util;
     using UnityEngine;
+
+    /// <summary>
+    /// Element describing a piece of the level
+    /// </summary>
+    public class LevelElement
+    {
+        // cached unity object representing this element
+        public PooledObject<GameObject> _poolObject;
+
+        // id of the element
+        public int _id;
+
+        // random variation applied to this element
+        public int _randomRoll;
+    }
 
     /// <summary>
     /// Class which generates a grid which is the basis of a level
@@ -54,21 +70,18 @@ namespace Tds.GameScripts
         public int _tileHeight = 64;
 
         /// <summary>
-        /// If true the position of the game object is the center, otherwise it will
-        /// the level upwards
-        /// </summary>
-        public bool _buildAroundCenter = true;
-
-        /// <summary>
-        /// If true adds a border around the level space
-        /// </summary>
-        public bool _addWallBorder = true;
-
-        /// <summary>
         /// Definitions for the level elements. Work in progress
         /// </summary>
         public LevelSpritePoolDefinition[] _levelDefinitions;
 
+        /// <summary>
+        /// How far are tiles being rendered from the point of focus
+        /// </summary>
+        public int _viewRadius = 6;
+
+        /// <summary>
+        /// Cached offset of the grid
+        /// </summary>
         private Vector3 _offset;
 
         /// <summary>
@@ -76,7 +89,27 @@ namespace Tds.GameScripts
         /// </summary>
         private SpriteProvider[] _spriteProviders;
 
-        void Start()
+        /// <summary>
+        /// Contains the level data
+        /// </summary>
+        private Grid2D<LevelElement> _grid;
+
+        /// <summary>
+        /// Cached level elements (floors, walls) currently visible
+        /// </summary>
+        private List<LevelElement> _elementCache = new List<LevelElement>();
+
+        /// <summary>
+        /// Cached reference to the player
+        /// </summary>
+        private GameObject _player;
+
+        /// <summary>
+        /// Last position of the player
+        /// </summary>
+        private Vector3 _previousPlayerPosition;
+
+        public void Start()
         {
             _spriteProviders = new SpriteProvider[_levelDefinitions.Length];
 
@@ -85,24 +118,124 @@ namespace Tds.GameScripts
                 _spriteProviders[i] = _levelDefinitions[i].CreateProvider();
             }
 
-            var offsetX = _buildAroundCenter ? (_width * _tileWidth) * -0.5f : 0;
-            var offsetY = _buildAroundCenter ? (_height * _tileHeight) * -0.5f : 0;
-            _offset = new Vector3(offsetX, offsetY, transform.position.z);
+            _grid = CreateDefaultLayout(_width, _height);
+
+            _offset = new Vector3((_width * _tileWidth) * -0.5f, (_height * _tileHeight) * -0.5f, transform.position.z);
 
             var exitX = UnityEngine.Random.Range(1, _width - 2);
             var exitY = UnityEngine.Random.Range(1, _height - 2);
 
-            DeterminePlayerStartPosition(exitX, exitY);
+            _grid[exitX, exitY]._id = ExitIndex;
 
-            for (int x = 0; x < _width; x++)
+            _player = GameObject.FindGameObjectWithTag(GameTags.Player);
+
+            if (_player != null)
             {
-                for (int y = 0; y < _height; y++)
+                _player.transform.position = DeterminePlayerStartPosition(exitX, exitY) + _offset;
+            }
+
+            _previousPlayerPosition = new Vector3(float.MaxValue, float.MaxValue, 0);
+        }
+
+        /// <summary>
+        /// Behaviour's update call
+        /// </summary>
+        public void Update()
+        {
+            if (_player != null)
+            {
+                var centerPosition = _player.transform.position;
+
+                if (hasPlayerMoved(centerPosition, _previousPlayerPosition))
                 {
-                    var element = DeterminePrefab(x, y, exitX, exitY);
-                    if (element != null)
+                    ClearLevelElementCache();
+
+                    _previousPlayerPosition = centerPosition;
+
+                    UpdateVisableGrid(centerPosition);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Creates a simple layout in a grid
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <returns></returns>
+        private Grid2D<LevelElement> CreateDefaultLayout(int width, int height)
+        {
+            // fill the grid with tiles
+            var result = new Grid2D<LevelElement>(_width, _height,
+                () => new LevelElement()
+                {
+                    _id = FloorTileIndex,
+                    // pre-select a randomized value so the sprite variations can easily pick a random sprite / color 
+                    _randomRoll = UnityEngine.Random.Range(0, 256 * 256)
+                });
+
+            // draw some borders
+            result.TraceLine(Vector2.zero, new Vector2(result.Width, 0), (x, y, grid) => grid[x, y]._id = HorizontalWallIndex);
+            result.TraceLine(Vector2.zero, new Vector2(0, result.Height), (x, y, grid) => grid[x, y]._id = VerticalWallIndex);
+            result.TraceLine(new Vector2(result.Width - 1, 0), new Vector2(result.Width - 1, result.Height), (x, y, grid) => grid[x, y]._id = VerticalWallIndex);
+            result.TraceLine(new Vector2(0, result.Height - 1), new Vector2(result.Width, result.Height - 1), (x, y, grid) => grid[x, y]._id = HorizontalWallIndex);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Clears the cached level elements, returning them to the pools
+        /// </summary>
+        private void ClearLevelElementCache()
+        {
+            _elementCache.ForEach(element =>
+            {
+                _spriteProviders[element._poolObject._poolId].Release(element._poolObject);
+            });
+
+            _elementCache.Clear();
+        }
+
+        /// <summary>
+        /// Checks if the player has moved a position on the discrete 2d grid
+        /// </summary>
+        /// <param name="newPosition"></param>
+        /// <param name="oldPosition"></param>
+        /// <returns></returns>
+        private bool hasPlayerMoved(Vector3 newPosition, Vector3 oldPosition)
+        {
+            return ((int)newPosition.x) != ((int)oldPosition.x)
+                || ((int)newPosition.y) != ((int)oldPosition.y);
+        }
+
+        /// <summary>
+        /// updates the parts of the level which are in range of the playuer
+        /// </summary>
+        /// <param name="centerPosition"></param>
+        private void UpdateVisableGrid(Vector3 centerPosition)
+        {
+            var viewRadiusSqr = _viewRadius * _viewRadius;
+
+            for (var x = -_viewRadius; x <= _viewRadius; x++)
+            {
+                for (var y = -_viewRadius; y <= _viewRadius; y++)
+                {
+                    // check if this grid position is in the view radius
+                    if (x * x + y * y <viewRadiusSqr)
                     {
-                        element.transform.parent = transform;
-                        element.transform.position = _offset + new Vector3(x * _tileWidth, y * _tileHeight, 0);
+                        var gridX = x + (int)((centerPosition.x - _offset.x + _tileWidth * 0.5f) / _tileWidth);
+                        var gridY = y + (int)((centerPosition.y - _offset.y + _tileHeight * 0.5f) / _tileHeight);
+
+                        if (_grid.IsOnGrid(gridX, gridY))
+                        {
+                            var element = _grid[gridX, gridY];
+
+                            // obtain up a visual from the pool and place it in the new position
+                            element._poolObject = _spriteProviders[element._id].Obtain(element._randomRoll);
+                            element._poolObject._obj.transform.position = _offset + new Vector3(gridX * _tileWidth, gridY * _tileHeight, 0);
+
+                            _elementCache.Add(element);
+                        }
                     }
                 }
             }
@@ -114,8 +247,8 @@ namespace Tds.GameScripts
         /// </summary>
         /// <param name="exitX"></param>
         /// <param name="exitY"></param>
-        private void DeterminePlayerStartPosition(int exitX, int exitY)
-        {
+        private Vector3 DeterminePlayerStartPosition(int exitX, int exitY)
+        {            
             int halfWidth = _width / 2;
             int halfHeight = _height/ 2;
 
@@ -124,72 +257,8 @@ namespace Tds.GameScripts
 
             var x = UnityEngine.Random.Range(1 + xQuadrant * halfWidth, (xQuadrant + 1) * halfWidth - 1);
             var y = UnityEngine.Random.Range(1+ yQuadrant * halfHeight, (yQuadrant + 1) * halfHeight - 1);
-
-            var player = GameObject.FindGameObjectWithTag(GameTags.Player);
-            if (player != null)
-            {
-                var position = player.transform.position;
-
-                position.x = x + 0.5f;
-                position.y = y + 0.5f;
-
-                player.transform.position = position + _offset;
-            }
-        }
-
-        /// <summary>
-        /// Determines what tile should be created for a given x, y position 
-        /// </summary>
-        /// <param name="x">Current x position on the map </param>
-        /// <param name="y">Current y position on the map</param>
-        /// <param name="exitX">X position of the exit</param>
-        /// <param name="exitY">y position of the exit</param>
-        /// <returns></returns>
-        private GameObject DeterminePrefab(int x, int y, int exitX, int exitY)
-        {
-            var result = (GameObject)null;
-
-            if (x == exitX && y == exitY)
-            {
-                return Obtain(ExitIndex, "exit", x, y);
-            }
-
-            if (_addWallBorder && (y == 0 || y == _height - 1))
-            {
-                result = Obtain(HorizontalWallIndex, "h-wall", x, y);
-            }
-            else if (_addWallBorder && (x == 0 || x == _width - 1))
-            {
-                result = Obtain(VerticalWallIndex, "v-wall", x, y);
-            }
-            else
-            {
-                result = Obtain(FloorTileIndex, "floor", x, y);
-            }
-
-            return result;
-        }
-
-        /// <summary>
-        /// Wrapper getting a pool object. Intermediate method until pools actually
-        /// get their elements returned to them.
-        /// </summary>
-        /// <param name="elementIndex"></param>
-        /// <param name="name"></param>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <returns></returns>
-        private GameObject Obtain(int elementIndex, string name, int x, int y)
-        {
-            var poolObject = _spriteProviders[elementIndex].Obtain();
-
-            if (poolObject != null)
-            {
-                poolObject ._obj.name = name + " " + x + ", " + y;
-                return poolObject._obj;
-            }
-
-            return null;
+            
+            return new Vector3(x + 0.5f, y + 0.5f, 0);
         }
     }
 }

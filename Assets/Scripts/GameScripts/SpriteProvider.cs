@@ -16,7 +16,6 @@ namespace Tds.GameScripts
     /// </summary>
     public class SpriteProvider
     {
-        private int _id;
         private ObjectPool<GameObject> _pool;
         private SpriteVariation _variations; 
 
@@ -31,9 +30,7 @@ namespace Tds.GameScripts
         /// <returns></returns>
         public SpriteProvider Initialize(int providerId, int count, Func<GameObject> factoryMethod, SpriteVariation variations, int sortingOrder)
         {
-            _id = providerId;
-
-            _pool = new ObjectPool<GameObject>(() =>
+            _pool = new ObjectPool<GameObject>(providerId, () =>
             {
                 var instance = factoryMethod();
                 var renderer = instance.GetComponent<SpriteRenderer>();
@@ -54,7 +51,7 @@ namespace Tds.GameScripts
         /// Returns a pool object if available or null otherwise
         /// </summary>
         /// <returns></returns>
-        public PooledObject<GameObject> Obtain()
+        public PooledObject<GameObject> Obtain(int randomRoll)
         {
             var poolObject = _pool.Obtain();
 
@@ -62,8 +59,8 @@ namespace Tds.GameScripts
             {
                 var spriteRenderer = poolObject._obj.GetComponent<SpriteRenderer>();
 
-                spriteRenderer.sprite = _variations.GetRandomSprite();
-                spriteRenderer.color = _variations.GetRandomColor();
+                spriteRenderer.sprite = _variations.GetRandomSprite(randomRoll);
+                spriteRenderer.color = _variations.GetRandomColor(randomRoll);
 
                 poolObject._obj.SetActive(true);
             }

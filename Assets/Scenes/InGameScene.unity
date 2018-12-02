@@ -593,7 +593,7 @@ MonoBehaviour:
       - {r: 0.23137257, g: 0.2392157, b: 0.24313727, a: 1}
     _prefab: {fileID: 1979511085101218, guid: 758c5c15742dc4b47af0578e0fc6ccc0, type: 2}
     _sortOrder: 0
-    _poolSize: 256
+    _poolSize: 225
     _poolId: 0
   - _variations:
       _spriteVariations:
@@ -606,7 +606,7 @@ MonoBehaviour:
     _prefab: {fileID: 1519310321278836, guid: c6536752b1d3b2a479ae26122ead47c9, type: 2}
     _sortOrder: 0
     _poolSize: 128
-    _poolId: 0
+    _poolId: 1
   - _variations:
       _spriteVariations:
       - {fileID: 21300000, guid: f17be6d86e2bab3449b1159430ebcd1b, type: 3}
@@ -618,7 +618,7 @@ MonoBehaviour:
     _prefab: {fileID: 1234374881730766, guid: 434f77ac5d0049641ab175b50dd781e8, type: 2}
     _sortOrder: 0
     _poolSize: 128
-    _poolId: 0
+    _poolId: 2
   - _variations:
       _spriteVariations:
       - {fileID: 21300000, guid: 6eea78355453c2a4596034dc3cdc8440, type: 3}
@@ -630,7 +630,8 @@ MonoBehaviour:
     _prefab: {fileID: 1731099387608354, guid: cca009ef6577a7645906df1df79bbd7d, type: 2}
     _sortOrder: 0
     _poolSize: 1
-    _poolId: 0
+    _poolId: 3
+  _viewRadius: 7
 --- !u!4 &1227337995
 Transform:
   m_ObjectHideFlags: 0

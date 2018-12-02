@@ -15,20 +15,32 @@ namespace Tds.Util
     public class PooledObject<T>
     {
         public T   _obj;
+        public int _indexId;
         public int _poolId;
+
+        public override string ToString()
+        {
+            return _obj.ToString() + "[" + _indexId + "@" + _poolId + "]";
+        }
     }
 
+    /// <summary>
+    /// Data structure storing pre-created objects.
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
     public class ObjectPool<T> 
     {
         private List<PooledObject<T>> _availableObjects = new List<PooledObject<T>>();
-        private List<PooledObject<T>> _objectsInUse = new List<PooledObject<T>>();
+        private HashSet<PooledObject<T>> _objectsInUse = new HashSet<PooledObject<T>>();
 
-        public ObjectPool()
+        private int _poolId;
+
+        public ObjectPool(int id)
         {
-
+            _poolId = id;
         }
 
-        public ObjectPool(Func<T> factoryMethod, int count)
+        public ObjectPool(int id, Func<T> factoryMethod, int count) : this(id)
         {
             Generate(factoryMethod, count);
         }
@@ -44,7 +56,7 @@ namespace Tds.Util
             {
                 _availableObjects.Add(new PooledObject<T>()
                 {
-                    _poolId = _availableObjects.Count,
+                    _indexId = _availableObjects.Count,
                     _obj = factoryMethod()
                 });
             }
@@ -59,7 +71,8 @@ namespace Tds.Util
             if ( _availableObjects.Count > 0)
             {
                 var result = _availableObjects[0];
-                result._poolId = _objectsInUse.Count;
+                result._indexId = _objectsInUse.Count;
+                result._poolId = _poolId;
                 _objectsInUse.Add(result);
                 _availableObjects.RemoveAt(0);
                 return result;
@@ -79,7 +92,7 @@ namespace Tds.Util
             {
                 result = new PooledObject<T>()
                 {
-                    _poolId = _objectsInUse.Count,
+                    _indexId = _objectsInUse.Count,
                     _obj = factoryMethod()
                 };
 
@@ -94,8 +107,9 @@ namespace Tds.Util
         /// <param name="obj"></param>
         public void Release(PooledObject<T> obj)
         {
-            _objectsInUse.RemoveAt(obj._poolId);
-            obj._poolId = _availableObjects.Count;
+
+            _objectsInUse.Remove(obj);
+            obj._indexId = _availableObjects.Count;
             _availableObjects.Add(obj);
         }
     }
