@@ -224,7 +224,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1563601713607258, guid: 828773286aa87014392114ed320a0261, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114815628925385442, guid: 828773286aa87014392114ed320a0261,
         type: 2}
@@ -285,7 +285,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.3301887, g: 0.3214278, b: 0.31617126, a: 0}
+  m_BackGroundColor: {r: 0.09433961, g: 0.09285628, b: 0.09211462, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
@@ -466,7 +466,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1985903484779424, guid: 65f2ae3c6e03a5f409731280368ec351, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 212399431143147674, guid: 65f2ae3c6e03a5f409731280368ec351,
         type: 2}
@@ -579,8 +579,6 @@ MonoBehaviour:
   _height: 20
   _tileWidth: 1
   _tileHeight: 1
-  _buildAroundCenter: 1
-  _addWallBorder: 1
   _levelDefinitions:
   - _variations:
       _spriteVariations:
@@ -593,7 +591,7 @@ MonoBehaviour:
       - {r: 0.23137257, g: 0.2392157, b: 0.24313727, a: 1}
     _prefab: {fileID: 1979511085101218, guid: 758c5c15742dc4b47af0578e0fc6ccc0, type: 2}
     _sortOrder: 0
-    _poolSize: 225
+    _poolSize: 300
     _poolId: 0
   - _variations:
       _spriteVariations:
