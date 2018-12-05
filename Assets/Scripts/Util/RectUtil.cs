@@ -33,5 +33,20 @@ namespace Tds.Util
                    || e >= 2;
         }
 
+        public static Vector2Int[] GetTouchPoints(RectInt a, RectInt b)
+        {
+            var x1 = Mathf.Max(a.min.x, b.min.x);
+            var x2 = Mathf.Min(a.max.x, b.max.x);
+
+            var y1 = Mathf.Max(a.min.y, b.min.y);
+            var y2 = Mathf.Min(a.max.y, b.max.y);
+
+            return new Vector2Int[]
+            {
+                new Vector2Int(x1, y1),
+                new Vector2Int(x2, y2),
+            };
+        }
+
     }
 }

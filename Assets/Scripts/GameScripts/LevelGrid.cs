@@ -6,6 +6,7 @@
 namespace Tds.GameScripts
 {
     using System.Collections.Generic;
+    using Tds.DungeonGeneration;
     using Tds.Util;
     using UnityEngine;
 
@@ -29,25 +30,7 @@ namespace Tds.GameScripts
     /// </summary>
     public class LevelGrid : MonoBehaviour
     {
-        /// <summary>
-        /// Definitions for the floor
-        /// </summary>
-        private static int FloorTileIndex = 0;
-
-        /// <summary>
-        /// GameObject prefab which contains the behaviour of a horizontal wall element
-        /// </summary>
-        private static int HorizontalWallIndex = 1;
-
-        /// <summary>
-        /// GameObject prefab which contains the behaviour of a vertical wall element
-        /// </summary>
-        private static int VerticalWallIndex = 2;
-
-        /// <summary>
-        /// Prefab which contains the exit prefab
-        /// </summary>
-        private static int ExitIndex = 3;
+        public SubdivisionAlgorithm _algorithm = new SubdivisionAlgorithm();
 
         /// <summary>
         /// Width in units of the level
@@ -118,14 +101,15 @@ namespace Tds.GameScripts
                 _spriteProviders[i] = _levelDefinitions[i].CreateProvider();
             }
 
-            _grid = CreateDefaultLayout(_width, _height);
-
+            _grid = LevelBuilder.BuildLevel(_algorithm, _width, _height);
+        
+            
             _offset = new Vector3((_width * _tileWidth) * -0.5f, (_height * _tileHeight) * -0.5f, transform.position.z);
 
             var exitX = UnityEngine.Random.Range(1, _width - 2);
             var exitY = UnityEngine.Random.Range(1, _height - 2);
 
-            _grid[exitX, exitY]._id = ExitIndex;
+            _grid[exitX, exitY]._id = LevelElementDefinitions.ExitIndex;
 
             _player = GameObject.FindGameObjectWithTag(GameTags.Player);
 
@@ -155,32 +139,6 @@ namespace Tds.GameScripts
                     UpdateVisableGrid(centerPosition);
                 }
             }
-        }
-
-        /// <summary>
-        /// Creates a simple layout in a grid
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <returns></returns>
-        private Grid2D<LevelElement> CreateDefaultLayout(int width, int height)
-        {
-            // fill the grid with tiles
-            var result = new Grid2D<LevelElement>(_width, _height,
-                () => new LevelElement()
-                {
-                    _id = FloorTileIndex,
-                    // pre-select a randomized value so the sprite variations can easily pick a random sprite / color 
-                    _randomRoll = UnityEngine.Random.Range(0, 256 * 256)
-                });
-
-            // draw some borders
-            result.TraceLine(Vector2.zero, new Vector2(result.Width, 0), (x, y, grid) => grid[x, y]._id = HorizontalWallIndex);
-            result.TraceLine(Vector2.zero, new Vector2(0, result.Height), (x, y, grid) => grid[x, y]._id = VerticalWallIndex);
-            result.TraceLine(new Vector2(result.Width - 1, 0), new Vector2(result.Width - 1, result.Height), (x, y, grid) => grid[x, y]._id = VerticalWallIndex);
-            result.TraceLine(new Vector2(0, result.Height - 1), new Vector2(result.Width, result.Height - 1), (x, y, grid) => grid[x, y]._id = HorizontalWallIndex);
-
-            return result;
         }
 
         /// <summary>
@@ -230,11 +188,14 @@ namespace Tds.GameScripts
                         {
                             var element = _grid[gridX, gridY];
 
-                            // obtain up a visual from the pool and place it in the new position
-                            element._poolObject = _spriteProviders[element._id].Obtain(element._randomRoll);
-                            element._poolObject._obj.transform.position = _offset + new Vector3(gridX * _tileWidth, gridY * _tileHeight, 0);
+                            if (element._id != LevelElementDefinitions.None)
+                            {
+                                // obtain up a visual from the pool and place it in the new position
+                                element._poolObject = _spriteProviders[element._id].Obtain(element._randomRoll);
+                                element._poolObject._obj.transform.position = _offset + new Vector3(gridX * _tileWidth, gridY * _tileHeight, 0);
 
-                            _elementCache.Add(element);
+                                _elementCache.Add(element);
+                            }
                         }
                     }
                 }

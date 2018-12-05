@@ -218,13 +218,13 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _algorithm:
-    _minWidth: 8
-    _minHeight: 5
-    _minDepth: 7
+    _minRectWidth: 5
+    _minRectHeight: 5
+    _minDepth: 8
     _maxDepth: -1
-    _seed: 42
-    _stopChanceBase: 0.05
-    _stopChanceDepthFactor: 0.75
+    _seed: -1
+    _stopChanceBase: 0.085
+    _stopChanceDepthFactor: 0.01
   _rectPrefab: {fileID: 1190849013635190, guid: bd3978954d342e046be87583348584ae,
     type: 2}
   _rectColors:

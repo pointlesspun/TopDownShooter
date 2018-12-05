@@ -575,8 +575,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe1dcefc5a4328a4abc114081ecfd4fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _width: 20
-  _height: 20
+  _algorithm:
+    _minRectWidth: 5
+    _minRectHeight: 5
+    _minDepth: 3
+    _maxDepth: -1
+    _seed: -1
+    _stopChanceBase: 0.05
+    _stopChanceDepthFactor: 0.15
+  _width: 100
+  _height: 100
   _tileWidth: 1
   _tileHeight: 1
   _levelDefinitions:
@@ -591,7 +599,7 @@ MonoBehaviour:
       - {r: 0.23137257, g: 0.2392157, b: 0.24313727, a: 1}
     _prefab: {fileID: 1979511085101218, guid: 758c5c15742dc4b47af0578e0fc6ccc0, type: 2}
     _sortOrder: 0
-    _poolSize: 300
+    _poolSize: 800
     _poolId: 0
   - _variations:
       _spriteVariations:
@@ -629,7 +637,7 @@ MonoBehaviour:
     _sortOrder: 0
     _poolSize: 1
     _poolId: 3
-  _viewRadius: 7
+  _viewRadius: 15
 --- !u!4 &1227337995
 Transform:
   m_ObjectHideFlags: 0
