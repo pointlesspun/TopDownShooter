@@ -217,18 +217,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4f28175cc6cfda24fadfa1ebabd48621, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _algorithm:
-    _minRectWidth: 5
-    _minRectHeight: 5
+  _rectSubdivisionAlgorithm:
+    _minRectWidth: 12
+    _minRectHeight: 12
     _minDepth: 8
     _maxDepth: -1
     _seed: -1
-    _stopChanceBase: 0.085
-    _stopChanceDepthFactor: 0.01
-  _rectPrefab: {fileID: 1190849013635190, guid: bd3978954d342e046be87583348584ae,
+    _stopChanceBase: 0.05
+    _stopChanceDepthFactor: 0.25
+  _traversalAlgorithm:
+    _maxDepth: -1
+    _maxLength: 1200
+    _seed: -1
+  _rectDebugPrefab: {fileID: 1190849013635190, guid: bd3978954d342e046be87583348584ae,
     type: 2}
   _rectColors:
-  - {r: 1, g: 1, b: 1, a: 1}
+  - {r: 0.754717, g: 0.6793087, b: 0.09611962, a: 1}
   - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
   - {r: 0, g: 1, b: 1, a: 1}
   - {r: 0.46293163, g: 0.46293163, b: 0.9716981, a: 1}
@@ -239,6 +243,7 @@ MonoBehaviour:
   _width: 320
   _height: 200
   _scaleMultiplier: 3.15
+  _traversePath: 1
 --- !u!4 &2100532165
 Transform:
   m_ObjectHideFlags: 0
