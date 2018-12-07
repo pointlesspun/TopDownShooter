@@ -5,6 +5,7 @@
  */
 namespace Tds.GameScripts
 {
+    using System;
     using System.Collections.Generic;
     using Tds.DungeonGeneration;
     using Tds.Util;
@@ -30,7 +31,15 @@ namespace Tds.GameScripts
     /// </summary>
     public class LevelGrid : MonoBehaviour
     {
-        public SubdivisionAlgorithm _algorithm = new SubdivisionAlgorithm();
+        /// <summary>
+        /// Algorithm which will split the level area in smaller rectangles
+        /// </summary>
+        public SubdivisionAlgorithm _divisionAlgorithm = new SubdivisionAlgorithm();
+
+        /// <summary>
+        /// Algorithm which will create a path through the area create by the SubdivisionAlgorithm
+        /// </summary>
+        public SplitRectTraversalAlgorithm _traversalAlgorithm = new SplitRectTraversalAlgorithm();
 
         /// <summary>
         /// Width in units of the level
@@ -61,6 +70,8 @@ namespace Tds.GameScripts
         /// How far are tiles being rendered from the point of focus
         /// </summary>
         public int _viewRadius = 6;
+
+        public Vector3 _playerStartPosition;
 
         /// <summary>
         /// Cached offset of the grid
@@ -101,21 +112,16 @@ namespace Tds.GameScripts
                 _spriteProviders[i] = _levelDefinitions[i].CreateProvider();
             }
 
-            _grid = LevelBuilder.BuildLevel(_algorithm, _width, _height);
-        
-            
+            _grid = BuildLevel();
+
             _offset = new Vector3((_width * _tileWidth) * -0.5f, (_height * _tileHeight) * -0.5f, transform.position.z);
 
-            var exitX = UnityEngine.Random.Range(1, _width - 2);
-            var exitY = UnityEngine.Random.Range(1, _height - 2);
-
-            _grid[exitX, exitY]._id = LevelElementDefinitions.ExitIndex;
-
+          
             _player = GameObject.FindGameObjectWithTag(GameTags.Player);
 
             if (_player != null)
             {
-                _player.transform.position = DeterminePlayerStartPosition(exitX, exitY) + _offset;
+                _player.transform.position = _playerStartPosition + _offset;
             }
 
             _previousPlayerPosition = new Vector3(float.MaxValue, float.MaxValue, 0);
@@ -179,7 +185,7 @@ namespace Tds.GameScripts
                 for (var y = -_viewRadius; y <= _viewRadius; y++)
                 {
                     // check if this grid position is in the view radius
-                    if (x * x + y * y <viewRadiusSqr)
+                    if (x * x + y * y < viewRadiusSqr)
                     {
                         var gridX = x + (int)((centerPosition.x - _offset.x + _tileWidth * 0.5f) / _tileWidth);
                         var gridY = y + (int)((centerPosition.y - _offset.y + _tileHeight * 0.5f) / _tileHeight);
@@ -201,25 +207,151 @@ namespace Tds.GameScripts
                 }
             }
         }
+       
+        public Grid2D<LevelElement> BuildLevel()
+        {
+            var pathRoot = _traversalAlgorithm.TraverseSplitRects(_divisionAlgorithm.Subdivide(new SplitRect(0, 0, _width, _height)));
 
-        /// <summary>
-        /// Position the player in a different quadrant than the exit. This is just a temporary function to
-        /// capture the need to put the exit away from the player.
-        /// </summary>
-        /// <param name="exitX"></param>
-        /// <param name="exitY"></param>
-        private Vector3 DeterminePlayerStartPosition(int exitX, int exitY)
-        {            
-            int halfWidth = _width / 2;
-            int halfHeight = _height/ 2;
+            _playerStartPosition = pathRoot._split._rect.center;
 
-            int xQuadrant = exitX / halfWidth > 0 ? 0 : 1;
-            int yQuadrant = exitY / halfHeight > 0 ? 0 : 1; 
+            // fill the grid with tiles
+            var target = new Grid2D<LevelElement>(_width, _height,
+                () => new LevelElement()
+                {
+                    _id = LevelElementDefinitions.None,
+                    // pre-select a randomized value so the sprite variations can easily pick a random sprite / color 
+                    _randomRoll = UnityEngine.Random.Range(0, 256 * 256)
+                });
 
-            var x = UnityEngine.Random.Range(1 + xQuadrant * halfWidth, (xQuadrant + 1) * halfWidth - 1);
-            var y = UnityEngine.Random.Range(1+ yQuadrant * halfHeight, (yQuadrant + 1) * halfHeight - 1);
-            
-            return new Vector3(x + 0.5f, y + 0.5f, 0);
+            CreateLevelElement(pathRoot, target);
+            TraceRoomBorders(pathRoot, target);
+
+            return target;
+        }
+
+
+        public void OnDrawGizmos()
+        {
+            // draw the outline of the level   
+            Gizmos.DrawWireCube(transform.position + Vector3.forward * 10, new Vector3(_width, _height, 0));
+        }
+
+        private void CreateLevelElement(TraversalNode node, Grid2D<LevelElement> grid)
+        {
+            var split = node._split;
+            var xOffset = split._rect.position.x;
+            var yOffset = split._rect.position.y;
+
+            for (var x = 1; x < split._rect.width; ++x)
+            {
+                for (var y = 1; y < split._rect.height; ++y)
+                {
+                    grid[x + xOffset, y + yOffset]._id = LevelElementDefinitions.FloorTileIndex;
+                }
+            }
+
+            // draw some borders around the bottom and left part of the rect
+            var p1 = split._rect.position;
+            var p2 = split._rect.position + new Vector2Int(split._rect.width, 0);
+            var p3 = split._rect.position + new Vector2Int(0, split._rect.height);
+
+            grid.TraceLine(p1, p2, (x, y, g) => grid[x, y]._id = LevelElementDefinitions.HorizontalWallIndex);
+            grid.TraceLine(p1 + Vector2Int.up, p3, (x, y, g) => grid[x, y]._id = LevelElementDefinitions.VerticalWallIndex);
+
+            if (node._parent != null)
+            {
+                DrawDoorWay(node, node._parent, node._parentIntersection, grid);
+            }
+
+            node._children.ForEach((child) =>
+            {
+                DrawDoorWay(node, child, child._parentIntersection, grid);
+                CreateLevelElement(child, grid);
+            });
+
+            if (node._children.Count == 0 && node._isPrimaryPath)
+            {
+                var center = node._split._rect.center;
+                grid[(int)center.x, (int)center.y]._id = LevelElementDefinitions.ExitIndex;
+            }
+        }
+
+        private void DrawDoorWay(TraversalNode parent, TraversalNode child, Vector2Int[] intersection, Grid2D<LevelElement> grid)
+        {
+            var x1 = intersection[0].x;
+            var x2 = intersection[1].x;
+
+            var y1 = intersection[0].y;
+            var y2 = intersection[1].y;
+
+            // vertical intersection with child on the left side ?
+            if (x1 == x2 && x1 <= parent._split._rect.min.x)
+            {
+                grid[x1, y1 + (y2 - y1) / 2]._id = LevelElementDefinitions.FloorTileIndex;
+            }
+            // horizontal intersection with child the bottom side ?
+            else if (y1 == y2 && y1 <= parent._split._rect.min.y)
+            {
+                grid[x1 + (x2 - x1) / 2, y1]._id = LevelElementDefinitions.FloorTileIndex;
+            }
+        }
+
+        private void TraceRoomBorders(TraversalNode node, Grid2D<LevelElement> grid)
+        {
+            var x1 = node._split._rect.min.x;
+            var x2 = node._split._rect.max.x;
+
+            var y1 = node._split._rect.min.y;
+            var y2 = node._split._rect.max.y;
+
+            if (y2 >= grid.Height)
+            {
+                // trace the top left to the top right
+                for (var x = x1; x <= x2; x++)
+                {
+                    if (grid.IsOnGrid(x, y2-1) && grid[x, y2-1]._id == LevelElementDefinitions.FloorTileIndex)
+                    {
+                        grid[x, y2-1]._id = LevelElementDefinitions.HorizontalWallIndex;
+                    }
+                }
+            }
+            else
+            {
+                // trace the top left to the top right
+                for (var x = x1; x <= x2; x++)
+                {
+                    if (grid.IsOnGrid(x, y2) && grid[x, y2]._id == LevelElementDefinitions.None)
+                    {
+                        grid[x, y2]._id = LevelElementDefinitions.HorizontalWallIndex;
+                    }
+                }
+            }
+
+            if (x2 >= grid.Width)
+            {
+                // trace the top right to the bottom right
+                for (var y = y1; y < y2; y++)
+                {
+                    if (grid.IsOnGrid(x2-1, y) && grid[x2-1, y]._id == LevelElementDefinitions.FloorTileIndex)
+                    {
+                        grid[x2-1, y]._id = LevelElementDefinitions.VerticalWallIndex;
+                    }
+                }
+            }
+            else
+            {
+                // trace the top right to the bottom right
+                for (var y = y1; y < y2; y++)
+                {
+                    if (grid.IsOnGrid(x2, y) && grid[x2, y]._id == LevelElementDefinitions.None)
+                    {
+                        grid[x2, y]._id = LevelElementDefinitions.VerticalWallIndex;
+                    }
+                }
+            }
+
+            node._children.ForEach((c) => TraceRoomBorders(c, grid));
+
         }
     }
 }

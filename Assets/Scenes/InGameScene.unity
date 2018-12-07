@@ -575,16 +575,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe1dcefc5a4328a4abc114081ecfd4fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _algorithm:
-    _minRectWidth: 5
-    _minRectHeight: 5
+  _divisionAlgorithm:
+    _minRectWidth: 12
+    _minRectHeight: 12
     _minDepth: 3
     _maxDepth: -1
     _seed: -1
-    _stopChanceBase: 0.05
-    _stopChanceDepthFactor: 0.15
-  _width: 100
-  _height: 100
+    _stopChanceBase: 0.01
+    _stopChanceDepthFactor: 0.1
+  _traversalAlgorithm:
+    _maxDepth: -1
+    _maxLength: 2000
+    _seed: -1
+  _width: 200
+  _height: 200
   _tileWidth: 1
   _tileHeight: 1
   _levelDefinitions:
@@ -638,6 +642,7 @@ MonoBehaviour:
     _poolSize: 1
     _poolId: 3
   _viewRadius: 15
+  _playerStartPosition: {x: 0, y: 0, z: 0}
 --- !u!4 &1227337995
 Transform:
   m_ObjectHideFlags: 0
@@ -865,6 +870,11 @@ Prefab:
     - target: {fileID: 1439677177833652, guid: 7891e8c7680424a4e9588cdf5ede581d, type: 2}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114399845310931382, guid: 7891e8c7680424a4e9588cdf5ede581d,
+        type: 2}
+      propertyPath: _maxVelocity
+      value: 4.25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7891e8c7680424a4e9588cdf5ede581d, type: 2}

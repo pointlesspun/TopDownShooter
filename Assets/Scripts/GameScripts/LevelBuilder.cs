@@ -12,9 +12,10 @@ namespace Tds.GameScripts
 
     public static class LevelBuilder
     {
-        public static Grid2D<LevelElement> BuildLevel(SubdivisionAlgorithm algorithm, int width, int height)
+        public static Grid2D<LevelElement> BuildLevel(SubdivisionAlgorithm rectSplitAlgorithm, 
+                                                    SplitRectTraversalAlgorithm  traversalAlgorithm, int width, int height)
         {
-            List<SplitRect> source = algorithm.Subdivide(new SplitRect(0, 0, width, height));
+            List<SplitRect> splitRectArea = rectSplitAlgorithm.Subdivide(new SplitRect(0, 0, width, height));
 
             // fill the grid with tiles
             var target = new Grid2D<LevelElement>(width, height,
@@ -25,7 +26,7 @@ namespace Tds.GameScripts
                     _randomRoll = Random.Range(0, 256 * 256)
                 });
 
-            source.ForEach((split) =>
+            splitRectArea.ForEach((split) =>
             {
                 var xOffset = split._rect.position.x;
                 var yOffset = split._rect.position.y;
@@ -48,7 +49,7 @@ namespace Tds.GameScripts
             });
 
             // add doorways
-            source.ForEach((split) =>
+            splitRectArea.ForEach((split) =>
             {
                 foreach ( var neighbour in split.Neighbours )
                 {
