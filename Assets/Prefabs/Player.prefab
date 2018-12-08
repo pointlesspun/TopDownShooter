@@ -560,7 +560,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _priority: 0
-  _range: 4
+  _range: 5
   _cooldown: 0.25
   _damage: 1
   _offsetFromOwner: 0.36
@@ -572,7 +572,7 @@ MonoBehaviour:
   _destroyWhenOutOfBullets: 0
   _bulletPrefab: {fileID: 1474087171358050, guid: b0af31779834fe7499103aedd2ac94f2,
     type: 2}
-  _bulletSpeed: 8
+  _bulletSpeed: 12
   _bulletLifeTime: 2
   _bulletScale: 0.2
   _speedScalingPerLevel: 0
@@ -588,7 +588,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _velocityDampening: 8
-  _maxVelocity: 3.75
+  _maxVelocity: 4.5
   _minVelocity: 0.0005
   _velocityIncrease: 32
   _animatorControllerObject: {fileID: 1333234065051158}

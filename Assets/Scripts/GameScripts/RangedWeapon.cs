@@ -61,7 +61,7 @@ namespace Tds.GameScripts
             bullet.name = "bullet " + gameObject.name;
 
             var bulletSettings = bullet.GetComponent<BulletBehaviour>();
-            var levelScale = _gameState._levelScale;
+            var levelScale = _gameState == null ? 1.0f : _gameState._levelScale;
 
             bulletSettings._friendlyTag = gameObject.tag;
             bulletSettings._velocity = _bulletSpeed + levelScale * _speedScalingPerLevel;

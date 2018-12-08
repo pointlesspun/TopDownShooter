@@ -9,6 +9,9 @@ namespace Tds.UI
     using UnityEngine;
     using UnityEngine.UI;
 
+    /// <summary>
+    /// UI element displaying the current level
+    /// </summary>
     public class LevelIndicator : MonoBehaviour
     {
         private Text _text;

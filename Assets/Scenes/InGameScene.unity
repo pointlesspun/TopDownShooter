@@ -224,7 +224,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1563601713607258, guid: 828773286aa87014392114ed320a0261, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 114815628925385442, guid: 828773286aa87014392114ed320a0261,
         type: 2}
@@ -285,7 +285,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.3301887, g: 0.3214278, b: 0.31617126, a: 0}
+  m_BackGroundColor: {r: 0.09433961, g: 0.09285628, b: 0.09211462, a: 0}
   m_projectionMatrixMode: 1
   m_SensorSize: {x: 36, y: 24}
   m_LensShift: {x: 0, y: 0}
@@ -466,7 +466,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 1985903484779424, guid: 65f2ae3c6e03a5f409731280368ec351, type: 2}
       propertyPath: m_IsActive
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 212399431143147674, guid: 65f2ae3c6e03a5f409731280368ec351,
         type: 2}
@@ -575,29 +575,75 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe1dcefc5a4328a4abc114081ecfd4fc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _floorPrefab: {fileID: 1979511085101218, guid: 758c5c15742dc4b47af0578e0fc6ccc0,
-    type: 2}
-  _horizontalWallPrefab: {fileID: 1519310321278836, guid: c6536752b1d3b2a479ae26122ead47c9,
-    type: 2}
-  _verticalWallPrefab: {fileID: 1234374881730766, guid: 434f77ac5d0049641ab175b50dd781e8,
-    type: 2}
-  _exitLevelPrefab: {fileID: 1731099387608354, guid: cca009ef6577a7645906df1df79bbd7d,
-    type: 2}
-  _floorSprites:
-  - {fileID: 21300000, guid: 8429889319da2a344ab6cd4ee9c2d1e6, type: 3}
-  - {fileID: 21300000, guid: fc361629b853bca4db49b60657b6bec7, type: 3}
-  _floorColors:
-  - {r: 0.254717, g: 0.254717, b: 0.254717, a: 1}
-  - {r: 0.25882354, g: 0.2627451, b: 0.25490198, a: 1}
-  - {r: 0.2627451, g: 0.27058825, b: 0.26666668, a: 1}
-  - {r: 0.26666668, g: 0.27450982, b: 0.2784314, a: 1}
-  _floorSortingOrder: 0
-  _width: 20
-  _height: 20
+  _divisionAlgorithm:
+    _minRectWidth: 12
+    _minRectHeight: 12
+    _minDepth: 3
+    _maxDepth: -1
+    _seed: -1
+    _stopChanceBase: 0.01
+    _stopChanceDepthFactor: 0.1
+  _traversalAlgorithm:
+    _maxDepth: -1
+    _maxLength: 30
+    _seed: -1
+  _width: 200
+  _height: 200
   _tileWidth: 1
   _tileHeight: 1
-  _buildAroundCenter: 1
-  _addWallBorder: 1
+  _levelDefinitions:
+  - _variations:
+      _spriteVariations:
+      - {fileID: 21300000, guid: fc361629b853bca4db49b60657b6bec7, type: 3}
+      - {fileID: 21300000, guid: 8429889319da2a344ab6cd4ee9c2d1e6, type: 3}
+      _colorVariations:
+      - {r: 0.25490198, g: 0.25490198, b: 0.25490198, a: 1}
+      - {r: 0.25882354, g: 0.2627451, b: 0.25490198, a: 1}
+      - {r: 0.2627451, g: 0.27058825, b: 0.26666668, a: 1}
+      - {r: 0.23137257, g: 0.2392157, b: 0.24313727, a: 1}
+    _prefab: {fileID: 1979511085101218, guid: 758c5c15742dc4b47af0578e0fc6ccc0, type: 2}
+    _sortOrder: 0
+    _poolSize: 800
+    _poolId: 0
+  - _variations:
+      _spriteVariations:
+      - {fileID: 21300000, guid: b9286a7d3e68c45498374d959184975e, type: 3}
+      _colorVariations:
+      - {r: 0.7058824, g: 0.654902, b: 0.6117647, a: 1}
+      - {r: 0.6392157, g: 0.5921569, b: 0.5529412, a: 1}
+      - {r: 0.5686275, g: 0.5294118, b: 0.49411768, a: 1}
+      - {r: 0.50980395, g: 0.47058827, b: 0.4431373, a: 1}
+    _prefab: {fileID: 1519310321278836, guid: c6536752b1d3b2a479ae26122ead47c9, type: 2}
+    _sortOrder: 0
+    _poolSize: 128
+    _poolId: 1
+  - _variations:
+      _spriteVariations:
+      - {fileID: 21300000, guid: f17be6d86e2bab3449b1159430ebcd1b, type: 3}
+      _colorVariations:
+      - {r: 0.7058824, g: 0.654902, b: 0.6117647, a: 1}
+      - {r: 0.6392157, g: 0.5921569, b: 0.5529412, a: 1}
+      - {r: 0.5686275, g: 0.5294118, b: 0.49411768, a: 1}
+      - {r: 0.50980395, g: 0.47058827, b: 0.4431373, a: 1}
+    _prefab: {fileID: 1234374881730766, guid: 434f77ac5d0049641ab175b50dd781e8, type: 2}
+    _sortOrder: 0
+    _poolSize: 128
+    _poolId: 2
+  - _variations:
+      _spriteVariations:
+      - {fileID: 21300000, guid: 6eea78355453c2a4596034dc3cdc8440, type: 3}
+      _colorVariations:
+      - {r: 0.7058824, g: 0.654902, b: 0.6117647, a: 1}
+      - {r: 0.6392157, g: 0.5921569, b: 0.5529412, a: 1}
+      - {r: 0.5686275, g: 0.5294118, b: 0.49411768, a: 1}
+      - {r: 0.50980395, g: 0.47058827, b: 0.4431373, a: 1}
+    _prefab: {fileID: 1731099387608354, guid: cca009ef6577a7645906df1df79bbd7d, type: 2}
+    _sortOrder: 0
+    _poolSize: 1
+    _poolId: 3
+  _viewRadius: 15
+  _dungeonLengthLevelScale: 0.5
+  _maxDungeonLength: 500
 --- !u!4 &1227337995
 Transform:
   m_ObjectHideFlags: 0
@@ -825,6 +871,11 @@ Prefab:
     - target: {fileID: 1439677177833652, guid: 7891e8c7680424a4e9588cdf5ede581d, type: 2}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 114399845310931382, guid: 7891e8c7680424a4e9588cdf5ede581d,
+        type: 2}
+      propertyPath: _maxVelocity
+      value: 4.25
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7891e8c7680424a4e9588cdf5ede581d, type: 2}

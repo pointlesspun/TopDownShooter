@@ -429,10 +429,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7907378eb0d45d44b82c6cf09af6a7a2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _priority: 0
   _range: 1
   _cooldown: 2
   _damage: 1
   _offsetFromOwner: 0.3
+  _cooldownLevelScaling: 0
+  _damageScalingPerLevel: 0
+  _rangeScalingPerLevel: 0
+  _miniumCooldown: 0.1
 --- !u!114 &114465070090708702
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -463,7 +468,7 @@ MonoBehaviour:
   _hitpoints: 2
   _onHitColor: {r: 1, g: 1, b: 1, a: 1}
   _onHitDuration: 0.2
-  _hitpointsScalePerLevel: 1
+  _hitpointsScalePerLevel: 0.5
 --- !u!210 &210203508681828030
 SortingGroup:
   m_ObjectHideFlags: 1

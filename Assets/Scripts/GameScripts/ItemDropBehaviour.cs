@@ -39,7 +39,9 @@ namespace Tds.GameScripts
             {
                 var instance = Instantiate(_commonItemPrefabs[Random.Range(0, _commonItemPrefabs.Length)]);
                 instance.transform.position = deadCharacter.transform.position;
-                _commonChance = 0;
+
+                // make sure items don't drop too quickly after each other
+                _commonChance = Mathf.Min(0, -(1.0f - _commonChance));
             }
             else
             {
