@@ -1,4 +1,4 @@
-# TopDownShooter v0.01, build 005
+# TopDownShooter v0.01, build 006
 Simple 2D shooter game in Unity.
 
 Although the end-goal is build a "Gauntlet*" style, single player game, the main purpose is to build a game iterative fashion where at any point development can be abandoned for a period of time and then picked up later successfully. Too often my projects were build to a certain level of maturity and then 'something' happened which caused developement to stop (work required too much attention, vacations, no energy). When I got back to the project, the effort it would require to understand what was going on, what I was working on, what bugs existed were too big of a hurdle to pick up development again.    
