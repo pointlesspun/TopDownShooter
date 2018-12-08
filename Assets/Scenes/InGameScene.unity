@@ -585,7 +585,7 @@ MonoBehaviour:
     _stopChanceDepthFactor: 0.1
   _traversalAlgorithm:
     _maxDepth: -1
-    _maxLength: 2000
+    _maxLength: 30
     _seed: -1
   _width: 200
   _height: 200
@@ -642,7 +642,8 @@ MonoBehaviour:
     _poolSize: 1
     _poolId: 3
   _viewRadius: 15
-  _playerStartPosition: {x: 0, y: 0, z: 0}
+  _dungeonLengthLevelScale: 0.5
+  _maxDungeonLength: 500
 --- !u!4 &1227337995
 Transform:
   m_ObjectHideFlags: 0

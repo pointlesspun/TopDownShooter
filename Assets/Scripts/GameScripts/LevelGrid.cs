@@ -13,21 +13,6 @@ namespace Tds.GameScripts
     using Tds.Util;
 
     /// <summary>
-    /// Element describing a piece of the level
-    /// </summary>
-    public class LevelElement
-    {
-        // cached unity object representing this element
-        public PooledObject<GameObject> _poolObject;
-
-        // id of the element
-        public int _id;
-
-        // random variation applied to this element
-        public int _randomRoll;
-    }
-
-    /// <summary>
     /// Class which generates a grid which is the basis of a level
     /// </summary>
     public class LevelGrid : MonoBehaviour
@@ -72,7 +57,20 @@ namespace Tds.GameScripts
         /// </summary>
         public int _viewRadius = 6;
 
-        public Vector3 _playerStartPosition;
+        /// <summary>
+        /// Each level makes the length of the dungeon this much longer
+        /// </summary>
+        public float _dungeonLengthLevelScale = 0.25f;
+
+        /// <summary>
+        /// Maxium length of a dungeon
+        /// </summary>
+        public float _maxDungeonLength = 500;
+
+        /// <summary>
+        /// Location where the player will start
+        /// </summary>
+        private Vector3 _playerStartPosition;
 
         /// <summary>
         /// Cached offset of the grid
@@ -106,29 +104,13 @@ namespace Tds.GameScripts
 
         public void Start()
         {
-            _spriteProviders = new SpriteProvider[_levelDefinitions.Length];
-
-            for (int i = 0; i < _spriteProviders.Length; ++i)
-            {
-                _spriteProviders[i] = _levelDefinitions[i].CreateProvider();
-            }
+            _spriteProviders = SetupSpritePools(_levelDefinitions);
 
             _offset = new Vector3((_width * _tileWidth) * -0.5f, (_height * _tileHeight) * -0.5f, transform.position.z);
 
-            var pathRoot = BuildLevelLayout(_width, _height, _traversalAlgorithm, _divisionAlgorithm);
-            
-            _playerStartPosition = pathRoot._split._rect.center;
+            var pathRoot = BuildLevel();
 
-            _levelGrid = BuildLevelGrid(_width, _height, pathRoot);
-            
-            _player = GameObject.FindGameObjectWithTag(GameTags.Player);
-
-            if (_player != null)
-            {
-                _player.transform.position = _playerStartPosition + _offset;
-            }
-
-            _previousPlayerPosition = new Vector3(float.MaxValue, float.MaxValue, 0);
+            InitializePlayerPosition(pathRoot._split._rect.center);
         }
 
         /// <summary>
@@ -150,6 +132,54 @@ namespace Tds.GameScripts
                 }
             }
         }
+
+        private SpriteProvider[] SetupSpritePools(LevelSpritePoolDefinition[] definitions)
+        {
+            var providers = new SpriteProvider[_levelDefinitions.Length];
+
+            for (int i = 0; i < providers.Length; ++i)
+            {
+                providers[i] = definitions[i].CreateProvider();
+            }
+
+            return providers;
+        }
+
+        private void InitializePlayerPosition(Vector3 startPosition)
+        {
+            _player = GameObject.FindGameObjectWithTag(GameTags.Player);
+
+            if (_player != null)
+            {
+                _playerStartPosition = startPosition;
+                _player.transform.position = _playerStartPosition + _offset;
+                _previousPlayerPosition = new Vector3(float.MaxValue, float.MaxValue, 0);
+            }
+        }
+
+        private TraversalNode BuildLevel()
+        {
+            // scale the length of the dungeon with the level
+            var gameStateObject = GameObject.FindGameObjectWithTag(GameTags.GameState);
+
+            if (gameStateObject != null && _traversalAlgorithm._maxLength != -1)
+            {
+                var levelScale = gameStateObject.GetComponent<GameStateBehaviour>()._levelScale;
+                _traversalAlgorithm._maxLength += _traversalAlgorithm._maxLength
+                                                * levelScale
+                                                * _dungeonLengthLevelScale;
+
+                _traversalAlgorithm._maxLength = Mathf.Min(_traversalAlgorithm._maxLength, _maxDungeonLength);
+            }
+
+            var pathRoot = BuildLevelLayout(_width, _height, _traversalAlgorithm, _divisionAlgorithm);
+
+            _levelGrid = BuildLevelGrid(_width, _height, pathRoot);
+            
+            return pathRoot;
+        }
+
+
 
         /// <summary>
         /// Clears the cached level elements, returning them to the pools

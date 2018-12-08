@@ -30,7 +30,7 @@ namespace Tds.DungeonGeneration
                     Gizmos.color = Color.white;
                     Gizmos.DrawLine(intersection[0], intersection[1]);
 
-                    Gizmos.color = Color.black;
+                    Gizmos.color = _node._isPrimaryPath ? Color.black : Color.white;
                     Gizmos.DrawLine(gameObject.transform.position, intersection[0] + (intersection[1] - intersection[0]) * 0.5f);
                 }
                 // draw lines to all children
@@ -39,7 +39,7 @@ namespace Tds.DungeonGeneration
                     if (child.DebugElement != null)
                     {
                         var intersection = GetIntersectionVectors(child._parentIntersection);
-                        Gizmos.color = Color.black;
+                        Gizmos.color = child._isPrimaryPath ? Color.black : Color.white;
                         Gizmos.DrawLine(gameObject.transform.position, intersection[0] + (intersection[1] - intersection[0]) * 0.5f);
                     }
                 }

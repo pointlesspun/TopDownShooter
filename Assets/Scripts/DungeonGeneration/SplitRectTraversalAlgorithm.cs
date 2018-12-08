@@ -32,6 +32,13 @@ namespace Tds.DungeonGeneration
         /// Random seed, set to -1 if
         /// </summary>
         public int _seed = 42;
+
+        /// <summary>
+        /// Node which has the longest distance to the root. When the max length exceeds
+        /// the heurstic length from start to end, no value will be found. Instead return
+        /// the node with the longest distance;
+        /// </summary>
+        private TraversalNode _longestDistanceNode;
    
         public TraversalNode TraverseSplitRects( List<SplitRect> source)
         {
@@ -41,6 +48,8 @@ namespace Tds.DungeonGeneration
             {
                 UnityEngine.Random.InitState(_seed);
             }
+
+            _longestDistanceNode = null;
 
             var result = BuildPath(source[UnityEngine.Random.Range(0, source.Count)], new HashSet<SplitRect>());
 
@@ -78,6 +87,13 @@ namespace Tds.DungeonGeneration
                 }
             }
 
+            // did we find a solution
+            if (currentNode == null)
+            {
+                // if not take the best alternative
+                currentNode = _longestDistanceNode;
+            }
+
             // traverse up again marking the primary path through the level
             while (currentNode != null && currentNode._parent != null)
             {
@@ -99,7 +115,13 @@ namespace Tds.DungeonGeneration
                 _pathLength = parent == null ?  0 : parent._pathLength + Vector2.Distance(parent._split._rect.center, split._rect.center)
             };
 
+            if (_longestDistanceNode == null || result._pathLength > _longestDistanceNode._pathLength)
+            {
+                _longestDistanceNode = result;
+            }
+
             closedList.Add(split);
+
             if (parent != null)
             {
                 parent._children.Add(result);
@@ -117,9 +139,15 @@ namespace Tds.DungeonGeneration
             {
                 var subject = neighbours[(i + startIndex) % count];
 
-                if (!closedList.Contains(subject))
+                if (!closedList.Contains(subject) )
                 {
-                    return subject;
+                    var intersection = RectUtil.GetIntersection(source._rect, subject._rect);
+
+                    // need at least 3 units to build a door without artifacts (such as unreachable doors)
+                    if (Vector2Int.Distance(intersection[0], intersection[1]) >= 3)
+                    {
+                        return subject;
+                    }
                 }
             }
 

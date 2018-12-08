@@ -572,7 +572,7 @@ MonoBehaviour:
   _destroyWhenOutOfBullets: 0
   _bulletPrefab: {fileID: 1474087171358050, guid: b0af31779834fe7499103aedd2ac94f2,
     type: 2}
-  _bulletSpeed: 9
+  _bulletSpeed: 12
   _bulletLifeTime: 2
   _bulletScale: 0.2
   _speedScalingPerLevel: 0
