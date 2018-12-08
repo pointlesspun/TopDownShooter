@@ -95,7 +95,7 @@ namespace Tds.DungeonGeneration
                 _split = split,
                 _parent = parent,
                 _children = new List<TraversalNode>(),
-                _parentIntersection = parent == null ?  null : RectUtil.GetTouchPoints(parent._split._rect, split._rect),
+                _parentIntersection = parent == null ?  null : RectUtil.GetIntersection(parent._split._rect, split._rect),
                 _pathLength = parent == null ?  0 : parent._pathLength + Vector2.Distance(parent._split._rect.center, split._rect.center)
             };
 

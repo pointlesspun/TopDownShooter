@@ -4,12 +4,7 @@
  * You should have received a copy of the license along with this work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
  */
 namespace Tds.GameScripts
-{
-    using System.Collections.Generic;
-    using Tds.DungeonGeneration;
-    using Tds.Util;
-    using UnityEngine;
-
+{    
     public static class LevelElementDefinitions
     {
         /// <summary>

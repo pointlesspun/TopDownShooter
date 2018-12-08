@@ -33,7 +33,18 @@ namespace Tds.Util
                    || e >= 2;
         }
 
-        public static Vector2Int[] GetTouchPoints(RectInt a, RectInt b)
+        /// <summary>
+        /// Gets an intersection line between two rectangles. There are three possible outcomes:
+        /// 
+        /// * v1.x == v2.x or v1.y == v2.y, rectangles touch on a side 
+        /// * v1.x > v2.x or v1.y > v2.y, rectangles are disjunct
+        /// * none of the above applies and v1.x != v2.x or v1.y != v2.y, rectangles intersect 
+        /// 
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static Vector2Int[] GetIntersection(RectInt a, RectInt b)
         {
             var x1 = Mathf.Max(a.min.x, b.min.x);
             var x2 = Mathf.Min(a.max.x, b.max.x);
@@ -47,6 +58,5 @@ namespace Tds.Util
                 new Vector2Int(x2, y2),
             };
         }
-
     }
 }

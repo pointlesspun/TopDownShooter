@@ -82,7 +82,7 @@ public class RectUtilTest
         // right 
         var r1 = new RectInt(Vector2Int.zero, Vector2Int.one * 2);
         var r2 = new RectInt(Vector2Int.right * 2, Vector2Int.one * 2);
-        var touchPoints = RectUtil.GetTouchPoints(r1, r2);
+        var touchPoints = RectUtil.GetIntersection(r1, r2);
 
         Assert.IsTrue(touchPoints[0].x == 2);
         Assert.IsTrue(touchPoints[1].x == 2);
@@ -92,7 +92,7 @@ public class RectUtilTest
         // right & down
         r1 = new RectInt(Vector2Int.zero, Vector2Int.one * 2);
         r2 = new RectInt(Vector2Int.right * 2 + Vector2Int.down, Vector2Int.one * 2);
-        touchPoints = RectUtil.GetTouchPoints(r1, r2);
+        touchPoints = RectUtil.GetIntersection(r1, r2);
 
         Assert.IsTrue(touchPoints[0].x == 2);
         Assert.IsTrue(touchPoints[1].x == 2);
@@ -102,7 +102,7 @@ public class RectUtilTest
         // bottom & left
         r1 = new RectInt(Vector2Int.zero, Vector2Int.one * 2);
         r2 = new RectInt(Vector2Int.left + Vector2Int.down * 2, Vector2Int.one * 2);
-        touchPoints = RectUtil.GetTouchPoints(r1, r2);
+        touchPoints = RectUtil.GetIntersection(r1, r2);
 
         Assert.IsTrue(touchPoints[0].x == 0);
         Assert.IsTrue(touchPoints[1].x == 1);
@@ -112,7 +112,7 @@ public class RectUtilTest
         // top
         r1 = new RectInt(Vector2Int.zero, Vector2Int.one * 2);
         r2 = new RectInt(Vector2Int.zero + Vector2Int.up * 2, Vector2Int.one * 2);
-        touchPoints = RectUtil.GetTouchPoints(r1, r2);
+        touchPoints = RectUtil.GetIntersection(r1, r2);
 
         Assert.IsTrue(touchPoints[0].x == 0);
         Assert.IsTrue(touchPoints[1].x == 2);

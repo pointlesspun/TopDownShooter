@@ -5,11 +5,12 @@
  */
 namespace Tds.GameScripts
 {
-    using System;
     using System.Collections.Generic;
+
+    using UnityEngine;
+
     using Tds.DungeonGeneration;
     using Tds.Util;
-    using UnityEngine;
 
     /// <summary>
     /// Element describing a piece of the level
@@ -86,7 +87,7 @@ namespace Tds.GameScripts
         /// <summary>
         /// Contains the level data
         /// </summary>
-        private Grid2D<LevelElement> _grid;
+        private Grid2D<LevelElement> _levelGrid;
 
         /// <summary>
         /// Cached level elements (floors, walls) currently visible
@@ -112,11 +113,14 @@ namespace Tds.GameScripts
                 _spriteProviders[i] = _levelDefinitions[i].CreateProvider();
             }
 
-            _grid = BuildLevel();
-
             _offset = new Vector3((_width * _tileWidth) * -0.5f, (_height * _tileHeight) * -0.5f, transform.position.z);
 
-          
+            var pathRoot = BuildLevelLayout(_width, _height, _traversalAlgorithm, _divisionAlgorithm);
+            
+            _playerStartPosition = pathRoot._split._rect.center;
+
+            _levelGrid = BuildLevelGrid(_width, _height, pathRoot);
+            
             _player = GameObject.FindGameObjectWithTag(GameTags.Player);
 
             if (_player != null)
@@ -190,9 +194,9 @@ namespace Tds.GameScripts
                         var gridX = x + (int)((centerPosition.x - _offset.x + _tileWidth * 0.5f) / _tileWidth);
                         var gridY = y + (int)((centerPosition.y - _offset.y + _tileHeight * 0.5f) / _tileHeight);
 
-                        if (_grid.IsOnGrid(gridX, gridY))
+                        if (_levelGrid.IsOnGrid(gridX, gridY))
                         {
-                            var element = _grid[gridX, gridY];
+                            var element = _levelGrid[gridX, gridY];
 
                             if (element._id != LevelElementDefinitions.None)
                             {
@@ -208,14 +212,34 @@ namespace Tds.GameScripts
             }
         }
        
-        public Grid2D<LevelElement> BuildLevel()
+        /// <summary>
+        /// Build a layout of a given width and height
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="traverselAlgoirithm"></param>
+        /// <param name="divisionAlgorithm"></param>
+        /// <returns>The root of a path through the level rectangle </returns>
+        public TraversalNode BuildLevelLayout(int width, int height, SplitRectTraversalAlgorithm traverselAlgoirithm,
+                                                SubdivisionAlgorithm divisionAlgorithm)
         {
-            var pathRoot = _traversalAlgorithm.TraverseSplitRects(_divisionAlgorithm.Subdivide(new SplitRect(0, 0, _width, _height)));
+            var levelRect = new SplitRect(0, 0, width, height);
+            var levelSubdivisions = _divisionAlgorithm.Subdivide(levelRect);
+                
+            return _traversalAlgorithm.TraverseSplitRects(levelSubdivisions);
+        }
 
-            _playerStartPosition = pathRoot._split._rect.center;
-
+        /// <summary>
+        /// Build a 2d grid of level elements of the given dimensions and the traversal path
+        /// </summary>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="pathRoot"></param>
+        /// <returns></returns>
+        public Grid2D<LevelElement> BuildLevelGrid(int width, int height, TraversalNode pathRoot)
+        {
             // fill the grid with tiles
-            var target = new Grid2D<LevelElement>(_width, _height,
+            var grid = new Grid2D<LevelElement>(width, height,
                 () => new LevelElement()
                 {
                     _id = LevelElementDefinitions.None,
@@ -223,19 +247,29 @@ namespace Tds.GameScripts
                     _randomRoll = UnityEngine.Random.Range(0, 256 * 256)
                 });
 
-            CreateLevelElement(pathRoot, target);
-            TraceRoomBorders(pathRoot, target);
+            // recursively build out the level starting from the root
+            CreateLevelElement(pathRoot, grid);
 
-            return target;
+            // draw an outline around the "rooms" (rects) in the level that do not have an outline
+            TraceRoomBorders(pathRoot, grid);
+
+            return grid;
         }
 
-
+        /// <summary>
+        /// Draw the outline of the level
+        /// </summary>
         public void OnDrawGizmos()
         {
             // draw the outline of the level   
             Gizmos.DrawWireCube(transform.position + Vector3.forward * 10, new Vector3(_width, _height, 0));
         }
 
+        /// <summary>
+        /// Create a level element and recursively create elements for its children
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="grid"></param>
         private void CreateLevelElement(TraversalNode node, Grid2D<LevelElement> grid)
         {
             var split = node._split;
@@ -250,7 +284,9 @@ namespace Tds.GameScripts
                 }
             }
 
-            // draw some borders around the bottom and left part of the rect
+            // Draw some borders around the bottom and left part of the rect. We draw a wall on
+            // two sides only so we draw a wall one thick in every room. A separate step
+            // is required to draw the other walls iff necessary because children may surround this border
             var p1 = split._rect.position;
             var p2 = split._rect.position + new Vector2Int(split._rect.width, 0);
             var p3 = split._rect.position + new Vector2Int(0, split._rect.height);
@@ -260,15 +296,18 @@ namespace Tds.GameScripts
 
             if (node._parent != null)
             {
+                // draw a doorway to the parent's room
                 DrawDoorWay(node, node._parent, node._parentIntersection, grid);
             }
 
+            // recursively draw the level element for each child
             node._children.ForEach((child) =>
             {
                 DrawDoorWay(node, child, child._parentIntersection, grid);
                 CreateLevelElement(child, grid);
             });
 
+            // draw an exit if this is the last room on the primary path 
             if (node._children.Count == 0 && node._isPrimaryPath)
             {
                 var center = node._split._rect.center;
@@ -276,6 +315,13 @@ namespace Tds.GameScripts
             }
         }
 
+        /// <summary>
+        /// Draw a doorway between the parent and child
+        /// </summary>
+        /// <param name="parent"></param>
+        /// <param name="child"></param>
+        /// <param name="intersection"></param>
+        /// <param name="grid"></param>
         private void DrawDoorWay(TraversalNode parent, TraversalNode child, Vector2Int[] intersection, Grid2D<LevelElement> grid)
         {
             var x1 = intersection[0].x;
@@ -296,6 +342,11 @@ namespace Tds.GameScripts
             }
         }
 
+        /// <summary>
+        /// Last step of creating a grid, fill out the 
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="grid"></param>
         private void TraceRoomBorders(TraversalNode node, Grid2D<LevelElement> grid)
         {
             var x1 = node._split._rect.min.x;
@@ -304,54 +355,39 @@ namespace Tds.GameScripts
             var y1 = node._split._rect.min.y;
             var y2 = node._split._rect.max.y;
 
-            if (y2 >= grid.Height)
+            // if we're at the top of the grid, slightly tweak the offset and adjust the condition for
+            // drawing a wall
+            var isAboveGrid = (y2 >= grid.Height);
+            var offset = isAboveGrid  ? -1 : 0;
+            var condition = isAboveGrid ? LevelElementDefinitions.FloorTileIndex : LevelElementDefinitions.None;
+
+            // trace the top left to the top right
+            for (var x = x1; x <= x2; x++)
             {
-                // trace the top left to the top right
-                for (var x = x1; x <= x2; x++)
+                var y = y2 + offset;
+
+                if (grid.IsOnGrid(x, y) && grid[x, y]._id == condition)
                 {
-                    if (grid.IsOnGrid(x, y2-1) && grid[x, y2-1]._id == LevelElementDefinitions.FloorTileIndex)
-                    {
-                        grid[x, y2-1]._id = LevelElementDefinitions.HorizontalWallIndex;
-                    }
-                }
-            }
-            else
-            {
-                // trace the top left to the top right
-                for (var x = x1; x <= x2; x++)
-                {
-                    if (grid.IsOnGrid(x, y2) && grid[x, y2]._id == LevelElementDefinitions.None)
-                    {
-                        grid[x, y2]._id = LevelElementDefinitions.HorizontalWallIndex;
-                    }
+                    grid[x, y]._id = LevelElementDefinitions.HorizontalWallIndex;
                 }
             }
 
-            if (x2 >= grid.Width)
-            {
-                // trace the top right to the bottom right
-                for (var y = y1; y < y2; y++)
-                {
-                    if (grid.IsOnGrid(x2-1, y) && grid[x2-1, y]._id == LevelElementDefinitions.FloorTileIndex)
-                    {
-                        grid[x2-1, y]._id = LevelElementDefinitions.VerticalWallIndex;
-                    }
-                }
-            }
-            else
-            {
-                // trace the top right to the bottom right
-                for (var y = y1; y < y2; y++)
-                {
-                    if (grid.IsOnGrid(x2, y) && grid[x2, y]._id == LevelElementDefinitions.None)
-                    {
-                        grid[x2, y]._id = LevelElementDefinitions.VerticalWallIndex;
-                    }
-                }
-            }
+            var isRightOfGrid = (x2 >= grid.Width);
+            offset = isRightOfGrid ? -1 : 0;
+            condition = isRightOfGrid ? LevelElementDefinitions.FloorTileIndex : LevelElementDefinitions.None;
 
+            // trace the top right to the bottom right
+            for (var y = y1; y < y2; y++)
+            {
+                var x = x2 + offset;
+
+                if (grid.IsOnGrid(x, y) && grid[x, y]._id == condition)
+                {
+                    grid[x, y]._id = LevelElementDefinitions.VerticalWallIndex;
+                }
+            }
+            
             node._children.ForEach((c) => TraceRoomBorders(c, grid));
-
         }
     }
 }
