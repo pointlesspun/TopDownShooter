@@ -63,6 +63,11 @@ namespace Tds.GameScripts
         public float _dungeonLengthLevelScale = 0.25f;
 
         /// <summary>
+        /// Length of a door connecting one room to another
+        /// </summary>
+        public int _maxDoorLength = 4;
+
+        /// <summary>
         /// Maxium length of a dungeon
         /// </summary>
         public float _maxDungeonLength = 500;
@@ -178,8 +183,6 @@ namespace Tds.GameScripts
             
             return pathRoot;
         }
-
-
 
         /// <summary>
         /// Clears the cached level elements, returning them to the pools
@@ -363,14 +366,30 @@ namespace Tds.GameScripts
             // vertical intersection with child on the left side ?
             if (x1 == x2 && x1 <= parent._split._rect.min.x)
             {
-                grid[x1, y1 + (y2 - y1) / 2]._id = LevelElementDefinitions.FloorTileIndex;
+                var wallLength = y2 - y1;
+                var doorLength = Mathf.Min(_maxDoorLength, Random.Range(1, wallLength - 2));
+                var doorStart = Random.Range(1, wallLength - (doorLength+1));
+
+                for (var i = 0; i < doorLength; ++i)
+                {
+                    grid[x1, y1 + doorStart + i]._id = LevelElementDefinitions.FloorTileIndex;
+                }
             }
             // horizontal intersection with child the bottom side ?
             else if (y1 == y2 && y1 <= parent._split._rect.min.y)
             {
-                grid[x1 + (x2 - x1) / 2, y1]._id = LevelElementDefinitions.FloorTileIndex;
+                var wallLength = x2 - x1;
+                var doorLength = Mathf.Min(_maxDoorLength, Random.Range(1, wallLength - 2));
+                var doorStart = Random.Range(1, wallLength - (doorLength + 1));
+
+                for (var i = 0; i < doorLength; ++i)
+                {
+                    grid[x1 + doorStart + i, y1]._id = LevelElementDefinitions.FloorTileIndex;
+                }
             }
         }
+
+
 
         /// <summary>
         /// Last step of creating a grid, fill out the 
