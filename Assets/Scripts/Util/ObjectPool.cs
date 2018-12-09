@@ -45,6 +45,16 @@ namespace Tds.Util
             Generate(factoryMethod, count);
         }
 
+        public void Clear()
+        {
+            foreach ( var poolObject in _objectsInUse )
+            {
+                _availableObjects.Add(poolObject);
+            }
+
+            _objectsInUse.Clear();
+        }
+
         /// <summary>
         /// Generates 'objects according to the given factory method.
         /// </summary>
@@ -107,7 +117,6 @@ namespace Tds.Util
         /// <param name="obj"></param>
         public void Release(PooledObject<T> obj)
         {
-
             _objectsInUse.Remove(obj);
             obj._indexId = _availableObjects.Count;
             _availableObjects.Add(obj);

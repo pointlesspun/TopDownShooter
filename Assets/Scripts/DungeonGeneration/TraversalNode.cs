@@ -54,5 +54,24 @@ namespace Tds.DungeonGeneration
             get;
             set;
         }
+
+        public TraversalNode()
+        {
+        }
+
+        public TraversalNode(int x, int y, int w, int h)
+        {
+            _split = new SplitRect()
+            {
+                _rect = new RectInt(x, y, w, h)
+            };
+        }
+
+        public TraversalNode AddChild(TraversalNode child)
+        {
+            _children.Add(child);
+            child._parent = this;
+            return child;
+        }
     }
 }
