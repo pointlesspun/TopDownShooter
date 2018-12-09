@@ -29,5 +29,7 @@ namespace Tds
         /// Object regulating item spawning.
         /// </summary>
         public static string ItemSpawner = "ItemSpawner";
+
+        public static string Director = "Director"; 
     }
 }

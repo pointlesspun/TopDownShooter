@@ -9,6 +9,7 @@ TagManager:
   - InGameState
   - ItemSpawner
   - GameState
+  - Director
   layers:
   - Default
   - TransparentFX

@@ -80,7 +80,7 @@ namespace Tds.GameScripts
         /// <summary>
         /// Cached offset of the grid
         /// </summary>
-        private Vector3 _offset;
+        private Vector3 _levelOffset;
 
         /// <summary>
         /// Objects managing the sprite pools and the variations
@@ -107,15 +107,27 @@ namespace Tds.GameScripts
         /// </summary>
         private Vector3 _previousPlayerPosition;
 
+        private Director _director;
+
         public void Start()
         {
             _spriteProviders = SetupSpritePools(_levelDefinitions);
 
-            _offset = new Vector3((_width * _tileWidth) * -0.5f, (_height * _tileHeight) * -0.5f, transform.position.z);
+            _levelOffset = new Vector3((_width * _tileWidth) * -0.5f, (_height * _tileHeight) * -0.5f, transform.position.z);
 
             var pathRoot = BuildLevel();
 
             InitializePlayerPosition(pathRoot._split._rect.center);
+
+            var directorObject = GameObject.FindGameObjectWithTag(GameTags.Director);
+
+            if (directorObject != null)
+            {
+                _director = directorObject.GetComponent<Director>();
+                _director._offset = _levelOffset;
+                AddTraversalNodeToDirector(_director, pathRoot, _levelOffset);
+            }
+            
         }
 
         /// <summary>
@@ -138,6 +150,19 @@ namespace Tds.GameScripts
             }
         }
 
+        /// <summary>
+        /// Recursively register the nodes with the director
+        /// </summary>
+        /// <param name="director"></param>
+        /// <param name="pathRoot"></param>
+        /// <param name="offset"></param>
+        private void AddTraversalNodeToDirector(Director director, TraversalNode pathRoot, Vector3 offset)
+        {
+            director.AddTrigger(pathRoot, offset);
+
+            pathRoot._children.ForEach((child) => AddTraversalNodeToDirector(director, child, offset));
+        }
+
         private SpriteProvider[] SetupSpritePools(LevelSpritePoolDefinition[] definitions)
         {
             var providers = new SpriteProvider[_levelDefinitions.Length];
@@ -157,7 +182,7 @@ namespace Tds.GameScripts
             if (_player != null)
             {
                 _playerStartPosition = startPosition;
-                _player.transform.position = _playerStartPosition + _offset;
+                _player.transform.position = _playerStartPosition + _levelOffset;
                 _previousPlayerPosition = new Vector3(float.MaxValue, float.MaxValue, 0);
             }
         }
@@ -224,8 +249,8 @@ namespace Tds.GameScripts
                     // check if this grid position is in the view radius
                     if (x * x + y * y < viewRadiusSqr)
                     {
-                        var gridX = x + (int)((centerPosition.x - _offset.x + _tileWidth * 0.5f) / _tileWidth);
-                        var gridY = y + (int)((centerPosition.y - _offset.y + _tileHeight * 0.5f) / _tileHeight);
+                        var gridX = x + (int)((centerPosition.x - _levelOffset.x + _tileWidth * 0.5f) / _tileWidth);
+                        var gridY = y + (int)((centerPosition.y - _levelOffset.y + _tileHeight * 0.5f) / _tileHeight);
 
                         if (_levelGrid.IsOnGrid(gridX, gridY))
                         {
@@ -235,7 +260,7 @@ namespace Tds.GameScripts
                             {
                                 // obtain up a visual from the pool and place it in the new position
                                 element._poolObject = _spriteProviders[element._id].Obtain(element._randomRoll);
-                                element._poolObject._obj.transform.position = _offset + new Vector3(gridX * _tileWidth, gridY * _tileHeight, 0);
+                                element._poolObject._obj.transform.position = _levelOffset + new Vector3(gridX * _tileWidth, gridY * _tileHeight, 0);
 
                                 _elementCache.Add(element);
                             }
@@ -388,8 +413,6 @@ namespace Tds.GameScripts
                 }
             }
         }
-
-
 
         /// <summary>
         /// Last step of creating a grid, fill out the 
