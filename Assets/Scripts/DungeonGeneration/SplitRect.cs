@@ -9,39 +9,6 @@ namespace Tds.DungeonGeneration
     using System;
     using System.Collections.Generic;
     using UnityEngine;
-
-    /// <summary>
-    /// Enum capturing the decision whether or not to continue splitting a rect.
-    /// Mostly for debug purposes
-    /// </summary>
-    public enum ContinueSubdivisionDecision
-    {
-        /// <summary>
-        /// Rect can potentially still be divivde d over the other axis
-        /// </summary>
-        AttemptOtherAxis,
-
-        /// <summary>
-        /// Randomly decided not to split this any further
-        /// </summary>
-        RandomRollFailed,
-
-        /// <summary>
-        /// MAx depth has been reached, no need to further divide this
-        /// </summary>
-        MaxDepthReached,
-
-        /// <summary>
-        /// No more space , cannot subdivide this rect any further
-        /// </summary>
-        RectTooSmall,
-
-        /// <summary>
-        /// Do continue
-        /// </summary>
-        ContinueSubdivision
-    }
-
     /// <summary>
     /// Object which forms a 'node' in the level graph.
     /// </summary>

@@ -38,13 +38,16 @@ namespace Tds.Pathfinder
             if (_fromNode != null)
             {
                 var fromDebugBehaviour = _fromNode.GetComponent<TraversalNodeDebugBehaviour>();
-                
-                Vector3 position = fromDebugBehaviour._node._split._rect.center;
-                position += fromDebugBehaviour._offset;
 
-                Gizmos.DrawIcon(position, "start.png", true);
+                if (fromDebugBehaviour != null && fromDebugBehaviour._node != null)
+                {
+                    Vector3 position = fromDebugBehaviour._node._split._rect.center;
+                    position += fromDebugBehaviour._offset;
 
-                offset = fromDebugBehaviour._offset;
+                    Gizmos.DrawIcon(position, "start.png", true);
+
+                    offset = fromDebugBehaviour._offset;
+                }
             }
 
             if (_toNode != null)

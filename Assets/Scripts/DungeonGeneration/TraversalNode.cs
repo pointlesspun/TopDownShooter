@@ -35,7 +35,7 @@ namespace Tds.DungeonGeneration
         /// Split reference to the node defining the geometry and neighbours
         /// </summary>
         public SplitRect _split;
-
+      
         /// <summary>
         /// Current length from the root
         /// </summary>
@@ -65,6 +65,7 @@ namespace Tds.DungeonGeneration
             {
                 _rect = new RectInt(x, y, w, h)
             };
+
         }
 
         public TraversalNode AddChild(TraversalNode child)
