@@ -33,7 +33,7 @@ class DungeonSearchTest
         var search = new DungeonSearch(256);
 
         search.BeginSearch(nodeA, nodeB);
-
+         
         Assert.IsTrue(search.Iterate(1) == 1);
         Assert.IsTrue(search.Iterate(1) == 0);
 
@@ -62,8 +62,8 @@ class DungeonSearchTest
         search.BeginSearch(nodeA, nodeD);
 
         Assert.IsTrue(search.Iterate(1) == 2);
-        Assert.IsTrue(search.Iterate(1) == 3);
-        Assert.IsTrue(search.Iterate(1) == 3);
+        Assert.IsTrue(search.Iterate(1) == 2);
+        Assert.IsTrue(search.Iterate(1) == 4);
         Assert.IsTrue(search.Iterate(1) == 0);
 
         var path = search.GetBestPath();

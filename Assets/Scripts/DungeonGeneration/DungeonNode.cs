@@ -8,6 +8,7 @@ namespace Tds.DungeonGeneration
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using Tds.Util;
     using UnityEngine;
 
@@ -56,6 +57,14 @@ namespace Tds.DungeonGeneration
         public Vector2Int Max
         {
             get { return Rect.max; }
+        }
+
+        public IEnumerable<DungeonNode> Neighbours
+        {
+            get
+            {
+                return Edges == null ? null : Edges.Select(e => e.GetOther(this));
+            }
         }
 
         public DungeonNode(RectInt dimensions )

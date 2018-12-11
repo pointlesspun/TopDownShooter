@@ -199,6 +199,7 @@ GameObject:
   m_Component:
   - component: {fileID: 757225869}
   - component: {fileID: 757225868}
+  - component: {fileID: 757225870}
   m_Layer: 0
   m_Name: DungeonGenerator
   m_TagString: Untagged
@@ -224,14 +225,14 @@ MonoBehaviour:
     _minRectHeight: 20
     _minDepth: 3
     _maxDepth: -1
-    _seed: -1
+    _seed: 42
     _stopChanceBase: 0.01
     _stopChanceDepthFactor: 0
-  _useTraversal: 1
+  _useTraversal: 0
   _traversalAlgorithm:
     _maxDepth: -1
-    _maxLength: 1000
-    _seed: 42
+    _maxLength: 2000
+    _seed: 44
     _requiredIntersectionLength: 3
   _gizmoColors:
   - {r: 1, g: 1, b: 1, a: 1}
@@ -253,84 +254,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &2100532163
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2100532165}
-  - component: {fileID: 2100532164}
-  - component: {fileID: 2100532166}
-  m_Layer: 0
-  m_Name: LevelGenerator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &2100532164
+--- !u!114 &757225870
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2100532163}
+  m_GameObject: {fileID: 757225867}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f28175cc6cfda24fadfa1ebabd48621, type: 3}
+  m_Script: {fileID: 11500000, guid: 9b57e3cee2226ad47b31e6e13a29d7e9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _rectSubdivisionAlgorithm:
-    _minRectWidth: 8
-    _minRectHeight: 8
-    _minDepth: 3
-    _maxDepth: -1
-    _seed: -1
-    _stopChanceBase: 0
-    _stopChanceDepthFactor: 0
-  _traversalAlgorithm:
-    _maxDepth: -1
-    _maxLength: 750
-    _seed: -1
-  _rectDebugPrefab: {fileID: 1190849013635190, guid: bd3978954d342e046be87583348584ae,
-    type: 2}
-  _rectColors:
-  - {r: 0.754717, g: 0.6793087, b: 0.09611962, a: 1}
-  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  - {r: 0, g: 1, b: 1, a: 1}
-  - {r: 0.46293163, g: 0.46293163, b: 0.9716981, a: 1}
-  - {r: 0, g: 1, b: 0, a: 1}
-  - {r: 1, g: 0, b: 0, a: 1}
-  - {r: 1, g: 0.70822835, b: 0, a: 1}
-  - {r: 1, g: 0, b: 0.88374805, a: 1}
-  _width: 100
-  _height: 100
-  _scaleMultiplier: 3.15
-  _traversePath: 1
---- !u!4 &2100532165
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2100532163}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.56103396, y: -0.19320491, z: 0.010720687}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 2
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &2100532166
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 2100532163}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b5567bf4a761ab143aae8381b907e4ab, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _fromNode: {fileID: 0}
-  _toNode: {fileID: 0}
+  _pathfinder:
+    _pathLengthWeight: 1
+    _distanceToGoalWeight: 5
+    _distanceToNextNodeWeight: 1

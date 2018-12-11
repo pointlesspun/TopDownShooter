@@ -34,7 +34,7 @@ namespace Tds.GameScripts
         /// List of nodes which already have spawned monsters, in the current implementation the director
         /// only spawns a set of monsters once for each room.
         /// </summary>
-        private HashSet<TraversalNode> _closedSet = new HashSet<TraversalNode>();
+        private HashSet<DungeonNode> _closedSet = new HashSet<DungeonNode>();
 
         /// <summary>
         /// Set of default offsets from which the monsters are spawned
@@ -50,15 +50,17 @@ namespace Tds.GameScripts
         /// </summary>
         /// <param name="node"></param>
         /// <param name="offset"></param>
-        public void AddTrigger(TraversalNode node, Vector3 offset)
+        //public void AddTrigger(TraversalNode node, Vector3 offset)
+        public void AddTriggerFor(DungeonNode node)
         {
-            var triggerObject = new GameObject("trigger for " + node._split._rect);
+            RectInt rect = node.Rect;
+            var triggerObject = new GameObject("trigger for " + rect);
 
             var collider = triggerObject.AddComponent<BoxCollider2D>();
 
             collider.isTrigger = true;
-            collider.offset = node._split._rect.center + new Vector2(offset.x, offset.y);
-            collider.size = node._split._rect.size;
+            collider.offset = rect.center + new Vector2(_offset.x, _offset.y);
+            collider.size = rect.size;
 
             var triggerBehaviour = triggerObject.AddComponent<TraversalNodeTriggerBehaviour>();
 
@@ -73,25 +75,30 @@ namespace Tds.GameScripts
         /// </summary>
         /// <param name="collider"></param>
         /// <param name="node"></param>
-        public void OnTrigger(Collider2D collider, TraversalNode node)
+        public void OnTrigger(Collider2D collider, DungeonNode node)
         {
-           node._children.ForEach((child) =>
-           {
-               if (!_closedSet.Contains(child))
-               {
-                   for (int i = 0; i < _spawnCountPerTrigger; ++i)
-                   {
-                       var obj = Instantiate(_monsterPrefab);
-                       _monsterPrefab.transform.position = child._split._rect.center;
-                       _monsterPrefab.transform.position += _offset + _spawnOffsets[Random.Range(0, _spawnOffsets.Length)]
-                                                            * Random.Range(1, 3);
+            var nodeNeighbours = node.Neighbours;
 
-                       obj.transform.parent = transform;
+            if (nodeNeighbours != null)
+            {
+                foreach (var n in nodeNeighbours)
+                {
+                    if (!_closedSet.Contains(n))
+                    {
+                        for (int i = 0; i < _spawnCountPerTrigger; ++i)
+                        {
+                            var obj = Instantiate(_monsterPrefab);
+                            _monsterPrefab.transform.position = n.Rect.center;
+                            _monsterPrefab.transform.position += _offset + _spawnOffsets[Random.Range(0, _spawnOffsets.Length)]
+                                                                 * Random.Range(1, 3);
+
+                            obj.transform.parent = transform;
+                        }
+
+                        _closedSet.Add(n);
                     }
-
-                   _closedSet.Add(child);
-               }
-           });
+                }
+           }
         }
      }
 }

@@ -16,24 +16,26 @@ namespace Tds.Pathfinder
     {
         public float _pathLengthWeight = 1.0f;
         public float _distanceToGoalWeight = 1.0f;
-        public float _distanceToNextNode = 1.0f;
+        public float _distanceToNextNodeWeight = 1.0f;
 
         public DungeonSearch(int poolSize)
             : base(poolSize)
         {
         }
 
-        public void BeginSearch(DungeonNode from, DungeonNode to)
+        public void BeginSearch(DungeonNode startNode, DungeonNode goalNode)
         {
             var costFunction = new Func<DungeonNode, DungeonNode, float, float>(
-                (fromNode, toNode, parentCost) => fromNode.Distance(toNode) * _distanceToNextNode
-                                                + parentCost * _pathLengthWeight
-                                                + to.Distance(toNode) * _distanceToGoalWeight);
+                (fromNode, toNode, pathLength) => fromNode.Distance(toNode) * _distanceToNextNodeWeight
+                                                + pathLength * _pathLengthWeight
+                                                + goalNode.Distance(toNode) * _distanceToGoalWeight);
             
             var expandFunction = new Func<PathNode<DungeonNode>, IEnumerable<DungeonNode>>(
                             (parent) => parent._data.Edges == null ? null : parent._data.Edges.Select((e) => e.GetOther(parent._data)));
 
-            BeginSearch(from, to, costFunction, expandFunction);           
+            var distanceFunction = new Func<DungeonNode, DungeonNode, float>((fromNode, toNode) => fromNode.Distance(toNode));
+
+            BeginSearch(startNode, goalNode, costFunction, expandFunction, distanceFunction);           
         }
     }
 }

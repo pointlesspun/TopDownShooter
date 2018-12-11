@@ -47,6 +47,12 @@ namespace Tds.Pathfinder
             private set;
         }
 
+        public Func<T, T, float> DistanceFunction
+        {
+            get;
+            private set;
+        }
+
         private List<PathNode<T>> _openList = new List<PathNode<T>>();
         private HashSet<T> _closedTraversalNodes = new HashSet<T>();
 
@@ -63,12 +69,14 @@ namespace Tds.Pathfinder
         public void BeginSearch( T origin
                                , T destination
                                , Func<T, T, float, float> costFunction
-                               , Func<PathNode<T>, IEnumerable<T>> expansionFunction)
+                               , Func<PathNode<T>, IEnumerable<T>> expansionFunction
+                               , Func<T,T, float> distanceFunction)
         {
             Start = origin;
             End = destination;
             CostFunction = costFunction;
             ExpansionFunction = expansionFunction;
+            DistanceFunction = distanceFunction;
 
             _nodePool.Clear();
             _openList.Clear();
@@ -179,13 +187,14 @@ namespace Tds.Pathfinder
             // is the node not yet explored ?
             if (!_closedTraversalNodes.Contains(target))
             {
-                var cost = CostFunction(current._data, target, current._cost);
+                // how much does it cost to move to target ?
+                var accessCost = CostFunction(current._data, target, current._pathLength);
 
                 // if cost is negative it means access to the targetPosition is blocked so
                 // we can't expand in this direction
-                if (cost >= 0)
+                if (accessCost >= 0)
                 {
-                    Expand(current, target, cost);
+                    Expand(current, target, accessCost);
                 }
             }
         }
@@ -221,15 +230,16 @@ namespace Tds.Pathfinder
             }
         }
 
-        private PathNode<T> InitializeNode(PathNode<T> current, T target, float accessCost)
+        private PathNode<T> InitializeNode(PathNode<T> parent, T target, float accessCost)
         {
             PathNode<T> result = _nodePool.Obtain(() => new PathNode<T>())._obj;
 
             result._children.Clear();
             result._data = target;
             result._cost = accessCost;
+            result._pathLength = parent._pathLength + DistanceFunction(parent._data, target);
 
-            current.AddChild(result);
+            parent.AddChild(result);
 
             return result;
         }
