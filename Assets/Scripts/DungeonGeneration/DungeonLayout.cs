@@ -45,6 +45,11 @@ namespace Tds.DungeonGeneration
             _nodes = new List<DungeonNode>();
         }
 
+        public DungeonLayout(params DungeonNode[] nodes)
+        {
+            _nodes = new List<DungeonNode>(nodes);
+        }
+
         public DungeonLayout(IEnumerable<DungeonNode> nodes)
         {
             _nodes = new List<DungeonNode>(nodes);

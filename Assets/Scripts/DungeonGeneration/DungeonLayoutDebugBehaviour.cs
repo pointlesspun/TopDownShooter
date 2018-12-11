@@ -14,7 +14,11 @@ namespace Tds.DungeonGeneration
     /// </summary>
     public class DungeonLayoutDebugBehaviour : MonoBehaviour
     {
-        private DungeonLayout _layout;
+        public DungeonLayout Layout
+        {
+            get;
+            private set;
+        }
 
         public int _width = 40;
         public int _height = 40;
@@ -30,21 +34,21 @@ namespace Tds.DungeonGeneration
 
         public void BuildLayout()
         {
-            _layout = _subdivisionAlgorithm.Subdivide(new RectInt(0, 0, _width, _height));
+            Layout = _subdivisionAlgorithm.Subdivide(new RectInt(0, 0, _width, _height));
 
             if (_useTraversal)
             {
-                _layout = _traversalAlgorithm.Traverse(_layout);
+                Layout = _traversalAlgorithm.Traverse(Layout);
             } 
         }
 
         public void OnDrawGizmos()
         {
-            if (_layout != null)
+            if (Layout != null)
             {
                 var gizmoColorIndex = 0;
 
-                foreach( var node in _layout.Nodes)
+                foreach( var node in Layout.Nodes)
                 {
                     Gizmos.color = _gizmoColors[gizmoColorIndex % _gizmoColors.Length];
                     Gizmos.DrawCube(node.Rect.center, new Vector3(node.Width, node.Height, 0));
@@ -65,10 +69,10 @@ namespace Tds.DungeonGeneration
                     }
                 }
 
-                if (_useTraversal && _layout.Start != null)
+                if (_useTraversal && Layout.Start != null)
                 {
-                    Gizmos.DrawIcon(_layout.Start.Rect.center, "start.png", true);
-                    Gizmos.DrawIcon(_layout.End.Rect.center, "flag.png", true);
+                    Gizmos.DrawIcon(Layout.Start.Rect.center, "start.png", true);
+                    Gizmos.DrawIcon(Layout.End.Rect.center, "flag.png", true);
                 }
             }
         }

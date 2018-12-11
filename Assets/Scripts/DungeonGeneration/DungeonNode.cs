@@ -61,7 +61,12 @@ namespace Tds.DungeonGeneration
         public DungeonNode(RectInt dimensions )
         {
             Rect = dimensions;
-        } 
+        }
+
+        public DungeonNode(int x, int y, int w, int h)
+        {
+            Rect = new RectInt(x,y,w,h);
+        }
 
         public DungeonNode[] DivideOverXAxis(int height)
         {
