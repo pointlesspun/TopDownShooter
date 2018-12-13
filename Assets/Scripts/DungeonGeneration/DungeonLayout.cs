@@ -6,14 +6,8 @@
 
 namespace Tds.DungeonGeneration
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-
     using UnityEngine;
-    using UnityEngine.Animations;
-
-    using Tds.Util;
 
     /// <summary>
     /// Algorithm which randomly traverses through a dungeon (list of dungeon nodes),
@@ -21,6 +15,7 @@ namespace Tds.DungeonGeneration
     /// </summary>
     public class DungeonLayout
     {
+        // to do replace with quadtree
         private List<DungeonNode> _nodes;
 
         public IEnumerable<DungeonNode> Nodes
@@ -72,5 +67,30 @@ namespace Tds.DungeonGeneration
             _nodes.Add(node);
             return node;
         }
+
+        public DungeonNode FindClosestNode(Vector2 position)
+        {
+            DungeonNode result = null;
+            float bestDistance = float.MaxValue;
+
+            foreach (var node in _nodes)
+            {
+                if (node.ContainsPoint(position))
+                {
+                    return node;
+                }
+
+                var distance = node.Distance(position);
+
+                if (distance < bestDistance)
+                {
+                    bestDistance = distance;
+                    result = node;
+                }
+            }
+
+            return result;
+        }
+
     }
 }

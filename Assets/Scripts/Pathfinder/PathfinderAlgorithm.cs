@@ -4,27 +4,12 @@
  * You should have received a copy of the license along with this work.If not, see<http://creativecommons.org/licenses/by-sa/4.0/>.
  */
 
-namespace Tds.Pathfinder
+namespace Tds.PathFinder
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using Tds.Util;
-
-    public class PathNode<T>
-    {
-        public PathNode<T> _parent;
-        public List<PathNode<T>> _children = new List<PathNode<T>>();
-        public float _cost = 0;
-        public float _pathLength = 0;
-        public T _data;
-
-        public void AddChild(PathNode<T> node)
-        {
-            _children.Add(node);
-            node._parent = this;
-        }
-    }
 
     public class PathfinderAlgorithm<T> where T : class
     {
@@ -86,6 +71,9 @@ namespace Tds.Pathfinder
 
             _root._data = Start;
             _root._cost = costFunction(origin, destination, 0);
+            _root._children.Clear();
+            _root._parent = null;
+            _root._pathLength = 0;
 
             _bestNode = _root;
             _openList.Add(_root);

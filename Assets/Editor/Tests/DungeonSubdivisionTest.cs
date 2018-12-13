@@ -2,7 +2,7 @@
 using NUnit.Framework;
 using Tds.Util;
 using Tds.DungeonGeneration;
-using Tds.Pathfinder;
+using Tds.PathFinder;
 using System.Linq;
 
 public class DungeonSubdivisionTest

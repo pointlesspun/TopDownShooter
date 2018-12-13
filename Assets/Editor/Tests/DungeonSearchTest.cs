@@ -1,6 +1,6 @@
 ﻿using NUnit.Framework;
 using Tds.DungeonGeneration;
-using Tds.Pathfinder;
+using Tds.PathFinder;
 
 class DungeonSearchTest
 {

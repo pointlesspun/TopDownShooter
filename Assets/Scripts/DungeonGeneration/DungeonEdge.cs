@@ -69,5 +69,18 @@ namespace Tds.DungeonGeneration
                 return Vector2Int.Distance(NodeIntersection[0], NodeIntersection[1]);
             }
         }
+
+        public Vector2 IntersectionCenter
+        {
+            get
+            {
+                var direction = NodeIntersection[1] - NodeIntersection[0];
+
+                direction.x /= 2;
+                direction.y /= 2;
+
+                return NodeIntersection[0] + direction;
+            }
+        }
     }
 }

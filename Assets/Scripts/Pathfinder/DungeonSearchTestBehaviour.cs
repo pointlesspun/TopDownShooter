@@ -4,17 +4,18 @@
  * You should have received a copy of the license along with this work.If not, see<http://creativecommons.org/licenses/by-sa/4.0/>.
  */
 
-namespace Tds.Pathfinder
+namespace Tds.PathFinder
 {
     using System.Collections.Generic;
     using Tds.DungeonGeneration;
+    using Tds.Util;
     using UnityEngine;
 
     public class DungeonSearchTestBehaviour : MonoBehaviour
     { 
         public DungeonSearch _pathfinder = new DungeonSearch(256);
         private List<DungeonNode> _path = null;
-
+        
         public void BeginSearch()
         {
             var layoutTraversal = GetComponent<DungeonLayoutDebugBehaviour>();
@@ -35,6 +36,7 @@ namespace Tds.Pathfinder
             }
         }
 
+       
         public void OnDrawGizmos()
         {
             Vector3 offset = Vector3.zero;

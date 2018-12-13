@@ -9,6 +9,7 @@ namespace Tds.GameScripts
 
     using Tds.DungeonGeneration;
     using System.Collections.Generic;
+    using Tds.PathFinder;
 
     /// <summary>
     /// Class which controls and directs the level's monster behaviour
@@ -36,6 +37,9 @@ namespace Tds.GameScripts
         /// </summary>
         private HashSet<DungeonNode> _closedSet = new HashSet<DungeonNode>();
 
+        private DungeonLayout _layout;
+        public DungeonNode _currentPlayerNode;
+
         /// <summary>
         /// Set of default offsets from which the monsters are spawned
         /// </summary>
@@ -44,6 +48,49 @@ namespace Tds.GameScripts
             Vector3.left, Vector3.left + Vector3.up, Vector3.up, Vector3.right + Vector3.up, Vector3.right,
             Vector3.right + Vector3.down, Vector3.down, Vector3.left + Vector3.down, Vector3.zero
         };
+
+        public void SetDungeonLayout(DungeonLayout layout, Vector3 offset)
+        {
+            _offset = offset;
+            _layout = layout;
+
+            foreach (var node in layout.Nodes)
+            {
+                AddTriggerFor(node);
+            }
+        }
+
+        // xxx note this is not efficient but good enough for the scope of build007
+        // need to replace this with several things like a quadtree and a service for
+        // pathfinding
+        public DungeonSearch FindPath(Vector2 from, Vector2 to)
+        {
+            if (_layout != null)
+            {
+                DungeonNode fromNode = null;
+                DungeonNode toNode = null;
+
+                foreach (var node in _layout.Nodes)
+                {
+                    if (node.ContainsPoint(from))
+                    {
+                        fromNode = node;
+                    }
+
+                    if (node.ContainsPoint(to))
+                    {
+                        toNode = node;
+                    }
+
+                    if (fromNode != null && toNode != null)
+                    {
+                        return new DungeonSearch(128).BeginSearch(fromNode, toNode);
+                    }
+                }
+            }
+
+            return null;
+        }
 
         /// <summary>
         /// Add a trigger to the director
@@ -77,6 +124,8 @@ namespace Tds.GameScripts
         /// <param name="node"></param>
         public void OnTrigger(Collider2D collider, DungeonNode node)
         {
+            _currentPlayerNode = node;
+
             var nodeNeighbours = node.Neighbours;
 
             if (nodeNeighbours != null)

@@ -184,7 +184,7 @@ Transform:
   m_PrefabInternal: {fileID: 0}
   m_GameObject: {fileID: 198485656}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -10}
+  m_LocalPosition: {x: 343, y: 16, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
@@ -200,6 +200,7 @@ GameObject:
   - component: {fileID: 757225869}
   - component: {fileID: 757225868}
   - component: {fileID: 757225870}
+  - component: {fileID: 757225871}
   m_Layer: 0
   m_Name: DungeonGenerator
   m_TagString: Untagged
@@ -218,20 +219,20 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b13ad1838e3f91c4aba4e0fa16e7447c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _width: 200
-  _height: 200
+  _width: 500
+  _height: 500
   _subdivisionAlgorithm:
     _minRectWidth: 20
     _minRectHeight: 20
     _minDepth: 3
     _maxDepth: -1
-    _seed: 42
+    _seed: -1
     _stopChanceBase: 0.01
     _stopChanceDepthFactor: 0
-  _useTraversal: 0
+  _useTraversal: 1
   _traversalAlgorithm:
     _maxDepth: -1
-    _maxLength: 2000
+    _maxLength: 8000
     _seed: 44
     _requiredIntersectionLength: 3
   _gizmoColors:
@@ -269,3 +270,19 @@ MonoBehaviour:
     _pathLengthWeight: 1
     _distanceToGoalWeight: 5
     _distanceToNextNodeWeight: 1
+--- !u!114 &757225871
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 757225867}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9b9a20207b828644c933473bec661a3b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _waypointDistance: 0.25
+  _tracerUpdateSpeed: 1
+  _gizmoSize: 5
+  _targetObject: {fileID: 0}
+  _endPointThreshold: 5.5

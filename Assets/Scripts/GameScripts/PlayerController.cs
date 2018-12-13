@@ -138,7 +138,7 @@ namespace Tds.GameScripts
         private void UpdatePlayerControlledState()
         {          
             var velocity = UpdateVelocity();
-            var cursorPosition = GetCursorPosition();
+            var cursorPosition = InputUtil.GetCursorPosition(_camera);
 
             var animationState = AnimationStateDecisionTree.GetAnimationState(transform.position, cursorPosition, velocity, _idleSpeed);
 
@@ -256,7 +256,7 @@ namespace Tds.GameScripts
             return _body.velocity;
         }
 
-        private Vector3 GetCursorPosition()
+        /*private Vector3 GetCursorPosition()
         {
             var mouseScreenPosition = Input.mousePosition;
             var result = _camera.ScreenToWorldPoint(new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, _camera.nearClipPlane));
@@ -264,7 +264,7 @@ namespace Tds.GameScripts
             result.z = 0;
 
             return result;
-        }
+        }*/
 
         private void UpdateAttack(Vector3 cursorPosition, WeaponBase weapon)
         {

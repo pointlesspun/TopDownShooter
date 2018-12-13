@@ -20,13 +20,11 @@ namespace Tds.GameScripts
         /// <summary>
         /// Algorithm which will split the level area in smaller rectangles
         /// </summary>
-        // public SubdivisionAlgorithm _divisionAlgorithm = new SubdivisionAlgorithm();
         public DungeonSubdivision _divisionAlgorithm = new DungeonSubdivision();
 
         /// <summary>
-        /// Algorithm which will create a path through the area create by the SubdivisionAlgorithm
+        /// Algorithm which will create a path through the area create by the divisionAlgorithm
         /// </summary>
-        // public SplitRectTraversalAlgorithm _traversalAlgorithm = new SplitRectTraversalAlgorithm();
         public DungeonTraversal _traversalAlgorithm = new DungeonTraversal();
 
         /// <summary>
@@ -109,6 +107,9 @@ namespace Tds.GameScripts
         /// </summary>
         private Vector3 _previousPlayerPosition;
 
+        /// <summary>
+        /// Game object responsible for directing the "ai"
+        /// </summary>
         private Director _director;
 
         public void Start()
@@ -125,12 +126,7 @@ namespace Tds.GameScripts
 
             if (directorObject != null)
             {
-                _director = directorObject.GetComponent<Director>();
-                _director._offset = _levelOffset;
-                foreach(var node in layout.Nodes)
-                {
-                    _director.AddTriggerFor(node);
-                }
+                directorObject.GetComponent<Director>().SetDungeonLayout(layout, _levelOffset);
             }
             else
             {

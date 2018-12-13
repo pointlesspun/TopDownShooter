@@ -4,7 +4,7 @@
  * You should have received a copy of the license along with this work.If not, see<http://creativecommons.org/licenses/by-sa/4.0/>.
  */
 
-namespace Tds.Pathfinder
+namespace Tds.PathFinder
 {
     using System;
     using System.Collections.Generic;
@@ -23,7 +23,7 @@ namespace Tds.Pathfinder
         {
         }
 
-        public void BeginSearch(DungeonNode startNode, DungeonNode goalNode)
+        public DungeonSearch BeginSearch(DungeonNode startNode, DungeonNode goalNode)
         {
             var costFunction = new Func<DungeonNode, DungeonNode, float, float>(
                 (fromNode, toNode, pathLength) => fromNode.Distance(toNode) * _distanceToNextNodeWeight
@@ -35,7 +35,9 @@ namespace Tds.Pathfinder
 
             var distanceFunction = new Func<DungeonNode, DungeonNode, float>((fromNode, toNode) => fromNode.Distance(toNode));
 
-            BeginSearch(startNode, goalNode, costFunction, expandFunction, distanceFunction);           
+            BeginSearch(startNode, goalNode, costFunction, expandFunction, distanceFunction);
+
+            return this;
         }
     }
 }

@@ -12,24 +12,30 @@ namespace Tds.PathFinder
     /// <summary>
     /// Editor component which allows generating levels in the editor (ie it adds some buttons)
     /// </summary>
-    [CustomEditor(typeof(DungeonSearchTestBehaviour))]
-    public class DungeonSearchTestInspector : Editor
+    [CustomEditor(typeof(DungeonTracerTestBehaviour))]
+    public class DungeonTracerTestInspector : Editor
     {
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
 
-            DungeonSearchTestBehaviour testBehaviour = (DungeonSearchTestBehaviour)target;
+            DungeonTracerTestBehaviour testBehaviour = (DungeonTracerTestBehaviour)target;
 
-            if (GUILayout.Button("Begin Search"))
+            if ( testBehaviour.IsFollowingTarget)
             {
-                testBehaviour.BeginSearch();
+                if (GUILayout.Button("Stop following target"))
+                {
+                    testBehaviour.ToggleFollowTarget();
+                }
             }
-
-            if (GUILayout.Button("Iterate"))
+            else
             {
-                testBehaviour.Iterate();
+                if (GUILayout.Button("Start following target"))
+                {
+                    testBehaviour.ToggleFollowTarget();
+                }
             }
+            
         }
     }
 }

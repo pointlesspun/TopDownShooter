@@ -12,7 +12,7 @@ namespace Tds.DungeonGeneration
     using Tds.Util;
     using UnityEngine;
 
-    public class DungeonNode
+    public class DungeonNode 
     {
         private List<DungeonEdge> _edges;
 
@@ -134,9 +134,31 @@ namespace Tds.DungeonGeneration
             _edges.Clear();
         }
 
-        public bool Contains(DungeonEdge edge)
+        public DungeonEdge GetEdgeTo(DungeonNode other)
+        {
+            if (Edges != null)
+            {
+                return Edges.FirstOrDefault(e => e.GetOther(this) == other);
+            }
+
+            return null;
+        }
+
+        public float Distance(Vector2 point)
+        {
+            return (point - RectUtil.Clamp(Rect, point)).sqrMagnitude;
+        
+        } 
+
+        public bool ContainsEdge(DungeonEdge edge)
         {
             return _edges.Contains(edge);
+        }
+
+        public bool ContainsPoint(Vector2 point)
+        {
+            return point.x >= Rect.min.x && point.x < Rect.max.x
+                && point.y >= Rect.min.y && point.y < Rect.max.y;
         }
 
         public float Distance(DungeonNode other)

@@ -58,5 +58,11 @@ namespace Tds.Util
                 new Vector2Int(x2, y2),
             };
         }
+
+        public static Vector2 Clamp(RectInt rect, Vector2 point, float deltaWidth = 0, float deltaHeight = 0)
+        {
+            return new Vector2(Mathf.Clamp(point.x, rect.min.x + deltaWidth, rect.max.x - deltaWidth),
+                                                        Mathf.Clamp(point.y, rect.min.y + deltaWidth, rect.max.y - deltaWidth));
+        }
     }
 }
