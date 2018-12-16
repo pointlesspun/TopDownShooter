@@ -63,7 +63,7 @@ namespace Tds.GameScripts
         // xxx note this is not efficient but good enough for the scope of build007
         // need to replace this with several things like a quadtree and a service for
         // pathfinding
-        public DungeonSearch FindPath(Vector2 from, Vector2 to)
+        public PathfinderAlgorithm<DungeonNode> FindPath(Vector2 from, Vector2 to)
         {
             if (_layout != null)
             {

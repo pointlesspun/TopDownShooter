@@ -20,22 +20,22 @@ namespace Tds.PathFinder
         /// Cost function for moving from A to B, taking in account the cost for
         /// getting to A.
         /// </summary>
-        public Func<T, T, float, float> CostFunction
+        public Func<T, T, T, float, float> CostFunction
         {
             get;
-            private set;
+            set;
         }
 
         public Func<PathNode<T>, IEnumerable<T>> ExpansionFunction
         {
             get;
-            private set;
+            set;
         }
 
         public Func<T, T, float> DistanceFunction
         {
             get;
-            private set;
+            set;
         }
 
         private List<PathNode<T>> _openList = new List<PathNode<T>>();
@@ -46,22 +46,49 @@ namespace Tds.PathFinder
 
         private ObjectPool<PathNode<T>> _nodePool;
 
-        public PathfinderAlgorithm(int poolSize)
+
+        public PathfinderAlgorithm()
         {
-            _nodePool = new ObjectPool<PathNode<T>>(0, () => new PathNode<T>(), 256);
         }
 
-        public void BeginSearch( T origin
-                               , T destination
-                               , Func<T, T, float, float> costFunction
-                               , Func<PathNode<T>, IEnumerable<T>> expansionFunction
-                               , Func<T,T, float> distanceFunction)
+        public PathfinderAlgorithm(int poolSize)
         {
-            Start = origin;
-            End = destination;
+            Initialize(poolSize);
+        }
+
+        public PathfinderAlgorithm(int poolSize,
+                                    Func<T, T, T, float, float> costFunction,
+                                    Func<PathNode<T>, IEnumerable<T>> expansionFunction,
+                                    Func<T, T, float> distanceFunction)
+        {
+            Initialize(poolSize);
             CostFunction = costFunction;
             ExpansionFunction = expansionFunction;
             DistanceFunction = distanceFunction;
+        }
+
+        public PathfinderAlgorithm<T> Initialize(int poolSize)
+        {
+            _nodePool = new ObjectPool<PathNode<T>>(0, () => new PathNode<T>(), 256);
+            return this;
+        }
+
+        public PathfinderAlgorithm<T> BeginSearch( T origin
+                               , T destination
+                               , Func<T, T, T, float, float> costFunction
+                               , Func<PathNode<T>, IEnumerable<T>> expansionFunction
+                               , Func<T,T, float> distanceFunction)
+        {
+            CostFunction = costFunction;
+            ExpansionFunction = expansionFunction;
+            DistanceFunction = distanceFunction;
+            return BeginSearch(origin, destination);
+        }
+
+        public PathfinderAlgorithm<T> BeginSearch(T origin , T destination)
+        {
+            Start = origin;
+            End = destination;
 
             _nodePool.Clear();
             _openList.Clear();
@@ -70,7 +97,7 @@ namespace Tds.PathFinder
             _root = _nodePool.Obtain()._obj;
 
             _root._data = Start;
-            _root._cost = costFunction(origin, destination, 0);
+            _root._cost = CostFunction(Start, Start, End, 0);
             _root._children.Clear();
             _root._parent = null;
             _root._pathLength = 0;
@@ -79,6 +106,19 @@ namespace Tds.PathFinder
             _openList.Add(_root);
             
             _closedTraversalNodes.Add(_root._data);
+
+            return this;
+        }
+
+        public void EndSearch()
+        {
+            Start = null;
+            End = null;
+            _nodePool.Clear();
+            _openList.Clear();
+            _closedTraversalNodes.Clear();
+            _root = null;
+            _bestNode = null;
         }
 
         public List<T> GetOpenList()
@@ -143,7 +183,7 @@ namespace Tds.PathFinder
                         // found an expansion... iteration is now complete
                         foreach( var nextElement in expansions)
                         {
-                            Explore(current, nextElement);
+                            Explore(current, nextElement, End);
                         }                        
                     }
                 }
@@ -170,13 +210,48 @@ namespace Tds.PathFinder
             return result;
         }
 
-        private void Explore(PathNode<T> current, T target)
+        public T[] GetBestPath(T[] store)
+        {
+            if (_bestNode != null)
+            {
+                var current = _bestNode;
+                var i = 0;
+
+                while (current != null )
+                {
+                    if ( i < store.Length)
+                    {
+                        store[i] = current._data;
+                    }
+                    else
+                    {
+                        store.ShiftLeft();
+                        store[store.Length-1] = current._data;
+                    }
+
+                    current = current._parent;
+                    ++i;
+                }
+
+                Array.Reverse(store, 0, Math.Min(store.Length, i));
+
+                // insert an "end of path" if there is room
+                if ( i < store.Length)
+                {
+                    store[i] = null;
+                }
+            }
+
+            return store;
+        }
+
+        private void Explore(PathNode<T> current, T target, T goal)
         {
             // is the node not yet explored ?
             if (!_closedTraversalNodes.Contains(target))
             {
                 // how much does it cost to move to target ?
-                var accessCost = CostFunction(current._data, target, current._pathLength);
+                var accessCost = CostFunction(current._data, target, goal, current._pathLength);
 
                 // if cost is negative it means access to the targetPosition is blocked so
                 // we can't expand in this direction

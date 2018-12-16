@@ -47,7 +47,7 @@ namespace Tds.PathFinder
         /// </summary>
         public float _endPointThreshold = 5.5f;
 
-        private DungeonSearch _pathfinder = new DungeonSearch(256);
+        private PathfinderAlgorithm<DungeonNode> _pathfinder = new PathfinderAlgorithm<DungeonNode>(256);
         private DungeonPathTracer _tracer = new DungeonPathTracer();
 
         // current position of the tracer

@@ -6,21 +6,17 @@
 
 namespace Tds.PathFinder
 {
-    using System.Collections.Generic;
     using Tds.DungeonGeneration;
-    using Tds.Util;
     using UnityEngine;
 
     public class DungeonSearchTestBehaviour : MonoBehaviour
     { 
-        public DungeonSearch _pathfinder = new DungeonSearch(256);
-        private List<DungeonNode> _path = null;
+        public PathfinderAlgorithm<DungeonNode> _pathfinder = new PathfinderAlgorithm<DungeonNode>(256);
         
         public void BeginSearch()
         {
             var layoutTraversal = GetComponent<DungeonLayoutDebugBehaviour>();
 
-            _path = null;
 
             if (layoutTraversal != null)
             {
@@ -30,12 +26,8 @@ namespace Tds.PathFinder
 
         public void Iterate()
         {
-            if (_pathfinder.Iterate(1) == 0 )
-            {
-                _path = _pathfinder.GetBestPath();
-            }
+            _pathfinder.Iterate(1);
         }
-
        
         public void OnDrawGizmos()
         {
