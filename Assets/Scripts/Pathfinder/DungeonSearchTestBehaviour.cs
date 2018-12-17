@@ -11,16 +11,21 @@ namespace Tds.PathFinder
 
     public class DungeonSearchTestBehaviour : MonoBehaviour
     { 
-        public PathfinderAlgorithm<DungeonNode> _pathfinder = new PathfinderAlgorithm<DungeonNode>(256);
+        public PathfinderAlgorithm<DungeonNode> _pathfinder = DungeonSearch.CreatePathfinder(256, 1, 1, 1);
         
         public void BeginSearch()
         {
             var layoutTraversal = GetComponent<DungeonLayoutDebugBehaviour>();
 
-
             if (layoutTraversal != null)
             {
-                _pathfinder.BeginSearch(layoutTraversal.Layout.Start, layoutTraversal.Layout.End);
+                if (layoutTraversal.Layout != null)
+                {
+                    if (layoutTraversal.Layout.Start != null && layoutTraversal.Layout.End != null)
+                    {
+                        _pathfinder.BeginSearch(layoutTraversal.Layout.Start, layoutTraversal.Layout.End);
+                    }
+                }
             }
         }
 

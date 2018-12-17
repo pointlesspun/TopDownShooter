@@ -83,18 +83,22 @@ class DungeonSearchTest
         Assert.IsTrue(search.Iterate(-1) == 0);
 
         // test with providing an array
-        var arrayPath = search.GetBestPath(new DungeonNode[3]);
+        var arrayPath = new DungeonNode[3];
+
+        search.GetBestPath(arrayPath);
 
         Assert.IsTrue(arrayPath[0] == nodeA);
         Assert.IsTrue(arrayPath[1] == nodeC);
         Assert.IsTrue(arrayPath[2] == nodeD);
 
-        arrayPath = search.GetBestPath(new DungeonNode[2]);
+        arrayPath = new DungeonNode[2];
+        search.GetBestPath(arrayPath);
 
         Assert.IsTrue(arrayPath[0] == nodeA);
         Assert.IsTrue(arrayPath[1] == nodeC);
 
-        arrayPath = search.GetBestPath(new DungeonNode[4]);
+        arrayPath = new DungeonNode[4];
+        search.GetBestPath(arrayPath);
         Assert.IsTrue(arrayPath[0] == nodeA);
         Assert.IsTrue(arrayPath[1] == nodeC);
         Assert.IsTrue(arrayPath[2] == nodeD);

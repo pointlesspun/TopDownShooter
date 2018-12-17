@@ -6,6 +6,7 @@
 namespace Tds.Util
 {
     using System;
+    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
@@ -28,6 +29,17 @@ namespace Tds.Util
             set
             {
                 _data[x + y * Width] = value;
+            }
+        }
+
+        /// <summary>
+        /// Returns all values in this grid stored in an enumerable. May contain null values.
+        /// </summary>
+        public IEnumerable<T> Values
+        {
+            get
+            {
+                return _data;
             }
         }
 

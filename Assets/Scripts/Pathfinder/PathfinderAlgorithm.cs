@@ -87,6 +87,9 @@ namespace Tds.PathFinder
 
         public PathfinderAlgorithm<T> BeginSearch(T origin , T destination)
         {
+            // need to validate otherwise unity dies
+            Contract.Requires(CostFunction != null, "No cost function defined in pathfinder.");
+                
             Start = origin;
             End = destination;
 
@@ -210,18 +213,20 @@ namespace Tds.PathFinder
             return result;
         }
 
-        public T[] GetBestPath(T[] store)
+        public int GetBestPath(T[] store)
         {
+            int itemCount = -1;
+
             if (_bestNode != null)
             {
                 var current = _bestNode;
-                var i = 0;
+                itemCount = 0;
 
                 while (current != null )
                 {
-                    if ( i < store.Length)
+                    if (itemCount < store.Length)
                     {
-                        store[i] = current._data;
+                        store[itemCount] = current._data;
                     }
                     else
                     {
@@ -230,19 +235,19 @@ namespace Tds.PathFinder
                     }
 
                     current = current._parent;
-                    ++i;
+                    ++itemCount;
                 }
 
-                Array.Reverse(store, 0, Math.Min(store.Length, i));
+                Array.Reverse(store, 0, Math.Min(store.Length, itemCount));
 
                 // insert an "end of path" if there is room
-                if ( i < store.Length)
+                if (itemCount < store.Length)
                 {
-                    store[i] = null;
+                    store[itemCount] = null;
                 }
             }
 
-            return store;
+            return itemCount;
         }
 
         private void Explore(PathNode<T> current, T target, T goal)

@@ -13,18 +13,22 @@ namespace Tds.PathFinder
 
     public class PathfindingService<T> where T : class
     {
-        /// <summary>
-        ///  Assumption is a gameplay clock with 20 updates / seconds, so
-        ///  every 0.5 seconds a search is considered 'outdated' and can be re-used
-        /// </summary>
-        private readonly static int MaxAgeCompletedSearch = 10;
-
         private PathfinderAlgorithm<T>[] _pathfinders;
 
         private LinkedList<SearchParameters<T>> _availableSearches;
         private LinkedList<SearchParameters<T>> _scheduledSearches;
         private LinkedList<SearchParameters<T>> _searchesInProgress;
         private LinkedList<SearchParameters<T>> _completedSearches;
+
+        /// <summary>
+        ///  Assumption is a gameplay clock with 20 updates / seconds, so
+        ///  every 0.5 seconds a search is considered 'outdated' and can be re-used
+        /// </summary>
+        public int MaxAgeCompletedSearch
+        {
+            get;
+            set;
+        } 
 
         public IEnumerable<SearchParameters<T>> ScheduledSearches
         {
@@ -56,6 +60,11 @@ namespace Tds.PathFinder
             private set;
         }
 
+        public PathfindingService()
+        {
+            MaxAgeCompletedSearch = 10;
+        }
+
         public PathfindingService<T> Initialize( int searchAlgorithmCount, int searchResultCount, 
                                                     int estimatedSearchDepth, Func<PathfinderAlgorithm<T>> factoryMethod )
         {
@@ -63,7 +72,7 @@ namespace Tds.PathFinder
             
             for ( var i = 0; i < searchAlgorithmCount; ++i )
             {
-                _pathfinders[i] = factoryMethod(); // new PathfinderAlgorithm<T>().Initialize(searchAlgorithmNodePoolSize);
+                _pathfinders[i] = factoryMethod(); 
             }
 
             var id = 0;
@@ -120,24 +129,24 @@ namespace Tds.PathFinder
 
         public T[] RetrieveResult(int id, T from, T to, T[] store)
         {
-            var node = _completedSearches.FirstOrDefault(x => x.Id == id);
+            var completedSearch = _completedSearches.FirstOrDefault(x => x.Id == id);
 
-            if ( node != null && node.Value.IsMatch(from, to))
+            if ( completedSearch != null && completedSearch.Value.IsMatch(from, to))
             {
-                if (from == node.Value.FromNode)
+                if (from == completedSearch.Value.FromNode)
                 {
-                    Array.Copy(node.Value.Nodes, store, Mathf.Min(store.Length, node.Value.Nodes.Length));
+                    Array.Copy(completedSearch.Value.Nodes, store, Mathf.Min(store.Length, completedSearch.Value.Nodes.Length));
                 }
                 else
                 {
-                    var length = Mathf.Min(store.Length, node.Value.Nodes.Length);
+                    var length = Mathf.Min(store.Length, completedSearch.Value.Length);
 
-                    if (node.Value.Nodes.Length <= store.Length && node.Value.Nodes[node.Value.Nodes.Length - 1] == null)
+                    if (completedSearch.Value.Length <= store.Length && completedSearch.Value.Nodes[completedSearch.Value.Length - 1] == null)
                     {
                         length--;
                     } 
 
-                    Array.Copy(node.Value.Nodes, store, length);
+                    Array.Copy(completedSearch.Value.Nodes, store, length);
                     Array.Reverse(store, 0, length);
                 }
 
@@ -149,8 +158,8 @@ namespace Tds.PathFinder
 
         public void Update(int maxIterations)
         {
-            UpdateSearchesInProgrss(maxIterations, _pathfinders, _searchesInProgress, _completedSearches);
             TryStartNewSearches(_pathfinders, _scheduledSearches, _searchesInProgress);
+            UpdateSearchesInProgress(maxIterations, _pathfinders, _searchesInProgress, _completedSearches);
             TimeStamp++;
         }
 
@@ -169,7 +178,7 @@ namespace Tds.PathFinder
             }
         }
 
-        private void UpdateSearchesInProgrss(int maxIterations, 
+        private void UpdateSearchesInProgress(int maxIterations, 
                                                 PathfinderAlgorithm<T>[] searchers,
                                                 LinkedList<SearchParameters<T>> searchesInProgress,
                                                 LinkedList<SearchParameters<T>> completedSearches)
@@ -185,7 +194,7 @@ namespace Tds.PathFinder
                         searchResult.Value.IsComplete = true;
                         searchResult.Value.TimeStamp = TimeStamp;
 
-                        searchers[i].GetBestPath(searchResult.Value.Nodes);
+                        searchResult.Value.Length = searchers[i].GetBestPath(searchResult.Value.Nodes);                        
                         searchers[i].EndSearch();
 
                         searchesInProgress.Remove(searchResult);

@@ -10,6 +10,7 @@ namespace Tds.PathFinder
         public T FromNode { get; set; }
         public T ToNode { get; set; }
         public T[] Nodes { get; set; }
+        public int Length { get; set; }
         public bool IsComplete { get; set; }
         public int Id { get; set; }
         public int TimeStamp { get; set; }

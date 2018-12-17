@@ -6,6 +6,8 @@
 
 namespace Tds.DungeonGeneration
 {
+    using System.Linq;
+    using Tds.Util;
     using UnityEngine;
 
     /// <summary>
@@ -23,6 +25,15 @@ namespace Tds.DungeonGeneration
         public int _width = 40;
         public int _height = 40;
 
+        [TextArea(3, 10)]
+        public string _textInput;
+        public bool _useTextInput = false;
+        public int _textInputRectWidth = 10;
+        public int _textInputRectHeight = 10;
+        public Vector2Int _startCoordinate = Vector2Int.zero;
+        public Vector2Int _endCoordinate = Vector2Int.zero;
+
+
         public DungeonSubdivision _subdivisionAlgorithm = new DungeonSubdivision();
         public bool _useTraversal = false;
         public DungeonTraversal _traversalAlgorithm = new DungeonTraversal(); 
@@ -34,12 +45,48 @@ namespace Tds.DungeonGeneration
 
         public void BuildLayout()
         {
-            Layout = _subdivisionAlgorithm.Subdivide(new RectInt(0, 0, _width, _height));
+            if (_useTextInput)
+            {
+                var input = _textInput.Split('\n');
+                var grid = DungeonGenerationUtil.CreateFrom(input, _textInputRectWidth, _textInputRectHeight);
+                var nodes = grid.Values.Where(v => v != null);
+                Layout = new DungeonLayout(nodes);
+                Layout.Start = GetAndValidateNode(_startCoordinate, grid, "Error getting start node"); 
+                Layout.End = GetAndValidateNode(_endCoordinate, grid, "Error getting end node");
+            }
+            else
+            {
+                Layout = _subdivisionAlgorithm.Subdivide(new RectInt(0, 0, _width, _height));
+            }
 
             if (_useTraversal)
             {
                 Layout = _traversalAlgorithm.Traverse(Layout);
             } 
+        }
+
+        private DungeonNode GetAndValidateNode( Vector2Int coordinate, Grid2D<DungeonNode> grid, string message)
+        {
+            DungeonNode result = null;
+
+            if ( grid.IsOnGrid(coordinate.x, coordinate.y))
+            {
+                result = grid[coordinate.x, coordinate.y];
+
+                if (result != null )
+                {
+                    return result;
+                }
+
+                Debug.LogError(message + ", coordinate " + coordinate + " does not contain a dungeon node." );
+
+            }
+            else
+            {
+                Debug.LogError(message + ", coordinate " + coordinate + " is not with in grid bounds (" + grid.Width + ", " + grid.Height + ").");
+            }
+
+            return result;
         }
 
         public void OnDrawGizmos()

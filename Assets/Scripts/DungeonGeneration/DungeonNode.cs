@@ -9,8 +9,10 @@ namespace Tds.DungeonGeneration
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Tds.Util;
+
     using UnityEngine;
+
+    using Tds.Util;
 
     public class DungeonNode 
     {
@@ -188,11 +190,14 @@ namespace Tds.DungeonGeneration
             return null;
         }
 
-        public static void Connect(DungeonNode nodeA, DungeonNode nodeB)
+        public static DungeonEdge Connect(DungeonNode nodeA, DungeonNode nodeB)
         {
             var edge = new DungeonEdge(nodeA, nodeB, EdgeDirection.BiDirectional);
+
             nodeA.AddEdge(edge);
             nodeB.AddEdge(edge);
+
+            return edge;
         }
     }
 }

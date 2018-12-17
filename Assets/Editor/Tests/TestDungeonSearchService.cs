@@ -6,6 +6,9 @@ using Tds.Util;
 
 public class TestDungeonSearchService
 {
+    /// <summary>
+    /// Test initialization, expect all datastructures to be there and ready
+    /// </summary>
     [Test]
     public void TestInitialization_ExpectInitialValuesToBeCorrect()
     {
@@ -17,6 +20,9 @@ public class TestDungeonSearchService
         Assert.IsTrue(service.CompletedSearches.Count() == 0);
     }
 
+    /// <summary>
+    /// Test with a single agent, trying to find a specific path . 
+    /// </summary>
     [Test]
     public void TestSingleSearch_ExpectPathFound()
     {
@@ -63,6 +69,10 @@ public class TestDungeonSearchService
         Assert.IsTrue(store[3] == null);
     }
 
+    /// <summary>
+    /// Test with two agents, trying to find a comparable path (similar start and end nodes) at the same time.
+    /// One search should be started only because the search requests are similar 
+    /// </summary>
     [Test]
     public void TestDoubleSearch_ExpectOnlyOneSearchStarted()
     {
@@ -89,9 +99,8 @@ public class TestDungeonSearchService
         Assert.IsTrue(service.RetrieveResult(id1, nodeA, nodeD, store1) == null);
 
         service.Update(-1);
-        service.Update(-1);
 
-        Assert.IsTrue(service.TimeStamp == 2);
+        Assert.IsTrue(service.TimeStamp == 1);
         Assert.IsTrue(service.ScheduledSearches.Count() == 0);
         Assert.IsTrue(service.CompletedSearches.Count() == 1);
         Assert.IsTrue(service.RetrieveResult(id1, nodeA, nodeD, store1) == store1);
@@ -106,6 +115,89 @@ public class TestDungeonSearchService
         Assert.IsTrue(store2[1] == nodeC);
         Assert.IsTrue(store2[2] == nodeA);
         Assert.IsTrue(store2[3] == null);
+    }
+
+    /// <summary>
+    /// When running similar searches in sequence the old result should be returned
+    /// </summary>
+    [Test]
+    public void TestSequentialSearch_ExpectOldResultFound()
+    {
+        string[] input =
+        {
+            " #",
+            "##",
+        };
+
+        var grid = DungeonGenerationUtil.CreateFrom(input);
+        var service = new PathfindingService<DungeonNode>().Initialize(1, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+
+        var id1 = service.BeginSearch(grid[0,0], grid[1, 1]);
+        Assert.IsTrue(service.ScheduledSearches.Count() == 1);
+
+        service.Update(-1);
+        var store1 = new DungeonNode[8];
+
+        Assert.IsTrue(service.CompletedSearches.Count() == 1);
+        Assert.IsTrue(service.RetrieveResult(id1, grid[0, 0], grid[1, 1], store1) == store1);
+        
+        var id2 = service.BeginSearch(grid[1, 1], grid[0, 0]);
+        Assert.IsTrue(id1 == id2);
+        Assert.IsTrue(service.ScheduledSearches.Count() == 0);
+    }
+
+    /// <summary>
+    /// When running similar searches and no search results are available, eventually they
+    /// results should time out and a new search should become available
+    /// </summary>
+    [Test]
+    public void TestSequentialSearchWithNoAvailableSearchResults_ExpectSearchResultToTimeout()
+    {
+        string[] input =
+        {
+            " #",
+            "##",
+        };
+
+        var grid = DungeonGenerationUtil.CreateFrom(input);
+        var service = new PathfindingService<DungeonNode>().Initialize(1, 1, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+
+        service.MaxAgeCompletedSearch = 2;
+
+        var id1 = service.BeginSearch(grid[0, 0], grid[1, 1]);
+        var id2 = service.BeginSearch(grid[1, 0], grid[0, 0]);
+
+        Assert.IsTrue(id1 == 0);
+        Assert.IsTrue(service.ScheduledSearches.Count() == 1);
+
+        // no search should be available
+        Assert.IsTrue(id2 == -1);
+
+        service.Update(-1);
+        var store1 = new DungeonNode[8];
+
+        Assert.IsTrue(service.CompletedSearches.Count() == 1);
+        Assert.IsTrue(service.RetrieveResult(id2, grid[1, 0], grid[0, 0], store1) == null);
+
+        // still no search should be available
+        id2 = service.BeginSearch(grid[1, 0], grid[0, 0]);
+        Assert.IsTrue(id2 == -1);
+
+        // age of search should be 1, max age is 2 ... 
+        service.Update(-1);
+        
+        // still no search should be available
+        id2 = service.BeginSearch(grid[1, 0], grid[0, 0]);
+        Assert.IsTrue(id2 == -1);
+
+        // age of search should be 2, max age is 2 ... so a search should become available now
+        service.Update(-1);
+
+        id2 = service.BeginSearch(grid[1, 0], grid[0, 0]);
+        Assert.IsTrue(id2 == 0);
+        Assert.IsTrue(service.ScheduledSearches.Count() == 1);
+        Assert.IsTrue(service.CompletedSearches.Count() == 0);
+
     }
 }
 

@@ -47,7 +47,7 @@ namespace Tds.PathFinder
         /// </summary>
         public float _endPointThreshold = 5.5f;
 
-        private PathfinderAlgorithm<DungeonNode> _pathfinder = new PathfinderAlgorithm<DungeonNode>(256);
+        private PathfinderAlgorithm<DungeonNode> _pathfinder = DungeonSearch.CreatePathfinder(256, 1, 1, 1);
         private DungeonPathTracer _tracer = new DungeonPathTracer();
 
         // current position of the tracer
@@ -170,7 +170,5 @@ namespace Tds.PathFinder
             _tracer.Initialize(() => _tracerPosition, _waypointDistance);
             _tracer.BeginTrace(endPoint, _path);
         }
-
-
     }
 }
