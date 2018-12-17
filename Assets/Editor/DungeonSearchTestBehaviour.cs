@@ -7,8 +7,12 @@
 namespace Tds.PathFinder
 {
     using Tds.DungeonGeneration;
+
     using UnityEngine;
 
+    /// <summary>
+    /// Test behaviour which can be used to visualize the pathfinder algorithm
+    /// </summary>
     public class DungeonSearchTestBehaviour : MonoBehaviour
     { 
         public PathfinderAlgorithm<DungeonNode> _pathfinder = DungeonSearch.CreatePathfinder(256, 1, 1, 1);

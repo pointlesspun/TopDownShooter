@@ -14,7 +14,6 @@ namespace Tds.PathFinder
     /// <summary>
     /// Class with a state which allows for tin-editor testing of pathfinding. 
     /// </summary>
-    [ExecuteInEditMode]
     public class AgentPathfindingTestBehaviour : MonoBehaviour
     {
         /// <summary>
@@ -121,11 +120,6 @@ namespace Tds.PathFinder
                     }
                 }
 
-                EditorApplication.update += OnUpdate;
-            }
-            else
-            {
-                EditorApplication.update -= OnUpdate;
             }
         }
 

@@ -15,27 +15,37 @@ namespace Tds.PathFinder
     [CustomEditor(typeof(AgentPathfindingTestBehaviour))]
     public class AgentPathfindingInspector : Editor
     {
+        private AgentPathfindingTestBehaviour _testBehaviour;
+
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
 
-            AgentPathfindingTestBehaviour testBehaviour = (AgentPathfindingTestBehaviour)target;
+            _testBehaviour = (AgentPathfindingTestBehaviour)target;
 
-            if (testBehaviour.IsFollowingTarget)
+            if (_testBehaviour.IsFollowingTarget)
             {
                 if (GUILayout.Button("Stop following target"))
                 {
-                    testBehaviour.ToggleFollowTarget();
+                    _testBehaviour.ToggleFollowTarget();
+                    EditorApplication.update -= OnUpdate;
+
                 }
             }
             else
             {
                 if (GUILayout.Button("Start following target"))
                 {
-                    testBehaviour.ToggleFollowTarget();
+                    _testBehaviour.ToggleFollowTarget();
+                    EditorApplication.update += OnUpdate;
+
                 }
             }
+        }
 
+        public void OnUpdate()
+        {
+            _testBehaviour.OnUpdate();
         }
     }
 }
