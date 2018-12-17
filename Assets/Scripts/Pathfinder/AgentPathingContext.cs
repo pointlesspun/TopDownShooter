@@ -18,6 +18,9 @@ namespace Tds.PathFinder
         FollowingPath,
     }
 
+    /// <summary>
+    /// Class containing the information for an agent to perform pathfinding.
+    /// </summary>
     [Serializable]
     public class AgentPathingContext
     {
@@ -65,6 +68,12 @@ namespace Tds.PathFinder
         /// Ticket id in pathfinding service
         /// </summary>
         public int pathfindingTicket;
+
+        /// <summary>
+        /// Last time this agent requested a pathfinding. Used to prevent spamming
+        /// the pathfinding service.
+        /// </summary>
+        public float lastTicketRequest;
        
         /// <summary>
         /// List of nodes to go through
@@ -85,8 +94,14 @@ namespace Tds.PathFinder
         {
             state = PathingState.Idle;
             pathfindingTicket = -1;
+            lastTicketRequest = 0;
         }
 
+        /// <summary>
+        /// Creates a context with a given set of nodes. This nodes represents the maximum
+        /// length of the path an agent can follow. 
+        /// </summary>
+        /// <param name="pathNodeCount"></param>
         public AgentPathingContext(int pathNodeCount) : this()
         {
             pathNodes = new DungeonNode[pathNodeCount];

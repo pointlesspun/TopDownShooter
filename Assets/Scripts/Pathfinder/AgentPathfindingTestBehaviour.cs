@@ -12,21 +12,24 @@ namespace Tds.PathFinder
     using Tds.Util;
 
     /// <summary>
-    /// Class with a state which allows for following a path consisting of dungeonnodes. 
+    /// Class with a state which allows for tin-editor testing of pathfinding. 
     /// </summary>
     [ExecuteInEditMode]
     public class AgentPathfindingTestBehaviour : MonoBehaviour
     {
-        private PathfindingService<DungeonNode> _service;
-        private DungeonLayout _layout;
-        private AgentPathfindingSettings _settings;
+        /// <summary>
+        /// Number of times a service is allowed to search
+        /// </summary>
+        public int _serviceIterations = 16;
 
-        private AgentPathingContext _context = new AgentPathingContext(48);
+        /// <summary>
+        /// Number of agents created
+        /// </summary>
+        public int _agentCount = 4;
 
         /// <summary>
         /// Target object to follow
         /// </summary>
-
         public GameObject _target;
 
         /// <summary>
@@ -49,9 +52,39 @@ namespace Tds.PathFinder
         }
 
         /// <summary>
-        /// Cached position of the agent using this tracer
+        /// Length of the buffer the agent has to store path nodes in
         /// </summary>
-        private Vector2 _currentPosition;
+        public int _agentSearchBuffer = 128;
+
+        /// <summary>
+        /// Agents containing the pathing information
+        /// </summary>
+        private AgentPathingContext[] _agents;
+
+        /// <summary>
+        /// Reference to the service capable of pathfinding
+        /// </summary>
+        private PathfindingService<DungeonNode> _service;
+
+        /// <summary>
+        /// Current dungeon layout
+        /// </summary>
+        private DungeonLayout _layout;
+
+        /// <summary>
+        /// Reference to the pathfinding settings
+        /// </summary>
+        private AgentPathfindingSettings _settings;
+
+        /// <summary>
+        /// Cached position of the agents
+        /// </summary>
+        private Vector2[] _currentPosition;
+
+        /// <summary>
+        /// Randomized speed of the agents
+        /// </summary>
+        private float[] _agentSpeeds;
 
         /// <summary>
         /// Toggle following the target
@@ -62,14 +95,30 @@ namespace Tds.PathFinder
 
             if (IsFollowingTarget)
             {
+                // recreate the agents and settings from scratch every time the button is
+                // clicked as re-using them turns out to be tricky
+                _agents = new AgentPathingContext[_agentCount];
+                _currentPosition = new Vector2[_agentCount];
+                _agentSpeeds = new float[_agentCount];
+
+                for ( int i = 0; i < _agentCount; ++i )
+                {
+                    _agents[i] = new AgentPathingContext(_agentSearchBuffer);
+                    _currentPosition[i] = Vector2.zero;
+                    _agentSpeeds[i] = Random.Range(_tracerUpdateSpeed - _tracerUpdateSpeed * 0.5f, _tracerUpdateSpeed +_tracerUpdateSpeed * 0.5f);
+                }
+
                 _layout = GetComponent<DungeonLayoutDebugBehaviour>().Layout;
                 _service = GetComponent<PathfindingServiceBehaviour>().PathfindingService;
                 _settings = GetComponent<PathfindingServiceBehaviour>()._pathfindingSettings;
 
                 if (_layout != null && _service != null && _settings != null )
                 {
-                    AgentPathing.InitializeIdleState(_context, Time.realtimeSinceStartup);
-                    _currentPosition = _layout.Start.Rect.center;
+                    for (int i = 0; i < _agentCount; ++i)
+                    {
+                        AgentPathingService.InitializeIdleState(_agents[i], Time.realtimeSinceStartup);
+                        _currentPosition[i] = _layout.GetRandomNode().Rect.center;
+                    }
                 }
 
                 EditorApplication.update += OnUpdate;
@@ -84,36 +133,47 @@ namespace Tds.PathFinder
         {
             if (_target == null )
             {
-                if (_context.state != PathingState.Idle)
+                // target is gone, cancel all searches (and put the agents into idle mode)
+                for (int i = 0; i < _agentCount; ++i)
                 {
-                    AgentPathing.CancelPathfinding(_context, _service, Time.realtimeSinceStartup);
+                    if (_agents[i].state != PathingState.Idle)
+                    {
+                        AgentPathingService.CancelPathfinding(_agents[i], _service, Time.realtimeSinceStartup);
+                    }
                 }
             }
             else if (_layout != null && _settings != null && _service != null && _target != null)
             {
-                _context.agentLocation = _currentPosition;
-                _context.targetLocation = _target.transform.position;
-
-                AgentPathing.UpdateState(_context, _settings, _service, _layout, Time.realtimeSinceStartup);
-
-                if (_context.state == PathingState.FollowingPath)
+                for (int i = 0; i < _agentCount; ++i)
                 {
-                    var distanceToWaypoint = (_currentPosition - _context.waypoint).magnitude;
-                    _currentPosition += (_context.waypoint - _currentPosition).normalized 
-                                                    * Mathf.Min(distanceToWaypoint, _tracerUpdateSpeed);
+                    // update the current agent location and target location
+                    _agents[i].agentLocation = _currentPosition[i];
+                    _agents[i].targetLocation = _target.transform.position;
 
-                    if ((_context.waypoint - _context.targetStartLocation).sqrMagnitude < 0.1f)
+                    AgentPathingService.UpdateState(_agents[i], _settings, _service, _layout, Time.realtimeSinceStartup);
+
+                    if (_agents[i].state == PathingState.FollowingPath)
                     {
-                        var lastNode = _context.pathNodes[_context.waypointIndex];
+                        // move the agent
+                        var distanceToWaypoint = (_currentPosition[i] - _agents[i].waypoint).magnitude;
+                        _currentPosition[i] += (_agents[i].waypoint - _currentPosition[i]).normalized
+                                                        * Mathf.Min(distanceToWaypoint, _agentSpeeds[i]);
 
-                        if (lastNode != null)
+                        // if the current waypoint is the end point, clamp the position of the agent to the 
+                        // last dungeon node to prevent it from clipping throuhg the wall
+                        if ((_agents[i].waypoint - _agents[i].targetStartLocation).sqrMagnitude < 0.1f)
                         {
-                            _currentPosition = RectUtil.Clamp(lastNode.Rect, _currentPosition, 0.1f, 0.1f);
+                            var lastNode = _agents[i].pathNodes[_agents[i].waypointIndex];
+
+                            if (lastNode != null)
+                            {
+                                _currentPosition[i] = RectUtil.Clamp(lastNode.Rect, _currentPosition[i], 0.1f, 0.1f);
+                            }
                         }
                     }
                 }
 
-                _service.Update(5);
+                _service.Update(_serviceIterations);
             }
         }
 
@@ -123,14 +183,15 @@ namespace Tds.PathFinder
 
             if (_target != null)
             {
-                if (_context.state == PathingState.FollowingPath)
-                {
-                    Gizmos.DrawIcon(_context.targetLocation, "flag.png", true);
-                }
+                Gizmos.DrawIcon(_target.transform.position, "flag.png", true);
             }
 
             Gizmos.color = Color.black;
-            Gizmos.DrawSphere(_currentPosition, _gizmoSize);
+
+            for (int i = 0; _currentPosition != null && i < _currentPosition.Length; ++i)
+            {
+                Gizmos.DrawSphere(_currentPosition[i], _gizmoSize);
+            }
         }
     }
 }

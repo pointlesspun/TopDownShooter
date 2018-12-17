@@ -82,5 +82,16 @@ namespace Tds.DungeonGeneration
                 return NodeIntersection[0] + direction;
             }
         }
+
+        public Vector2 RandomIntersectionPoint
+        {
+            get
+            {
+                Vector2 direction = NodeIntersection[1] - NodeIntersection[0];
+                direction *= UnityEngine.Random.value;
+                return NodeIntersection[0] + direction;
+
+            }
+        }
     }
 }

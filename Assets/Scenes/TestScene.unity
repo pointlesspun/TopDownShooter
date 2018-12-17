@@ -194,149 +194,6 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &726870809
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 726870810}
-  m_Layer: 0
-  m_Name: Target
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &726870810
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 726870809}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 142.9, y: 19.4, z: -0.90235376}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &757225867
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 757225869}
-  - component: {fileID: 757225868}
-  - component: {fileID: 757225870}
-  - component: {fileID: 757225871}
-  m_Layer: 0
-  m_Name: DungeonGenerator
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 0
---- !u!114 &757225868
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 757225867}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b13ad1838e3f91c4aba4e0fa16e7447c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _width: 500
-  _height: 500
-  _textInput: '######
-
-    #    #
-
-    #### #
-
-    #### #
-
-    #### #
-
-    ######'
-  _useTextInput: 1
-  _textInputRectWidth: 40
-  _textInputRectHeight: 40
-  _startCoordinate: {x: 0, y: 0}
-  _endCoordinate: {x: 5, y: 5}
-  _subdivisionAlgorithm:
-    _minRectWidth: 20
-    _minRectHeight: 20
-    _minDepth: 3
-    _maxDepth: -1
-    _seed: -1
-    _stopChanceBase: 0.01
-    _stopChanceDepthFactor: 0
-  _useTraversal: 0
-  _traversalAlgorithm:
-    _maxDepth: -1
-    _maxLength: 8000
-    _seed: 44
-    _requiredIntersectionLength: 3
-  _gizmoColors:
-  - {r: 1, g: 1, b: 1, a: 1}
-  - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
-  - {r: 0, g: 1, b: 1, a: 1}
-  - {r: 0.43147027, g: 0.43147027, b: 0.9056604, a: 1}
-  - {r: 0, g: 1, b: 0, a: 1}
-  - {r: 1, g: 0, b: 0, a: 1}
---- !u!4 &757225869
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 757225867}
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 1
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &757225870
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 757225867}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b57e3cee2226ad47b31e6e13a29d7e9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &757225871
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 757225867}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 9b9a20207b828644c933473bec661a3b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _waypointDistance: 0.25
-  _tracerUpdateSpeed: 1
-  _gizmoSize: 5
-  _targetObject: {fileID: 0}
-  _endPointThreshold: 5.5
 --- !u!1 &1481756741
 GameObject:
   m_ObjectHideFlags: 0
@@ -368,9 +225,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1081060895e5a844bcc8da82fa1a1e4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _target: {fileID: 726870809}
+  _serviceIterations: 64
+  _agentCount: 1024
+  _target: {fileID: 1481756741}
   _tracerUpdateSpeed: 2
   _gizmoSize: 2
+  _agentSearchBuffer: 8
 --- !u!114 &1481756743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -384,12 +244,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _pathfindingSettings:
-    targetDistanceThreshold: 20
-    pathValidatyCheckTimeout: 2
+    targetDistanceThreshold: 5
+    pathValidatyCheckTimeout: 0.2
     waypointDistance: 0.25
   _algorithmCount: 4
-  _searchResultCount: 32
-  _searchDepth: 48
+  _searchResultCount: 64
+  _searchDepth: 256
   _algorithmPoolCount: 256
 --- !u!114 &1481756744
 MonoBehaviour:
@@ -403,8 +263,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b13ad1838e3f91c4aba4e0fa16e7447c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _width: 200
-  _height: 200
+  _width: 500
+  _height: 500
   _textInput: 
   _useTextInput: 0
   _textInputRectWidth: 10
@@ -417,13 +277,13 @@ MonoBehaviour:
     _minDepth: 3
     _maxDepth: -1
     _seed: 42
-    _stopChanceBase: 0
-    _stopChanceDepthFactor: 0
+    _stopChanceBase: 0.01
+    _stopChanceDepthFactor: 0.05
   _useTraversal: 1
   _traversalAlgorithm:
     _maxDepth: -1
-    _maxLength: 500
-    _seed: 42
+    _maxLength: 4000
+    _seed: -1
     _requiredIntersectionLength: 3
   _gizmoColors:
   - {r: 1, g: 1, b: 1, a: 1}
@@ -440,9 +300,9 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1481756741}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 35.7, y: 4.2, z: 0}
+  m_LocalPosition: {x: 449, y: 302, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 2
+  m_RootOrder: 1
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}

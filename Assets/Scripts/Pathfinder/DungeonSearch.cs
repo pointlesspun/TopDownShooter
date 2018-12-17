@@ -12,6 +12,10 @@ namespace Tds.PathFinder
 
     using Tds.DungeonGeneration;
 
+    /// <summary>
+    /// Factory-ish class to instantiate a pahtfinder through dungeon nodes
+    /// xxx refactor at some point
+    /// </summary>
     [Serializable]
     public class DungeonSearch 
     {

@@ -15,9 +15,24 @@ namespace Tds.PathFinder
     {
         private PathfinderAlgorithm<T>[] _pathfinders;
 
+        /// <summary>
+        /// Buffered searchparameters. 
+        /// </summary>
         private LinkedList<SearchParameters<T>> _availableSearches;
+
+        /// <summary>
+        /// Searches which are currently waiting to be started
+        /// </summary>
         private LinkedList<SearchParameters<T>> _scheduledSearches;
+
+        /// <summary>
+        /// Searches currently in progress
+        /// </summary>
         private LinkedList<SearchParameters<T>> _searchesInProgress;
+
+        /// <summary>
+        /// Searches completed
+        /// </summary>
         private LinkedList<SearchParameters<T>> _completedSearches;
 
         /// <summary>
@@ -54,6 +69,10 @@ namespace Tds.PathFinder
             }
         }
 
+        /// <summary>
+        /// Current timestamp (number of time update has been called on the service)
+        /// used to determine which completed searches can be re-used by new queries
+        /// </summary>
         public int TimeStamp
         {
             get;
@@ -62,9 +81,17 @@ namespace Tds.PathFinder
 
         public PathfindingService()
         {
-            MaxAgeCompletedSearch = 10;
+            MaxAgeCompletedSearch = 30;
         }
 
+        /// <summary>
+        /// Initializes the service
+        /// </summary>
+        /// <param name="searchAlgorithmCount">Number of pathfinders </param>
+        /// <param name="searchResultCount">Number of cached search results</param>
+        /// <param name="estimatedSearchDepth">Number of nodes in the cached search results</param>
+        /// <param name="factoryMethod">Method used to create new pathfinders</param>
+        /// <returns></returns>
         public PathfindingService<T> Initialize( int searchAlgorithmCount, int searchResultCount, 
                                                     int estimatedSearchDepth, Func<PathfinderAlgorithm<T>> factoryMethod )
         {
@@ -127,6 +154,14 @@ namespace Tds.PathFinder
             } 
         }
 
+        /// <summary>
+        /// Retrieves a patch research
+        /// </summary>
+        /// <param name="id">id of the search ticket</param>
+        /// <param name="from">from node </param>
+        /// <param name="to">to node</param>
+        /// <param name="store">the store to put the result in</param>
+        /// <returns>Store if a result is found, null otherwise</returns>
         public T[] RetrieveResult(int id, T from, T to, T[] store)
         {
             var completedSearch = _completedSearches.FirstOrDefault(x => x.Id == id);
@@ -156,6 +191,10 @@ namespace Tds.PathFinder
             return null;
         }
 
+        /// <summary>
+        /// Updates the searches
+        /// </summary>
+        /// <param name="maxIterations">Number of expansions a pathfinder is allowed to do</param>
         public void Update(int maxIterations)
         {
             TryStartNewSearches(_pathfinders, _scheduledSearches, _searchesInProgress);
