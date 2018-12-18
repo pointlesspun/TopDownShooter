@@ -6,10 +6,12 @@
 namespace Tds.GameScripts
 {
     using System.Collections.Generic;
-    using Tds.Util;
+
     using UnityEngine;
     using UnityEngine.SceneManagement;
 
+    using Tds.Util;
+    
     /// <summary>
     /// Behaviour handling the player's input
     /// </summary>
@@ -88,7 +90,6 @@ namespace Tds.GameScripts
             _weapons = new List<WeaponBase>(GetComponentsInChildren<WeaponBase>());
 
             _currentWeaponIndex = SelectWeapon();
-
 
             Contract.Requires(_camera != null, "The player object is required to be able to access the camera.");
         }
@@ -255,16 +256,6 @@ namespace Tds.GameScripts
 
             return _body.velocity;
         }
-
-        /*private Vector3 GetCursorPosition()
-        {
-            var mouseScreenPosition = Input.mousePosition;
-            var result = _camera.ScreenToWorldPoint(new Vector3(mouseScreenPosition.x, mouseScreenPosition.y, _camera.nearClipPlane));
-
-            result.z = 0;
-
-            return result;
-        }*/
 
         private void UpdateAttack(Vector3 cursorPosition, WeaponBase weapon)
         {

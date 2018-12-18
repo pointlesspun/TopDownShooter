@@ -6,10 +6,9 @@
 
 namespace Tds.DungeonGeneration
 {
-    using System;
-    using System.Collections.Generic;
-    using Tds.Util;
     using UnityEngine;
+
+    using Tds.Util;
 
     public enum EdgeDirection
     {
@@ -57,11 +56,19 @@ namespace Tds.DungeonGeneration
             NodeIntersection = RectUtil.GetIntersection(from.Rect, to.Rect);
         }
 
+        /// <summary>
+        /// Returns the from node when the given node is to and to when the node is from
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
         public DungeonNode GetOther(DungeonNode node)
         {
             return node == From ? To : From;
         }
 
+        /// <summary>
+        /// Length of the intersection etween the from and to nodes   
+        /// </summary>
         public float IntersectionLength
         {
             get
@@ -70,6 +77,9 @@ namespace Tds.DungeonGeneration
             }
         }
 
+        /// <summary>
+        /// Returns the center point on  the intersection between the from and to nodes   
+        /// </summary>
         public Vector2 IntersectionCenter
         {
             get
@@ -83,6 +93,9 @@ namespace Tds.DungeonGeneration
             }
         }
 
+        /// <summary>
+        /// Returns a random point on the intersection between the from and to nodes   
+        /// </summary>
         public Vector2 RandomIntersectionPoint
         {
             get

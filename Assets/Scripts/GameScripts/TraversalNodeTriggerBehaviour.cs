@@ -17,7 +17,6 @@ namespace Tds.GameScripts
     public class TraversalNodeTriggerBehaviour : MonoBehaviour
     {
         public Director _director;
-        //public TraversalNode _node;
         public DungeonNode _node;
 
         public void OnTriggerEnter2D(Collider2D collider)

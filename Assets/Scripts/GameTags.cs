@@ -26,10 +26,18 @@ namespace Tds
         public static string GameState = "GameState";
 
         /// <summary>
-        /// Object regulating item spawning.
+        /// Object regulating item (drops) spawning.
         /// </summary>
         public static string ItemSpawner = "ItemSpawner";
 
-        public static string Director = "Director"; 
+        /// <summary>
+        /// Game object responsible for guiding the AI
+        /// </summary>
+        public static string Director = "Director";
+
+        /// <summary>
+        /// Game object containing the level grid & level layout (dungeon nodes)
+        /// </summary>
+        public static string LevelLayout = "LevelLayout";
     }
 }

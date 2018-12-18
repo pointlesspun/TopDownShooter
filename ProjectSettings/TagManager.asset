@@ -10,6 +10,7 @@ TagManager:
   - ItemSpawner
   - GameState
   - Director
+  - LevelLayout
   layers:
   - Default
   - TransparentFX

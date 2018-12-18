@@ -3,10 +3,12 @@
  * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
  * You should have received a copy of the license along with this work.If not, see<http://creativecommons.org/licenses/by-sa/4.0/>.
  */
-using System;
 
 namespace Tds.PathFinder
 {
+    using System;
+    using UnityEngine;
+
     [Serializable]
     public class AgentPathfindingSettings
     {
@@ -25,5 +27,10 @@ namespace Tds.PathFinder
         /// Distance to waypoint where it is considered 'reached'
         /// </summary>
         public float waypointDistance;
+
+        /// <summary>
+        /// Offset of the world 
+        /// </summary>
+        public Vector2 worldOffset = Vector3.zero;
     }
 }

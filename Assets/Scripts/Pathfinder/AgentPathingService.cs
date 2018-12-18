@@ -3,11 +3,13 @@
  * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
  * You should have received a copy of the license along with this work.If not, see<http://creativecommons.org/licenses/by-sa/4.0/>.
  */
-using Tds.DungeonGeneration;
-using UnityEngine;
 
 namespace Tds.PathFinder
 {
+    using UnityEngine;
+
+    using Tds.DungeonGeneration;
+
     /// <summary>
     /// Service guiding the agent's pathing across a dungeon
     /// </summary>
@@ -129,8 +131,8 @@ namespace Tds.PathFinder
                     // has a path been defined ?
                     if (context.agentNode == null)
                     {
-                        context.agentNode = layout.FindClosestNode(context.agentLocation);
-                        context.targetNode = layout.FindClosestNode(context.targetLocation);
+                        context.agentNode = layout.FindClosestNode(context.agentLocation - settings.worldOffset);
+                        context.targetNode = layout.FindClosestNode(context.targetLocation - settings.worldOffset);
                         context.targetStartLocation = context.targetLocation;
                     }
 
@@ -145,7 +147,7 @@ namespace Tds.PathFinder
                 // check if a result is available
                 if (service.RetrieveResult(context.pathfindingTicket, context.agentNode, context.targetNode, context.pathNodes) != null)
                 {
-                    InitializePathFollowingState(context, time);
+                    InitializePathFollowingState(context, settings, time);
                     context.lastTicketRequest = time;
                 }
             }
@@ -156,12 +158,12 @@ namespace Tds.PathFinder
         /// </summary>
         /// <param name="context"></param>
         /// <param name="time"></param>
-        public static void InitializePathFollowingState(AgentPathingContext context, float time)
+        public static void InitializePathFollowingState(AgentPathingContext context, AgentPathfindingSettings settings, float time)
         {
             context.stateStartTime = time;
             context.waypointIndex = 0;
             context.pathfindingTicket = -1;
-            context.waypoint = GetNextWaypointPosition(0, context.pathNodes, context.targetStartLocation);
+            context.waypoint = GetNextWaypointPosition(0, context.pathNodes, context.targetStartLocation - settings.worldOffset);
             context.state = PathingState.FollowingPath;
         }
 
@@ -185,7 +187,7 @@ namespace Tds.PathFinder
                 else
                 { 
                     // is the agent within range of the current waypoint
-                    if (IsDistanceInRange(context.waypoint, context.agentLocation, settings.waypointDistance))
+                    if (IsDistanceInRange(context.waypoint + settings.worldOffset, context.agentLocation, settings.waypointDistance))
                     {
                         DungeonNode lastNode = context.pathNodes[context.pathNodes.Length - 1];
                         // go to the next waypoint
@@ -201,9 +203,11 @@ namespace Tds.PathFinder
                         else
                         {
                             context.waypoint = GetNextWaypointPosition(context.waypointIndex, context.pathNodes,
-                                                                            context.targetStartLocation, true);
+                                                                            context.targetStartLocation - settings.worldOffset, true);
                         }
                     }
+
+                    context.movementDirection = (context.waypoint + settings.worldOffset) - context.agentLocation;
                 }
             }
         }

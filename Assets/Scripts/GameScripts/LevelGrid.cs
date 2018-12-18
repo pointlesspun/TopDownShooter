@@ -73,14 +73,27 @@ namespace Tds.GameScripts
         public float _maxDungeonLength = 500;
 
         /// <summary>
+        /// Dungeon nodes making up this level
+        /// </summary>
+        public DungeonLayout _layout;
+
+        /// <summary>
         /// Location where the player will start
         /// </summary>
-        private Vector3 _playerStartPosition;
+        public Vector3 _playerStartPosition;
 
         /// <summary>
         /// Cached offset of the grid
         /// </summary>
-        private Vector3 _levelOffset;
+        public Vector3 _levelOffset;
+
+        public bool _drawGizmoLayout = false;
+        public Color[] _layoutGizmoColors = {
+                new Color(0.1f, 0.1f, 0.1f),
+                new Color(0.3f, 0.45f, 0.45f),
+                new Color(0.5f, 0.8f, 0.8f),
+                new Color(0.7f, 1.0f, 1.0f),
+        };
 
         /// <summary>
         /// Objects managing the sprite pools and the variations
@@ -98,59 +111,41 @@ namespace Tds.GameScripts
         private List<LevelElement> _elementCache = new List<LevelElement>();
 
         /// <summary>
-        /// Cached reference to the player
-        /// </summary>
-        private GameObject _player;
-
-        /// <summary>
         /// Last position of the player
         /// </summary>
-        private Vector3 _previousPlayerPosition;
+        private Vector3 _previousFocusPosition;
 
-        /// <summary>
-        /// Game object responsible for directing the "ai"
-        /// </summary>
-        private Director _director;
+        public Vector3 StartPosition
+        {
+            get
+            {
+                return _layout != null 
+                    ? new Vector3(_layout.Start.Rect.center.x, _layout.Start.Rect.center.y, 0) + _levelOffset 
+                    : Vector3.zero;
+            }
+        }
 
-        public void Start()
+        public void Awake()
         {
             _spriteProviders = SetupSpritePools(_levelDefinitions);
 
             _levelOffset = new Vector3((_width * _tileWidth) * -0.5f, (_height * _tileHeight) * -0.5f, transform.position.z);
 
-            var layout = BuildLevel();
-
-            InitializePlayerPosition(layout.Start.Rect.center);
-
-            var directorObject = GameObject.FindGameObjectWithTag(GameTags.Director);
-
-            if (directorObject != null)
-            {
-                directorObject.GetComponent<Director>().SetDungeonLayout(layout, _levelOffset);
-            }
-            else
-            {
-                Debug.LogWarning("No director object found");
-            }            
+            _layout = BuildLevel();
         }
 
         /// <summary>
         /// Behaviour's update call
         /// </summary>
-        public void Update()
+        public void UpdateFocus(Vector3 focusPosition)
         {
-            if (_player != null)
+            if (HasFocusMoved(focusPosition, _previousFocusPosition))
             {
-                var centerPosition = _player.transform.position;
+                ClearLevelElementCache();
 
-                if (hasPlayerMoved(centerPosition, _previousPlayerPosition))
-                {
-                    ClearLevelElementCache();
+                _previousFocusPosition = focusPosition;
 
-                    _previousPlayerPosition = centerPosition;
-
-                    UpdateVisableGrid(centerPosition);
-                }
+                UpdateVisableGrid(focusPosition);
             }
         }
 
@@ -164,18 +159,6 @@ namespace Tds.GameScripts
             }
 
             return providers;
-        }
-
-        private void InitializePlayerPosition(Vector3 startPosition)
-        {
-            _player = GameObject.FindGameObjectWithTag(GameTags.Player);
-
-            if (_player != null)
-            {
-                _playerStartPosition = startPosition;
-                _player.transform.position = _playerStartPosition + _levelOffset;
-                _previousPlayerPosition = new Vector3(float.MaxValue, float.MaxValue, 0);
-            }
         }
 
         private DungeonLayout BuildLevel()
@@ -217,7 +200,7 @@ namespace Tds.GameScripts
         /// <param name="newPosition"></param>
         /// <param name="oldPosition"></param>
         /// <returns></returns>
-        private bool hasPlayerMoved(Vector3 newPosition, Vector3 oldPosition)
+        private bool HasFocusMoved(Vector3 newPosition, Vector3 oldPosition)
         {
             return ((int)newPosition.x) != ((int)oldPosition.x)
                 || ((int)newPosition.y) != ((int)oldPosition.y);
@@ -285,7 +268,6 @@ namespace Tds.GameScripts
         /// <param name="height"></param>
         /// <param name="pathRoot"></param>
         /// <returns></returns>
-        //public Grid2D<LevelElement> BuildLevelGrid(int width, int height, TraversalNode pathRoot)
         public Grid2D<LevelElement> BuildLevelGrid(int width, int height, DungeonLayout layout)
         {
             // fill the grid with tiles
@@ -317,6 +299,11 @@ namespace Tds.GameScripts
         {
             // draw the outline of the level   
             Gizmos.DrawWireCube(transform.position + Vector3.forward * 10, new Vector3(_width, _height, 0));
+
+            if (_drawGizmoLayout && _layout != null)
+            {
+                _layout.DrawLayout(_layoutGizmoColors, true, _levelOffset);
+            }    
         }
 
         private void DrawDungeonNodes(DungeonLayout dungeon, Grid2D<LevelElement> grid)
@@ -348,6 +335,11 @@ namespace Tds.GameScripts
 
         }
 
+        /// <summary>
+        /// Draws all intersection doorways (and changes the intersection0
+        /// </summary>
+        /// <param name="dungeon"></param>
+        /// <param name="grid"></param>
         private void DrawDungeonDoorways(DungeonLayout dungeon, Grid2D<LevelElement> grid)
         {
             var edgesDrawn = new HashSet<DungeonEdge>();
@@ -369,6 +361,11 @@ namespace Tds.GameScripts
             }
         }
 
+        /// <summary>
+        /// Draws the doorway and modifies the intersection to fit the actual door drawn
+        /// </summary>
+        /// <param name="intersection"></param>
+        /// <param name="grid"></param>
         private void DrawDoorWay(Vector2Int[] intersection, Grid2D<LevelElement> grid)
         {
             var x1 = intersection[0].x;
@@ -383,6 +380,9 @@ namespace Tds.GameScripts
                 var doorLength = Mathf.Min(_maxDoorLength, Random.Range(1, wallLength - 2));
                 var doorStart = Random.Range(1, wallLength - (doorLength + 1));
 
+                intersection[0] = new Vector2Int(x1 + doorStart, y1);
+                intersection[1] = new Vector2Int(x1 + doorStart + doorLength, y2);
+
                 for (var i = 0; i < doorLength; ++i)
                 {
                     grid[x1 + doorStart + i, y1]._id = LevelElementDefinitions.FloorTileIndex;
@@ -393,6 +393,9 @@ namespace Tds.GameScripts
                 var wallLength = y2 - y1;
                 var doorLength = Mathf.Min(_maxDoorLength, Random.Range(1, wallLength - 2));
                 var doorStart = Random.Range(1, wallLength - (doorLength + 1));
+
+                intersection[0] = new Vector2Int(x1, y1 + doorStart);
+                intersection[1] = new Vector2Int(x2, y1 + doorStart + doorLength);
 
                 for (var i = 0; i < doorLength; ++i)
                 {

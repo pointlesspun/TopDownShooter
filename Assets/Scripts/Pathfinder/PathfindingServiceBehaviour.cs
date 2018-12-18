@@ -10,12 +10,26 @@ namespace Tds.PathFinder
 
     using Tds.DungeonGeneration;
 
+    /// <summary>
+    /// Behaviour wrapper around the PathfindingService
+    /// </summary>
     public class PathfindingServiceBehaviour : MonoBehaviour
     {
         private PathfindingService<DungeonNode> _service;
 
+        /// <summary>
+        /// Settings used 
+        /// </summary>
         public AgentPathfindingSettings _pathfindingSettings = new AgentPathfindingSettings();
-        
+
+        /// <summary>
+        /// Number iterations the service is run on each update
+        /// </summary>
+        public int _iterationCount = 16;
+
+        /// <summary>
+        /// Number of pathfinding algorithms in the service
+        /// </summary>
         public int _algorithmCount = 4;
         public int _searchResultCount = 32;
         public int _searchDepth = 48;
@@ -37,6 +51,16 @@ namespace Tds.PathFinder
         public void Awake()
         {
             _service = CreatePathfindingService();
+        }
+
+        public void Update()
+        {
+            _service.Update(_iterationCount);
+        }
+
+        public void UpdateAgentPathing(AgentPathingContext context, DungeonLayout layout)
+        {
+            AgentPathingService.UpdateState(context, _pathfindingSettings, PathfindingService, layout, Time.time);
         }
 
         private PathfindingService<DungeonNode> CreatePathfindingService()

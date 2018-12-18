@@ -5,6 +5,9 @@
  */
 namespace Tds.GameScripts
 {
+    using System;
+    using Tds.DungeonGeneration;
+    using Tds.PathFinder;
     using UnityEngine;
 
     /// <summary>
@@ -42,6 +45,14 @@ namespace Tds.GameScripts
         /// Cached animator
         /// </summary>
         private Animator _animator;
+
+        private AgentPathingContext _pathingContext = new AgentPathingContext(8);
+
+        public Action<AgentPathingContext> UpdatePathingContext
+        {
+            get;
+            set;
+        }
 
         public void Start()
         {
@@ -90,11 +101,7 @@ namespace Tds.GameScripts
                     }
                     else
                     {
-                        // if not move towards the player
-                        var movementDirection = (_player.transform.position - transform.position);
-                        movementDirection.z = 0;
-                        movementDirection.Normalize();
-                        _body.velocity = movementDirection * _maxSpeed;
+                        UpdateMovement(_player.transform.position);
                     }
                 }
 
@@ -147,6 +154,20 @@ namespace Tds.GameScripts
             direction.Normalize();
 
             weapon.gameObject.transform.position = transform.position + direction * weapon._offsetFromOwner;
+        }
+
+        /// <summary>
+        /// Moves the agent towards the destination
+        /// </summary>
+        /// <param name="destination"></param>
+        private void UpdateMovement(Vector3 destination)
+        {
+            _pathingContext.agentLocation = transform.position;
+            _pathingContext.targetLocation = destination;
+
+            UpdatePathingContext(_pathingContext);
+            
+            _body.velocity = _pathingContext.movementDirection.normalized * _maxSpeed;
         }
     }
 }

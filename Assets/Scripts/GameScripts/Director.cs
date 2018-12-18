@@ -5,11 +5,13 @@
  */
 namespace Tds.GameScripts
 {
+    using System.Collections.Generic;
+
     using UnityEngine;
 
     using Tds.DungeonGeneration;
-    using System.Collections.Generic;
     using Tds.PathFinder;
+    using Tds.Util;
 
     /// <summary>
     /// Class which controls and directs the level's monster behaviour
@@ -30,6 +32,11 @@ namespace Tds.GameScripts
         /// Number of monsters spawned per trigger
         /// </summary>
         public int _spawnCountPerTrigger = 3;
+        
+        /// <summary>
+        /// DungeonNode the player currently is in
+        /// </summary>
+        public DungeonNode _currentPlayerNode;
 
         /// <summary>
         /// List of nodes which already have spawned monsters, in the current implementation the director
@@ -37,8 +44,15 @@ namespace Tds.GameScripts
         /// </summary>
         private HashSet<DungeonNode> _closedSet = new HashSet<DungeonNode>();
 
+        /// <summary>
+        /// Current level layout
+        /// </summary>
         private DungeonLayout _layout;
-        public DungeonNode _currentPlayerNode;
+
+        /// <summary>
+        /// Mandatory behaviour containing the pathfinding settings
+        /// </summary>
+        private PathfindingServiceBehaviour  _pathfindingBehaviour;
 
         /// <summary>
         /// Set of default offsets from which the monsters are spawned
@@ -49,6 +63,18 @@ namespace Tds.GameScripts
             Vector3.right + Vector3.down, Vector3.down, Vector3.left + Vector3.down, Vector3.zero
         };
 
+        public void Awake()
+        {
+            Contract.RequiresComponent<PathfindingServiceBehaviour>(gameObject, "director needs a pathfinding behaviour");
+
+            _pathfindingBehaviour = GetComponent<PathfindingServiceBehaviour>();
+        }
+
+        /// <summary>
+        /// Sets the layout and the level offset, updating the settings
+        /// </summary>
+        /// <param name="layout"></param>
+        /// <param name="offset"></param>
         public void SetDungeonLayout(DungeonLayout layout, Vector3 offset)
         {
             _offset = offset;
@@ -58,6 +84,8 @@ namespace Tds.GameScripts
             {
                 AddTriggerFor(node);
             }
+
+            _pathfindingBehaviour._pathfindingSettings.worldOffset = _offset;
         }
 
         // xxx note this is not efficient but good enough for the scope of build007
@@ -97,7 +125,6 @@ namespace Tds.GameScripts
         /// </summary>
         /// <param name="node"></param>
         /// <param name="offset"></param>
-        //public void AddTrigger(TraversalNode node, Vector3 offset)
         public void AddTriggerFor(DungeonNode node)
         {
             RectInt rect = node.Rect;
@@ -124,30 +151,40 @@ namespace Tds.GameScripts
         /// <param name="node"></param>
         public void OnTrigger(Collider2D collider, DungeonNode node)
         {
-            _currentPlayerNode = node;
-
-            var nodeNeighbours = node.Neighbours;
-
-            if (nodeNeighbours != null)
+            if (collider.gameObject.tag == GameTags.Player)
             {
-                foreach (var n in nodeNeighbours)
+                _currentPlayerNode = node;
+
+                var nodeNeighbours = node.Neighbours;
+
+                if (nodeNeighbours != null)
                 {
-                    if (!_closedSet.Contains(n))
+                    foreach (var n in nodeNeighbours)
                     {
-                        for (int i = 0; i < _spawnCountPerTrigger; ++i)
+                        // only spawn once for every room
+                        if (!_closedSet.Contains(n))
                         {
-                            var obj = Instantiate(_monsterPrefab);
-                            _monsterPrefab.transform.position = n.Rect.center;
-                            _monsterPrefab.transform.position += _offset + _spawnOffsets[Random.Range(0, _spawnOffsets.Length)]
-                                                                 * Random.Range(1, 3);
+                            for (int i = 0; i < _spawnCountPerTrigger; ++i)
+                            {
+                                var monster = Instantiate(_monsterPrefab);
 
-                            obj.transform.parent = transform;
+                                // setup the monster's position
+                                monster.transform.position = n.Rect.center;
+                                monster.transform.position += _offset + _spawnOffsets[Random.Range(0, _spawnOffsets.Length)]
+                                                                     * Random.Range(1, 3);
+
+                                monster.transform.parent = transform;
+
+                                // define the monster's pathfinding 
+                                monster.GetComponent<MonsterBehaviour>().UpdatePathingContext =
+                                    (context) => _pathfindingBehaviour.UpdateAgentPathing(context, _layout);
+                            }
+
+                            _closedSet.Add(n);
                         }
-
-                        _closedSet.Add(n);
                     }
                 }
-           }
+            }
         }
-     }
+    }
 }

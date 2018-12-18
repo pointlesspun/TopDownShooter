@@ -7,8 +7,10 @@
 namespace Tds.DungeonGeneration
 {
     using System.Linq;
-    using Tds.Util;
+
     using UnityEngine;
+
+    using Tds.Util;
 
     /// <summary>
     /// Algorithm which randomly traverses through a dungeon (list of dungeon nodes),
@@ -93,34 +95,7 @@ namespace Tds.DungeonGeneration
         {
             if (Layout != null)
             {
-                var gizmoColorIndex = 0;
-
-                foreach( var node in Layout.Nodes)
-                {
-                    Gizmos.color = _gizmoColors[gizmoColorIndex % _gizmoColors.Length];
-                    Gizmos.DrawCube(node.Rect.center, new Vector3(node.Width, node.Height, 0));
-                    gizmoColorIndex++;
-
-                    foreach ( var edge in node.Edges )
-                    {
-                        var centerOffset = edge.NodeIntersection[1] - edge.NodeIntersection[0];
-
-                        centerOffset.x /= 2;
-                        centerOffset.y /= 2;
-
-                        var intersectionCenter = new Vector2( edge.NodeIntersection[0].x + centerOffset.x, 
-                                                                        edge.NodeIntersection[0].y + centerOffset.y);
-                        Gizmos.color = Color.black;
-
-                        Gizmos.DrawLine(node.Rect.center, intersectionCenter);
-                    }
-                }
-
-                if (_useTraversal && Layout.Start != null)
-                {
-                    Gizmos.DrawIcon(Layout.Start.Rect.center, "start.png", true);
-                    Gizmos.DrawIcon(Layout.End.Rect.center, "flag.png", true);
-                }
+                Layout.DrawLayout(_gizmoColors, _useTraversal, Vector2.zero);
             }
         }
     }
