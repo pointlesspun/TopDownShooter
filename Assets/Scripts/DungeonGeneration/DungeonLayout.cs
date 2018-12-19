@@ -7,13 +7,14 @@
 namespace Tds.DungeonGeneration
 {
     using System.Collections.Generic;
+    using Tds.PathFinder;
     using UnityEngine;
 
     /// <summary>
     /// Algorithm which randomly traverses through a dungeon (list of dungeon nodes),
     /// creating a smaller dungeon with guaranteed path
     /// </summary>
-    public class DungeonLayout
+    public class DungeonLayout : ISearchSpace<DungeonNode, Vector2>
     {
         // to do replace with quadtree
         private List<DungeonNode> _nodes;
@@ -57,7 +58,7 @@ namespace Tds.DungeonGeneration
             End = end;
         }
 
-        public DungeonNode GetRandomNode()
+        public DungeonNode GetRandomElement()
         {
             return _nodes[UnityEngine.Random.Range(0, _nodes.Count)];
         }
@@ -68,7 +69,19 @@ namespace Tds.DungeonGeneration
             return node;
         }
 
-        public DungeonNode FindClosestNode(Vector2 position)
+        public Vector2 GetInterpolatedLocation(DungeonNode from, DungeonNode to, float value, Vector2 fallbackLocation)
+        {
+            var edge = from.GetEdgeTo(to);
+
+            if (edge != null)
+            {
+                return  edge.GetIntersectionPoint(value);
+            }
+
+            return fallbackLocation;
+        }
+
+        public DungeonNode FindNearestSolution(Vector2 position, float maxDistance = -1)
         {
             DungeonNode result = null;
             float bestDistance = float.MaxValue;
@@ -82,7 +95,7 @@ namespace Tds.DungeonGeneration
 
                 var distance = node.Distance(position);
 
-                if (distance < bestDistance)
+                if (distance < bestDistance && (maxDistance == -1 || distance < maxDistance))
                 {
                     bestDistance = distance;
                     result = node;

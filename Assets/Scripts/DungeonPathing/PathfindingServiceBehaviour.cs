@@ -4,10 +4,11 @@
  * You should have received a copy of the license along with this work.If not, see<http://creativecommons.org/licenses/by-sa/4.0/>.
  */
 
-namespace Tds.PathFinder
+namespace Tds.DungeonPathfinding
 {
     using UnityEngine;
 
+    using Tds.PathFinder;
     using Tds.DungeonGeneration;
 
     /// <summary>
@@ -15,7 +16,7 @@ namespace Tds.PathFinder
     /// </summary>
     public class PathfindingServiceBehaviour : MonoBehaviour
     {
-        private PathfindingService<DungeonNode> _service;
+        private SearchService<DungeonNode> _service;
 
         /// <summary>
         /// Settings used 
@@ -35,7 +36,9 @@ namespace Tds.PathFinder
         public int _searchDepth = 48;
         public int _algorithmPoolCount = 256;
 
-        public PathfindingService<DungeonNode> PathfindingService
+        private AgentPathingContext<DungeonNode> _context;
+
+        public SearchService<DungeonNode> PathfindingService
         {
             get
             {
@@ -51,6 +54,7 @@ namespace Tds.PathFinder
         public void Awake()
         {
             _service = CreatePathfindingService();
+            _context = CreatePathingContext();
         }
 
         public void Update()
@@ -58,14 +62,28 @@ namespace Tds.PathFinder
             _service.Update(_iterationCount);
         }
 
-        public void UpdateAgentPathing(AgentPathingContext context, DungeonLayout layout)
+        private AgentPathingContext<DungeonNode> CreatePathingContext()
         {
-            AgentPathingService.UpdateState(context, _pathfindingSettings, PathfindingService, layout, Time.time);
+            return new AgentPathingContext<DungeonNode>()
+            {
+                searchSpace = null,
+                service = PathfindingService,
+                settings = _pathfindingSettings,
+                time = Time.realtimeSinceStartup
+            };
         }
 
-        private PathfindingService<DungeonNode> CreatePathfindingService()
+        public void UpdateAgentPathing(AgentPathingState<DungeonNode> pathfindingState, DungeonLayout layout)
         {
-           return new PathfindingService<DungeonNode>()
+            _context.time = Time.time;
+            _context.searchSpace = layout;
+
+            AgentPathingService.UpdateState(pathfindingState, _context);
+        }
+
+        private SearchService<DungeonNode> CreatePathfindingService()
+        {
+           return new SearchService<DungeonNode>()
                                 .Initialize(_algorithmCount, _searchResultCount, _searchDepth,
                                                         () => DungeonSearch.CreatePathfinder(_algorithmPoolCount, 1, 1, 1));
         }

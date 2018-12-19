@@ -4,14 +4,15 @@
  * You should have received a copy of the license along with this work.If not, see<http://creativecommons.org/licenses/by-sa/4.0/>.
  */
 
-namespace Tds.PathFinder
+namespace Tds.DungeonPathfinding
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
+    using Tds.PathFinder;
     using Tds.DungeonGeneration;
-
+   
     /// <summary>
     /// Factory-ish class to instantiate a pahtfinder through dungeon nodes
     /// xxx refactor at some point
@@ -23,21 +24,21 @@ namespace Tds.PathFinder
         public float _distanceToGoalWeight = 1.0f;
         public float _distanceToNextNodeWeight = 1.0f;
         
-        private PathfinderAlgorithm<DungeonNode> _pathfinder;
+        private BestFistSearch<DungeonNode> _pathfinder;
         
         public DungeonSearch(int poolSize)
         {
-            _pathfinder = new PathfinderAlgorithm<DungeonNode>(poolSize);
+            _pathfinder = new BestFistSearch<DungeonNode>(poolSize);
         }
 
-        public PathfinderAlgorithm<DungeonNode> BeginSearch(DungeonNode from, DungeonNode to)
+        public BestFistSearch<DungeonNode> BeginSearch(DungeonNode from, DungeonNode to)
         {
             return _pathfinder.BeginSearch(from, to, CostFunction, ExpansionFunction, DistanceFunction);
         }
 
-        public static PathfinderAlgorithm<DungeonNode> CreatePathfinder(int poolSize, float lengthWeight, float goalDistanceWeight, float nextNodeDistanceWeight)
+        public static BestFistSearch<DungeonNode> CreatePathfinder(int poolSize, float lengthWeight, float goalDistanceWeight, float nextNodeDistanceWeight)
         {
-            return new PathfinderAlgorithm<DungeonNode>(poolSize,
+            return new BestFistSearch<DungeonNode>(poolSize,
                     (from, to, goal, length) => 
                         from.Distance(to) * goalDistanceWeight
                                    + length * lengthWeight

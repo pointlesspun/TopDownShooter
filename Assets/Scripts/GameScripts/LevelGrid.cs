@@ -11,6 +11,7 @@ namespace Tds.GameScripts
 
     using Tds.DungeonGeneration;
     using Tds.Util;
+    using System;
 
     /// <summary>
     /// Class which generates a grid which is the basis of a level
@@ -123,6 +124,16 @@ namespace Tds.GameScripts
                     ? new Vector3(_layout.Start.Rect.center.x, _layout.Start.Rect.center.y, 0) + _levelOffset 
                     : Vector3.zero;
             }
+        }
+
+        public bool AnyOnPath(Vector3 position, Vector3 movementDirection, float radius, Func<LevelElement,bool> predicate)
+        {
+            var p1 = position - _levelOffset;
+            var p2 = p1 + movementDirection;
+
+            var gridRect = _levelGrid.GetIntersection(RectUtil.CreateBoundingBox(p1, p2, radius));
+
+            return _levelGrid.AnyInArea(gridRect, predicate);
         }
 
         public void Awake()
@@ -377,8 +388,8 @@ namespace Tds.GameScripts
             if (y1 == y2)
             {
                 var wallLength = x2 - x1;
-                var doorLength = Mathf.Min(_maxDoorLength, Random.Range(1, wallLength - 2));
-                var doorStart = Random.Range(1, wallLength - (doorLength + 1));
+                var doorLength = Mathf.Min(_maxDoorLength, UnityEngine.Random.Range(1, wallLength - 2));
+                var doorStart = UnityEngine.Random.Range(1, wallLength - (doorLength + 1));
 
                 intersection[0] = new Vector2Int(x1 + doorStart, y1);
                 intersection[1] = new Vector2Int(x1 + doorStart + doorLength, y2);
@@ -391,8 +402,8 @@ namespace Tds.GameScripts
             else
             {
                 var wallLength = y2 - y1;
-                var doorLength = Mathf.Min(_maxDoorLength, Random.Range(1, wallLength - 2));
-                var doorStart = Random.Range(1, wallLength - (doorLength + 1));
+                var doorLength = Mathf.Min(_maxDoorLength, UnityEngine.Random.Range(1, wallLength - 2));
+                var doorStart = UnityEngine.Random.Range(1, wallLength - (doorLength + 1));
 
                 intersection[0] = new Vector2Int(x1, y1 + doorStart);
                 intersection[1] = new Vector2Int(x2, y1 + doorStart + doorLength);

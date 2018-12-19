@@ -13,7 +13,7 @@ namespace Tds.Util
     /// Wrapper around a 2d array
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class Grid2D<T>
+    public class Grid2D<T> 
     {
         private T[] _data;
         public int Width { get; private set; }
@@ -73,6 +73,44 @@ namespace Tds.Util
         public bool IsOnGrid(int x, int y)
         {
             return x >= 0 && x < Width && y >= 0 && y < Height;
+        }
+
+        /// <summary>
+        /// Returns the intersection of the given rect with the grid, clamped by the grid's bounding box
+        /// </summary>
+        /// <param name="r"></param>
+        /// <returns>A discrete rect spanning the given rectangle </returns>
+        public RectInt GetIntersection(Rect r)
+        {
+            return new RectInt()
+            {
+                min = new Vector2Int(Mathf.Clamp(Mathf.FloorToInt(r.min.x), 0, Width), 
+                                        Mathf.Clamp(Mathf.FloorToInt(r.min.y), 0, Height)),
+                max = new Vector2Int(Mathf.Clamp(Mathf.CeilToInt(r.max.x), 0, Width),
+                                        Mathf.Clamp(Mathf.CeilToInt(r.max.y), 0, Height))
+            };
+        }
+
+        /// <summary>
+        /// Checks if any element the given area matches the predicate
+        /// </summary>
+        /// <param name="area"></param>
+        /// <param name="element"></param>
+        /// <returns></returns>
+        public bool AnyInArea(RectInt area, Func<T, bool> predicate)
+        {
+            for (int x = area.min.x; x <= area.max.x; x++)
+            {
+                for (int y = area.min.y; y <= area.max.y; y++)
+                {
+                    if (predicate(this[x,y]))
+                    {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
         }
 
         /// <summary>

@@ -84,12 +84,7 @@ namespace Tds.DungeonGeneration
         {
             get
             {
-                var direction = NodeIntersection[1] - NodeIntersection[0];
-
-                direction.x /= 2;
-                direction.y /= 2;
-
-                return NodeIntersection[0] + direction;
+                return GetIntersectionPoint(0.5f);
             }
         }
 
@@ -100,11 +95,14 @@ namespace Tds.DungeonGeneration
         {
             get
             {
-                Vector2 direction = NodeIntersection[1] - NodeIntersection[0];
-                direction *= UnityEngine.Random.value;
-                return NodeIntersection[0] + direction;
-
+                return GetIntersectionPoint(Random.value);
             }
+        }
+
+        public Vector2 GetIntersectionPoint(float interpolation)
+        {
+            Vector2 direction = NodeIntersection[1] - NodeIntersection[0];
+            return NodeIntersection[0] + direction * interpolation;
         }
     }
 }

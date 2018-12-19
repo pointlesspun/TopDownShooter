@@ -8,12 +8,19 @@ namespace Tds.PathFinder
     using System;
     using System.Collections.Generic;
     using System.Linq;
-    using Tds.Util;
-    using UnityEngine;
 
-    public class PathfindingService<T> where T : class
+    using UnityEngine;
+    
+    using Tds.Util;
+
+    /// <summary>
+    /// Service which encapsulates one or more BestFistSearch algorithms, allowing agents to share 
+    /// searches and search results rather than having to instantiate a searchalgorithm themselves/
+    /// </summary>
+    /// <typeparam name="T"></typeparam>
+    public class SearchService<T> where T : class
     {
-        private PathfinderAlgorithm<T>[] _pathfinders;
+        private BestFistSearch<T>[] _searchAlgorithms;
 
         /// <summary>
         /// Buffered searchparameters. 
@@ -79,7 +86,7 @@ namespace Tds.PathFinder
             private set;
         }
 
-        public PathfindingService()
+        public SearchService()
         {
             MaxAgeCompletedSearch = 30;
         }
@@ -92,14 +99,14 @@ namespace Tds.PathFinder
         /// <param name="estimatedSearchDepth">Number of nodes in the cached search results</param>
         /// <param name="factoryMethod">Method used to create new pathfinders</param>
         /// <returns></returns>
-        public PathfindingService<T> Initialize( int searchAlgorithmCount, int searchResultCount, 
-                                                    int estimatedSearchDepth, Func<PathfinderAlgorithm<T>> factoryMethod )
+        public SearchService<T> Initialize( int searchAlgorithmCount, int searchResultCount, 
+                                                    int estimatedSearchDepth, Func<BestFistSearch<T>> factoryMethod )
         {
-            _pathfinders = new PathfinderAlgorithm<T>[searchAlgorithmCount];
+            _searchAlgorithms = new BestFistSearch<T>[searchAlgorithmCount];
             
             for ( var i = 0; i < searchAlgorithmCount; ++i )
             {
-                _pathfinders[i] = factoryMethod(); 
+                _searchAlgorithms[i] = factoryMethod(); 
             }
 
             var id = 0;
@@ -197,12 +204,12 @@ namespace Tds.PathFinder
         /// <param name="maxIterations">Number of expansions a pathfinder is allowed to do</param>
         public void Update(int maxIterations)
         {
-            TryStartNewSearches(_pathfinders, _scheduledSearches, _searchesInProgress);
-            UpdateSearchesInProgress(maxIterations, _pathfinders, _searchesInProgress, _completedSearches);
+            TryStartNewSearches(_searchAlgorithms, _scheduledSearches, _searchesInProgress);
+            UpdateSearchesInProgress(maxIterations, _searchAlgorithms, _searchesInProgress, _completedSearches);
             TimeStamp++;
         }
 
-        private void TryStartNewSearches(PathfinderAlgorithm<T>[] searchers,
+        private void TryStartNewSearches(BestFistSearch<T>[] searchers,
                                                 LinkedList<SearchParameters<T>> planned,
                                                 LinkedList<SearchParameters<T>> inProgress) {
 
@@ -218,7 +225,7 @@ namespace Tds.PathFinder
         }
 
         private void UpdateSearchesInProgress(int maxIterations, 
-                                                PathfinderAlgorithm<T>[] searchers,
+                                                BestFistSearch<T>[] searchers,
                                                 LinkedList<SearchParameters<T>> searchesInProgress,
                                                 LinkedList<SearchParameters<T>> completedSearches)
         {
@@ -226,9 +233,9 @@ namespace Tds.PathFinder
             {
                 if (searchers[i].Start != null)
                 {
-                    if (_pathfinders[i].Iterate(maxIterations) <= 0)
+                    if (_searchAlgorithms[i].Iterate(maxIterations) <= 0)
                     {
-                        var searchResult = searchesInProgress.FirstOrDefault(x => x.IsMatch(_pathfinders[i].Start, _pathfinders[i].End));
+                        var searchResult = searchesInProgress.FirstOrDefault(x => x.IsMatch(_searchAlgorithms[i].Start, _searchAlgorithms[i].End));
 
                         searchResult.Value.IsComplete = true;
                         searchResult.Value.TimeStamp = TimeStamp;

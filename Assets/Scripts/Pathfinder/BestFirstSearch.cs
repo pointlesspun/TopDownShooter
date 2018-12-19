@@ -11,7 +11,7 @@ namespace Tds.PathFinder
     using System.Linq;
     using Tds.Util;
 
-    public class PathfinderAlgorithm<T> where T : class
+    public class BestFistSearch<T> where T : class
     {
         public T Start { get; private set; }
         public T End { get; private set; }
@@ -47,16 +47,16 @@ namespace Tds.PathFinder
         private ObjectPool<PathNode<T>> _nodePool;
 
 
-        public PathfinderAlgorithm()
+        public BestFistSearch()
         {
         }
 
-        public PathfinderAlgorithm(int poolSize)
+        public BestFistSearch(int poolSize)
         {
             Initialize(poolSize);
         }
 
-        public PathfinderAlgorithm(int poolSize,
+        public BestFistSearch(int poolSize,
                                     Func<T, T, T, float, float> costFunction,
                                     Func<PathNode<T>, IEnumerable<T>> expansionFunction,
                                     Func<T, T, float> distanceFunction)
@@ -67,13 +67,13 @@ namespace Tds.PathFinder
             DistanceFunction = distanceFunction;
         }
 
-        public PathfinderAlgorithm<T> Initialize(int poolSize)
+        public BestFistSearch<T> Initialize(int poolSize)
         {
             _nodePool = new ObjectPool<PathNode<T>>(0, () => new PathNode<T>(), 256);
             return this;
         }
 
-        public PathfinderAlgorithm<T> BeginSearch( T origin
+        public BestFistSearch<T> BeginSearch( T origin
                                , T destination
                                , Func<T, T, T, float, float> costFunction
                                , Func<PathNode<T>, IEnumerable<T>> expansionFunction
@@ -85,7 +85,7 @@ namespace Tds.PathFinder
             return BeginSearch(origin, destination);
         }
 
-        public PathfinderAlgorithm<T> BeginSearch(T origin , T destination)
+        public BestFistSearch<T> BeginSearch(T origin , T destination)
         {
             // need to validate otherwise unity dies
             Contract.Requires(CostFunction != null, "No cost function defined in pathfinder.");

@@ -46,9 +46,9 @@ namespace Tds.GameScripts
         /// </summary>
         private Animator _animator;
 
-        private AgentPathingContext _pathingContext = new AgentPathingContext(8);
+        private AgentPathingState<DungeonNode> _pathingContext = new AgentPathingState<DungeonNode>(8);
 
-        public Action<AgentPathingContext> UpdatePathingContext
+        public Action<AgentPathingState<DungeonNode>> UpdatePathingContext
         {
             get;
             set;

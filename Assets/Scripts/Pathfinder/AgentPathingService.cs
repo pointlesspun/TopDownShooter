@@ -8,206 +8,197 @@ namespace Tds.PathFinder
 {
     using UnityEngine;
 
-    using Tds.DungeonGeneration;
-
     /// <summary>
     /// Service guiding the agent's pathing across a dungeon
     /// </summary>
     public static class AgentPathingService
     {
         /// <summary>
-        /// Updates the current state of the context.
+        /// Updates the current state of the state.
         /// </summary>
-        /// <param name="context">Context containing all information to find a path</param>
+        /// <param name="state">State containing all information to find a path</param>
         /// <param name="settings">Settings for executing the pathfinding</param>
         /// <param name="service">Service which finds a path through a dungeon</param>
-        /// <param name="layout">Layout of the dungeon (searchspace)</param>
+        /// <param name="searchSpace">Layout of the dungeon (searchspace)</param>
         /// <param name="time">Current time</param>
-        public static void UpdateState(AgentPathingContext context,
-                                        AgentPathfindingSettings settings,
-                                        PathfindingService<DungeonNode> service,
-                                        DungeonLayout layout,
-                                        float time)
+        public static void UpdateState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
         {
-            switch (context.state)
+            switch (state.state)
             {
                 case PathingState.Idle:
-                    UpdateIdleState(context, settings, time);
+                    UpdateIdleState(state, context);
 
                     break;
 
                 case PathingState.FindingPath:
-                    UpdatePathfindingState(context, settings, service, layout, time);
+                    UpdatePathfindingState(state, context);
 
                     break;
 
                 case PathingState.FollowingPath:
-                    UpdateFollowingPath(context, settings, time);
+                    UpdateFollowingPath(state, context);
 
                     break;
             }
         }
 
         /// <summary>
-        /// Initializes the context such that it represents an idle state
+        /// Initializes the state such that it represents an idle state
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="state"></param>
         /// <param name="time"></param>
-        public static void InitializeIdleState(AgentPathingContext context, float time)
+        public static void InitializeIdleState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
         {
-            context.stateStartTime = time;
-            context.state = PathingState.Idle;
-            context.pathfindingTicket = -1;
-            context.agentNode = null;
-            context.targetNode = null;
-            context.targetLocation = context.agentLocation;
-            context.targetStartLocation = context.agentLocation;
+            state.stateStartTime = context.time;
+            state.state = PathingState.Idle;
+            state.pathfindingTicket = -1;
+            state.agentNode = null;
+            state.targetNode = null;
+            state.targetLocation = state.agentLocation;
+            state.targetStartLocation = state.agentLocation;
         }
 
         /// <summary>
         /// If the target is outside the target distance threshold as defined in settings, proceed to finding a path
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="state"></param>
         /// <param name="settings"></param>
         /// <param name="time"></param>
-        public static void UpdateIdleState(AgentPathingContext context, AgentPathfindingSettings settings, float time)
+        public static void UpdateIdleState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
         {
-            if (!IsDistanceInRange(context.targetLocation, context.agentLocation, settings.waypointDistance))
+            if (!IsDistanceInRange(state.targetLocation, state.agentLocation, context.settings.waypointDistance))
             {
-                InitializePathfindingState(context, time);
+                InitializePathfindingState(state, context);
             }
         }
 
         /// <summary>
-        /// Initializes the context such that it represents an pathfinding state state
+        /// Initializes the state such that it represents an pathfinding state state
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="state"></param>
         /// <param name="time"></param>
-        public static void InitializePathfindingState(AgentPathingContext context, float time)
+        public static void InitializePathfindingState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
         {
-            context.stateStartTime = time;
-            context.state = PathingState.FindingPath;
-            context.pathfindingTicket = -1;
-            context.agentNode = null;
-            context.targetNode = null;
+            state.stateStartTime = context.time;
+            state.state = PathingState.FindingPath;
+            state.pathfindingTicket = -1;
+            state.agentNode = null;
+            state.targetNode = null;
         }
 
         /// <summary>
-        /// Cancels any outstanding searches started by the given context
+        /// Cancels any outstanding searches started by the given state
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="state"></param>
         /// <param name="service"></param>
         /// <param name="time"></param>
-        public static void CancelPathfinding(AgentPathingContext context, PathfindingService<DungeonNode> service, float time)
+        public static void CancelPathfinding<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
         {
-            if ( context.pathfindingTicket != -1 )
+            if ( state.pathfindingTicket != -1 )
             {
-                service.CancelSearch(context.pathfindingTicket);
+                context.service.CancelSearch(state.pathfindingTicket);
             }
 
-            InitializeIdleState(context, time);
+            InitializeIdleState(state, context);
         }
 
         /// <summary>
         /// Attempts to find a path to a given target. When found proceeds to the pathfollowing state
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="state"></param>
         /// <param name="settings"></param>
         /// <param name="service"></param>
-        /// <param name="layout"></param>
+        /// <param name="searchSpace"></param>
         /// <param name="time"></param>
-        public static void UpdatePathfindingState(AgentPathingContext context,
-                                                        AgentPathfindingSettings settings,
-                                                        PathfindingService<DungeonNode> service,
-                                                        DungeonLayout layout,
-                                                        float time)
+        public static void UpdatePathfindingState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
         {
-            // does the context have an outstanding ticket to find a path
-            if (context.pathfindingTicket < 0)
+            // does the state have an outstanding ticket to find a path
+            if (state.pathfindingTicket < 0)
             {
                 // prevent re-spamming the search service. If no ticket was found, wait a random amount of time
-                if ((time - context.lastTicketRequest) > 0.25f + 0.25f * Random.value)
+                if ((context.time - state.lastTicketRequest) > 0.25f + 0.25f * Random.value)
                 {
                     // has a path been defined ?
-                    if (context.agentNode == null)
+                    if (state.agentNode == null)
                     {
-                        context.agentNode = layout.FindClosestNode(context.agentLocation - settings.worldOffset);
-                        context.targetNode = layout.FindClosestNode(context.targetLocation - settings.worldOffset);
-                        context.targetStartLocation = context.targetLocation;
+                        state.agentNode = context.searchSpace.FindNearestSolution(state.agentLocation - context.settings.worldOffset, -1);
+                        state.targetNode = context.searchSpace.FindNearestSolution(state.targetLocation - context.settings.worldOffset, -1);
+                        state.targetStartLocation = state.targetLocation;
                     }
 
-                    context.pathfindingTicket = service.BeginSearch(context.agentNode, context.targetNode);
-                    context.lastTicketRequest = time;
+                    state.pathfindingTicket = context.service.BeginSearch(state.agentNode, state.targetNode);
+                    state.lastTicketRequest = context.time;
                 }
             }
 
             // completed pathfinding ?
-            if (context.pathfindingTicket >= 0)
+            if (state.pathfindingTicket >= 0)
             {
                 // check if a result is available
-                if (service.RetrieveResult(context.pathfindingTicket, context.agentNode, context.targetNode, context.pathNodes) != null)
+                if (context.service.RetrieveResult(state.pathfindingTicket, state.agentNode, state.targetNode, state.pathNodes) != null)
                 {
-                    InitializePathFollowingState(context, settings, time);
-                    context.lastTicketRequest = time;
+                    InitializePathFollowingState(state, context);
+                    state.lastTicketRequest = context.time;
                 }
             }
         }
 
         /// <summary>
-        /// Initializes the context such that it represents an pathfollowing state state
+        /// Initializes the state such that it represents an pathfollowing state state
         /// </summary>
-        /// <param name="context"></param>
+        /// <param name="state"></param>
         /// <param name="time"></param>
-        public static void InitializePathFollowingState(AgentPathingContext context, AgentPathfindingSettings settings, float time)
+        public static void InitializePathFollowingState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
         {
-            context.stateStartTime = time;
-            context.waypointIndex = 0;
-            context.pathfindingTicket = -1;
-            context.waypoint = GetNextWaypointPosition(0, context.pathNodes, context.targetStartLocation - settings.worldOffset);
-            context.state = PathingState.FollowingPath;
+            state.stateStartTime = context.time;
+            state.waypointIndex = 0;
+            state.pathfindingTicket = -1;
+            state.waypoint = GetNextWaypointPosition(0, state.pathNodes, state.targetStartLocation - context.settings.worldOffset, context.searchSpace);
+            state.state = PathingState.FollowingPath;
         }
 
-        public static void UpdateFollowingPath(AgentPathingContext context,
-                                                AgentPathfindingSettings settings,
-                                                float time)
+        public static void UpdateFollowingPath<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
         {
             // has target moved beyond a certain range ?
-            if ((time - context.stateStartTime) > settings.pathValidatyCheckTimeout
-                && !IsDistanceInRange(context.targetLocation, context.targetStartLocation, settings.targetDistanceThreshold))
+            if ((context.time - state.stateStartTime) > context.settings.pathValidatyCheckTimeout
+                && !IsDistanceInRange(state.targetLocation, state.targetStartLocation, context.settings.targetDistanceThreshold))
             {
-                InitializePathfindingState(context, time);
+                InitializePathfindingState(state, context);
             }
             else
             {
                 // is the agent within range of the target ?
-                if (IsDistanceInRange(context.agentLocation, context.targetStartLocation, settings.waypointDistance))
+                if (IsDistanceInRange(state.agentLocation, state.targetStartLocation, context.settings.waypointDistance))
                 {
-                    InitializeIdleState(context, time);
+                    InitializeIdleState(state, context);
                 }
                 else
                 { 
                     // is the agent within range of the current waypoint
-                    if (IsDistanceInRange(context.waypoint + settings.worldOffset, context.agentLocation, settings.waypointDistance))
+                    if (IsDistanceInRange(state.waypoint + context.settings.worldOffset, state.agentLocation, context.settings.waypointDistance))
                     {
-                        DungeonNode lastNode = context.pathNodes[context.pathNodes.Length - 1];
+                        T lastNode = state.pathNodes[state.pathNodes.Length - 1];
                         // go to the next waypoint
-                        context.waypointIndex = Mathf.Min(context.waypointIndex + 1, context.pathNodes.Length);
+                        state.waypointIndex = Mathf.Min(state.waypointIndex + 1, state.pathNodes.Length);
 
                         // check if the previous node in the list was the 'closest' node (targetNode)
-                        if ((context.waypointIndex == context.pathNodes.Length -1
-                            || context.pathNodes[context.waypointIndex] ==  null) && lastNode != context.targetNode)
+                        if ((state.waypointIndex == state.pathNodes.Length -1
+                            || state.pathNodes[state.waypointIndex] ==  null) && lastNode != state.targetNode)
                         {
                             // agent's buffer was too small to contain the full path, continue pathfinding from the current position
-                            InitializePathfindingState(context, time);
+                            InitializePathfindingState(state, context);
                         }
                         else
                         {
-                            context.waypoint = GetNextWaypointPosition(context.waypointIndex, context.pathNodes,
-                                                                            context.targetStartLocation - settings.worldOffset, true);
+                            state.waypoint = GetNextWaypointPosition(state.waypointIndex, 
+                                                                        state.pathNodes,
+                                                                            state.targetStartLocation - context.settings.worldOffset,
+                                                                            context.searchSpace,
+                                                                            true);
                         }
                     }
 
-                    context.movementDirection = (context.waypoint + settings.worldOffset) - context.agentLocation;
+                    state.movementDirection = (state.waypoint + context.settings.worldOffset) - state.agentLocation;
                 }
             }
         }
@@ -234,7 +225,11 @@ namespace Tds.PathFinder
         /// <param name="nodes"></param>
         /// <param name="endPoint"></param>
         /// <returns></returns>
-        public static Vector2 GetNextWaypointPosition(int index, DungeonNode[] nodes, Vector2 endPoint, bool randomize = false)
+        public static Vector2 GetNextWaypointPosition<T>(int index, 
+                                                        T[] nodes, 
+                                                        Vector2 endPoint,
+                                                        ISearchSpace<T, Vector2> searchSpace,
+                                                        bool randomize = false) where T : class
         {
             if (index < nodes.Length - 1)
             {
@@ -243,12 +238,7 @@ namespace Tds.PathFinder
                 // node may be null - in which case we've reached the end of the path
                 if (node != null)
                 {
-                    var edge = nodes[index].GetEdgeTo(nodes[index + 1]);
-
-                    if (edge != null)
-                    {
-                        return randomize ? edge.RandomIntersectionPoint : edge.IntersectionCenter;
-                    }
+                    return searchSpace.GetInterpolatedLocation(node, nodes[index + 1], randomize ? Random.value : 0.5f, endPoint);
                 }
             }
 

@@ -1,8 +1,8 @@
 ﻿using NUnit.Framework;
 using System.Linq;
 using Tds.DungeonGeneration;
+using Tds.DungeonPathfinding;
 using Tds.PathFinder;
-using Tds.Util;
 
 public class TestDungeonSearchService
 {
@@ -12,7 +12,7 @@ public class TestDungeonSearchService
     [Test]
     public void TestInitialization_ExpectInitialValuesToBeCorrect()
     {
-        var service = new PathfindingService<DungeonNode>().Initialize(2, 4, 32,() => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+        var service = new SearchService<DungeonNode>().Initialize(2, 4, 32,() => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
 
         Assert.IsTrue(service.TimeStamp == 0);
         Assert.IsTrue(service.ScheduledSearches.Count() == 0);
@@ -35,7 +35,7 @@ public class TestDungeonSearchService
         DungeonNode.Connect(nodeA, nodeC);
         DungeonNode.Connect(nodeC, nodeD);
 
-        var service = new PathfindingService<DungeonNode>().Initialize(2, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+        var service = new SearchService<DungeonNode>().Initialize(2, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
 
         var id = service.BeginSearch(nodeA, nodeD);
         var store = new DungeonNode[8];
@@ -85,7 +85,7 @@ public class TestDungeonSearchService
         DungeonNode.Connect(nodeA, nodeC);
         DungeonNode.Connect(nodeC, nodeD);
 
-        var service = new PathfindingService<DungeonNode>().Initialize(2, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+        var service = new SearchService<DungeonNode>().Initialize(2, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
 
         var id1 = service.BeginSearch(nodeA, nodeD);
         var id2 = service.BeginSearch(nodeD, nodeA);
@@ -130,7 +130,7 @@ public class TestDungeonSearchService
         };
 
         var grid = DungeonGenerationUtil.CreateFrom(input);
-        var service = new PathfindingService<DungeonNode>().Initialize(1, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+        var service = new SearchService<DungeonNode>().Initialize(1, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
 
         var id1 = service.BeginSearch(grid[0,0], grid[1, 1]);
         Assert.IsTrue(service.ScheduledSearches.Count() == 1);
@@ -160,7 +160,7 @@ public class TestDungeonSearchService
         };
 
         var grid = DungeonGenerationUtil.CreateFrom(input);
-        var service = new PathfindingService<DungeonNode>().Initialize(1, 1, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+        var service = new SearchService<DungeonNode>().Initialize(1, 1, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
 
         service.MaxAgeCompletedSearch = 2;
 

@@ -12,6 +12,7 @@ namespace Tds.GameScripts
     using Tds.DungeonGeneration;
     using Tds.PathFinder;
     using Tds.Util;
+    using Tds.DungeonPathfinding;
 
     /// <summary>
     /// Class which controls and directs the level's monster behaviour
@@ -91,7 +92,7 @@ namespace Tds.GameScripts
         // xxx note this is not efficient but good enough for the scope of build007
         // need to replace this with several things like a quadtree and a service for
         // pathfinding
-        public PathfinderAlgorithm<DungeonNode> FindPath(Vector2 from, Vector2 to)
+        public BestFistSearch<DungeonNode> FindPath(Vector2 from, Vector2 to)
         {
             if (_layout != null)
             {

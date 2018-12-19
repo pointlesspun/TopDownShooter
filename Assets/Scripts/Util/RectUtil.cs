@@ -64,5 +64,21 @@ namespace Tds.Util
             return new Vector2(Mathf.Clamp(point.x, rect.min.x + deltaWidth, rect.max.x - deltaWidth),
                                                         Mathf.Clamp(point.y, rect.min.y + deltaWidth, rect.max.y - deltaWidth));
         }
+
+        /// <summary>
+        /// Creates a rect out bounding two circles where the circles are defined by a point and a given radius.
+        /// </summary>
+        /// <param name="p1">center of circle 1</param>
+        /// <param name="p2">center of circle 2</param>
+        /// <param name="radius">radius of both circles</param>
+        /// <returns></returns>
+        public static Rect CreateBoundingBox(Vector2 p1, Vector2 p2, float radius )
+        {
+            return new Rect()
+            {
+                min = new Vector2(Mathf.Min(p1.x, p2.x) - radius, Mathf.Min(p1.y, p2.y) - radius),
+                max = new Vector2(Mathf.Max(p1.x, p2.x) + radius, Mathf.Max(p1.y, p2.y) + radius)
+            };
+        }
     }
 }

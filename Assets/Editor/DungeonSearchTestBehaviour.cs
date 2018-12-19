@@ -4,18 +4,19 @@
  * You should have received a copy of the license along with this work.If not, see<http://creativecommons.org/licenses/by-sa/4.0/>.
  */
 
-namespace Tds.PathFinder
+namespace Tds.DungeonPathfinding
 {
-    using Tds.DungeonGeneration;
-
     using UnityEngine;
+
+    using Tds.PathFinder;
+    using Tds.DungeonGeneration;
 
     /// <summary>
     /// Test behaviour which can be used to visualize the pathfinder algorithm
     /// </summary>
     public class DungeonSearchTestBehaviour : MonoBehaviour
     { 
-        public PathfinderAlgorithm<DungeonNode> _pathfinder = DungeonSearch.CreatePathfinder(256, 1, 1, 1);
+        public BestFistSearch<DungeonNode> _pathfinder = DungeonSearch.CreatePathfinder(256, 1, 1, 1);
         
         public void BeginSearch()
         {

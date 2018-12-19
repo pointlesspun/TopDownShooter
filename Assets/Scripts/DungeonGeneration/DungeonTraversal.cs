@@ -77,7 +77,7 @@ namespace Tds.DungeonGeneration
                 UnityEngine.Random.InitState(_seed);
             }
 
-            var pathEnd = BuildPath(startNode == null ? source.GetRandomNode() : startNode, new HashSet<DungeonNode>());
+            var pathEnd = BuildPath(startNode == null ? source.GetRandomElement() : startNode, new HashSet<DungeonNode>());
             var pathStart = pathEnd;
 
             while (pathStart.Parent != null)
