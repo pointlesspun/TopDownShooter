@@ -26,7 +26,12 @@ namespace Tds.PathFinder
             set;
         }
 
-        public Func<PathNode<T>, IEnumerable<T>> ExpansionFunction
+        /// <summary>
+        /// Action which given a pathnode applies the provided action on all it's neighbours
+        /// expanding the current pathnode. This needs to be provided by the user of this search. Eg
+        /// (node, action) => foreach( var neigbour in node.neighbours ) action(neighbour)
+        /// </summary>
+        public Action<PathNode<T>, Action<T>> ExpansionFunction
         {
             get;
             set;
@@ -47,6 +52,22 @@ namespace Tds.PathFinder
         private ObjectPool<PathNode<T>> _nodePool;
 
 
+        public static BestFistSearch<T> Instantiate(int poolSize, 
+                                                    float lengthWeight, 
+                                                    float goalDistanceWeight, 
+                                                    float nextNodeDistanceWeight,
+                                                    Func<T,T, float> distanceFunction,
+                                                    Action<PathNode<T>, Action<T>> neighbourFunction )
+        {
+            return new BestFistSearch<T>(poolSize,
+                    (from, to, goal, length) =>
+                        distanceFunction(from, to) * goalDistanceWeight
+                                   + length * lengthWeight
+                                   + distanceFunction(goal, to) * nextNodeDistanceWeight,
+                        neighbourFunction,
+                        (from, to) => distanceFunction(from,to));
+        }
+
         public BestFistSearch()
         {
         }
@@ -58,7 +79,7 @@ namespace Tds.PathFinder
 
         public BestFistSearch(int poolSize,
                                     Func<T, T, T, float, float> costFunction,
-                                    Func<PathNode<T>, IEnumerable<T>> expansionFunction,
+                                    Action<PathNode<T>, Action<T>> expansionFunction,
                                     Func<T, T, float> distanceFunction)
         {
             Initialize(poolSize);
@@ -76,7 +97,7 @@ namespace Tds.PathFinder
         public BestFistSearch<T> BeginSearch( T origin
                                , T destination
                                , Func<T, T, T, float, float> costFunction
-                               , Func<PathNode<T>, IEnumerable<T>> expansionFunction
+                               , Action<PathNode<T>, Action<T>> expansionFunction
                                , Func<T,T, float> distanceFunction)
         {
             CostFunction = costFunction;
@@ -178,17 +199,7 @@ namespace Tds.PathFinder
 
                     _closedTraversalNodes.Add(current._data);
 
-                    var expansions = ExpansionFunction(current);
-
-                    // check for dead ends
-                    if (expansions != null && expansions.Any())
-                    {
-                        // found an expansion... iteration is now complete
-                        foreach( var nextElement in expansions)
-                        {
-                            Explore(current, nextElement, End);
-                        }                        
-                    }
+                    ExpansionFunction(current, (v) => Explore(current, v, End));
                 }
             }
 

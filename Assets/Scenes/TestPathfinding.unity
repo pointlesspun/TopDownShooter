@@ -222,13 +222,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1481756741}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c1081060895e5a844bcc8da82fa1a1e4, type: 3}
+  m_Script: {fileID: 11500000, guid: 7d87d0993420c124ca8b3f2dc79b4032, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _serviceIterations: 16
   _agentCount: 1024
   _target: {fileID: 1481756741}
-  _tracerUpdateSpeed: 1.25
+  _tracerUpdateSpeed: 2
   _gizmoSize: 2
   _agentSearchBuffer: 16
 --- !u!114 &1481756743
@@ -302,7 +302,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1481756741}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 506.5, y: 227.1, z: 0}
+  m_LocalPosition: {x: 271.4, y: 259, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

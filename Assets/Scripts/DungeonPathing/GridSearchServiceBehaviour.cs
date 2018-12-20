@@ -11,13 +11,14 @@ namespace Tds.DungeonPathfinding
     using Tds.PathFinder;
     using Tds.DungeonGeneration;
     using System;
+    using System.Collections.Generic;
 
     /// <summary>
     /// Behaviour wrapper around the PathfindingService
     /// </summary>
-    public class PathfindingServiceBehaviour : MonoBehaviour
+    public class GridSearchServiceBehaviour : MonoBehaviour
     {
-        private SearchService<DungeonNode> _service;
+        private SearchService<LevelElement> _service;
 
         /// <summary>
         /// Settings used 
@@ -37,9 +38,16 @@ namespace Tds.DungeonPathfinding
         public int _searchDepth = 48;
         public int _algorithmPoolCount = 256;
 
-        private AgentPathingContext<DungeonNode> _context;
+        public GameObject _levelGridObject; 
 
-        public SearchService<DungeonNode> PathfindingService
+        private AgentPathingContext<LevelElement> _context;
+        public LevelGridSearchSpace GridSearchSpace
+        {
+            get;
+            set;
+        }
+
+        public SearchService<LevelElement> PathfindingService
         {
             get
             {
@@ -63,9 +71,9 @@ namespace Tds.DungeonPathfinding
             _service.Update(_iterationCount);
         }
 
-        private AgentPathingContext<DungeonNode> CreatePathingContext()
+        private AgentPathingContext<LevelElement> CreatePathingContext()
         {
-            return new AgentPathingContext<DungeonNode>()
+            return new AgentPathingContext<LevelElement>()
             {
                 searchSpace = null,
                 service = PathfindingService,
@@ -74,38 +82,37 @@ namespace Tds.DungeonPathfinding
             };
         }
 
-        public void UpdateAgentPathing(AgentPathingState<DungeonNode> pathfindingState, DungeonLayout layout)
+        public void UpdateAgentPathing(AgentPathingState<LevelElement> pathfindingState)
         {
             _context.time = Time.time;
-            _context.searchSpace = layout;
+            _context.searchSpace = GridSearchSpace;
 
             AgentPathingService.UpdateState(pathfindingState, _context);
         }
 
-        private SearchService<DungeonNode> CreatePathfindingService()
+        private SearchService<LevelElement> CreatePathfindingService()
         {
-           return new SearchService<DungeonNode>()
-                                .Initialize(_algorithmCount, _searchResultCount, _searchDepth,
-                                                        () => CreatePathfinder(_algorithmPoolCount, 1, 1, 1));
+            return new SearchService<LevelElement>()
+                                 .Initialize(_algorithmCount, _searchResultCount, _searchDepth,
+                                                         () => CreatePathfinder(_algorithmPoolCount, 1, 1, 1));
         }
 
-        public BestFistSearch<DungeonNode> CreatePathfinder(int poolSize, float lengthWeight, float goalDistanceWeight, float nextNodeDistanceWeight)
+        public BestFistSearch<LevelElement> CreatePathfinder(int poolSize, float lengthWeight, float goalDistanceWeight, float nextNodeDistanceWeight)
         {
-            var distanceFunction = new Func<DungeonNode, DungeonNode, float>((n1, n2) => n1.Distance(n2));
-
-            var neighbourFunction = new Action<PathNode<DungeonNode>, Action<DungeonNode>>((pathNode, action) =>
+            var distanceFunction = new Func<LevelElement, LevelElement, float>((n1, n2) => n1.Distance(n2));
+            var neighbourFunction = new Action<PathNode<LevelElement>, Action<LevelElement>>((node,action) => 
             {
-                if (pathNode._data.Edges != null)
+                GridSearchSpace.Grid.ForEachNeigbours(node._data._position, (element) =>
                 {
-                    foreach (var edge in pathNode._data.Edges)
+                    if (element._id == LevelElementDefinitions.FloorTileIndex)
                     {
-                        action(edge.GetOther(pathNode._data));
+                        action(element);
                     }
-                }
+                });
             });
 
-            return BestFistSearch<DungeonNode>.Instantiate(poolSize, lengthWeight, goalDistanceWeight, nextNodeDistanceWeight, distanceFunction, neighbourFunction);
+            return BestFistSearch<LevelElement>.Instantiate(poolSize, lengthWeight, goalDistanceWeight, 
+                                            nextNodeDistanceWeight, distanceFunction, neighbourFunction);
         }
     }
 }
-    

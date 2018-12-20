@@ -3,10 +3,9 @@
  * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
  * You should have received a copy of the license along with this work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
  */
-namespace Tds.GameScripts
+namespace Tds.DungeonGeneration
 {
     using System;
-    using System.Collections.Generic;
     using Tds.Util;
     using UnityEngine;
 
@@ -59,8 +58,15 @@ namespace Tds.GameScripts
             {
                 var spriteRenderer = poolObject._obj.GetComponent<SpriteRenderer>();
 
-                spriteRenderer.sprite = _variations.GetRandomSprite(randomRoll);
-                spriteRenderer.color = _variations.GetRandomColor(randomRoll);
+                if (_variations._spriteVariations.Length > 0)
+                {
+                    spriteRenderer.sprite = _variations.GetRandomSprite(randomRoll);
+                }
+
+                if (_variations._colorVariations.Length > 0)
+                {
+                    spriteRenderer.color = _variations.GetRandomColor(randomRoll);
+                }
 
                 poolObject._obj.SetActive(true);
             }

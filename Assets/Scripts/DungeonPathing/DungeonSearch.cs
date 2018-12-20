@@ -38,15 +38,22 @@ namespace Tds.DungeonPathfinding
 
         public static BestFistSearch<DungeonNode> CreatePathfinder(int poolSize, float lengthWeight, float goalDistanceWeight, float nextNodeDistanceWeight)
         {
-            return new BestFistSearch<DungeonNode>(poolSize,
-                    (from, to, goal, length) => 
-                        from.Distance(to) * goalDistanceWeight
-                                   + length * lengthWeight
-                                   + goal.Distance(to) * nextNodeDistanceWeight,
-                        (parent) => parent._data.Edges == null
-                                                        ? null
-                                                        : parent._data.Edges.Select((e) => e.GetOther(parent._data)), 
-                        (from, to) => from.Distance(to));
+            var distanceFunction = new Func<DungeonNode, DungeonNode, float>((n1, n2) => n1.Distance(n2));
+           
+            var neighbourFunction = new Action<PathNode<DungeonNode>, Action<DungeonNode>>((pathNode, action) => 
+            {
+                if ( pathNode._data.Edges != null)
+                {
+                    foreach ( var edge in pathNode._data.Edges)
+                    {
+                        action(edge.GetOther(pathNode._data));
+                    }
+                }
+            });
+
+
+            return BestFistSearch<DungeonNode>.Instantiate(poolSize, lengthWeight, goalDistanceWeight, nextNodeDistanceWeight, distanceFunction, neighbourFunction);
+          
         }
 
         private float CostFunction(DungeonNode from, DungeonNode to, DungeonNode goal, float pathLength)
@@ -56,12 +63,15 @@ namespace Tds.DungeonPathfinding
                                     + goal.Distance(to) * _distanceToGoalWeight;
         }
 
-        private IEnumerable<DungeonNode> ExpansionFunction( PathNode<DungeonNode> parent)
+        private void ExpansionFunction( PathNode<DungeonNode> parent, Action<DungeonNode> actionOnNeighbour)
         {
-            return parent._data.Edges == null 
-                ? null 
-                : parent._data.Edges.Select((e) => e.GetOther(parent._data));
-
+            if (parent._data.Edges != null)
+            {
+                foreach ( var edge in parent._data.Edges)
+                {
+                    actionOnNeighbour(edge.GetOther(parent._data));
+                }
+            }
         }
 
         private float DistanceFunction( DungeonNode from, DungeonNode to)

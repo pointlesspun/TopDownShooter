@@ -35,5 +35,18 @@ namespace Tds.Util
                 array[i] = array[i + 1];
             }
         }
+
+        public static T RetrieveComponent<T>(string gameObjectTag, bool isOptional = false) where T  : Component
+        {
+            var obj = GameObject.FindGameObjectWithTag(gameObjectTag);
+
+            if (!isOptional)
+            {
+                Contract.Requires(obj != null, "cannot retrieve component from object with tag " + gameObjectTag);
+                Contract.RequiresComponent<T>(obj, "no component of type " + typeof(T) + " on object with tag " + gameObjectTag);
+            }
+
+            return obj != null ? obj.GetComponent<T>() : null;
+        }
     }
 }

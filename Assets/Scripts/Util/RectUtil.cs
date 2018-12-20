@@ -59,6 +59,14 @@ namespace Tds.Util
             };
         }
 
+        /// <summary>
+        /// Clamp the point against the rect, shrinking the rect with the given delta width / height.
+        /// </summary>
+        /// <param name="rect"></param>
+        /// <param name="point"></param>
+        /// <param name="deltaWidth"></param>
+        /// <param name="deltaHeight"></param>
+        /// <returns></returns>
         public static Vector2 Clamp(RectInt rect, Vector2 point, float deltaWidth = 0, float deltaHeight = 0)
         {
             return new Vector2(Mathf.Clamp(point.x, rect.min.x + deltaWidth, rect.max.x - deltaWidth),

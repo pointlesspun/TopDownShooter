@@ -75,7 +75,7 @@ namespace Tds.DungeonGeneration
 
             if (edge != null)
             {
-                return  edge.GetIntersectionPoint(value);
+                return edge.GetIntersectionPoint(value); 
             }
 
             return fallbackLocation;

@@ -3,7 +3,7 @@
  * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
  * You should have received a copy of the license along with this work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
  */
-namespace Tds.GameScripts
+namespace Tds.DungeonGeneration
 {
     using System;
     using UnityEngine;
@@ -20,9 +20,13 @@ namespace Tds.GameScripts
         public int _poolSize = 1;
         public int _poolId = 0;
 
-        public SpriteProvider CreateProvider()
+        public SpriteProvider CreateProvider(GameObject parent)
         {
-            return new SpriteProvider().Initialize(_poolId, _poolSize, () => GameObject.Instantiate(_prefab), _variations, _sortOrder);
+            return new SpriteProvider().Initialize(_poolId, _poolSize, () => {
+                var result = GameObject.Instantiate(_prefab);
+                result.transform.parent = parent.transform;
+                return result;
+            }, _variations, _sortOrder);
         }
     }
 }

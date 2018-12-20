@@ -3,20 +3,19 @@
  * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
  * You should have received a copy of the license along with this work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
  */
-namespace Tds.GameScripts
+namespace Tds.DungeonGeneration
 {
+    using System;
     using System.Collections.Generic;
 
     using UnityEngine;
 
-    using Tds.DungeonGeneration;
     using Tds.Util;
-    using System;
 
     /// <summary>
     /// Class which generates a grid which is the basis of a level
     /// </summary>
-    public class LevelGrid : MonoBehaviour
+    public class LevelBehaviour : MonoBehaviour
     {
         /// <summary>
         /// Algorithm which will split the level area in smaller rectangles
@@ -41,12 +40,12 @@ namespace Tds.GameScripts
         /// <summary>
         /// Width assigned in units of one tile
         /// </summary>
-        public int _tileWidth = 64;
+        public int _tileWidth = 1;
 
         /// <summary>
         /// Height assigned in units of one tile
         /// </summary>
-        public int _tileHeight = 64;
+        public int _tileHeight = 1;
 
         /// <summary>
         /// Definitions for the level elements. Work in progress
@@ -136,13 +135,24 @@ namespace Tds.GameScripts
             return _levelGrid.AnyInArea(gridRect, predicate);
         }
 
-        public void Awake()
+        public void BuildGrid(float levelScale)
         {
             _spriteProviders = SetupSpritePools(_levelDefinitions);
 
-            _levelOffset = new Vector3((_width * _tileWidth) * -0.5f, (_height * _tileHeight) * -0.5f, transform.position.z);
+            _levelOffset = new Vector3(_width * -0.5f, _height * -0.5f, transform.position.z);
 
-            _layout = BuildLevel();
+            // scale the length of the dungeon with the level
+            if (_traversalAlgorithm._maxLength != -1)
+            {
+                _traversalAlgorithm._maxLength += _traversalAlgorithm._maxLength
+                                                * levelScale
+                                                * _dungeonLengthLevelScale;
+
+                _traversalAlgorithm._maxLength = Mathf.Min(_traversalAlgorithm._maxLength, _maxDungeonLength);
+            }
+
+            _layout = BuildLevelLayout(_width, _height, _traversalAlgorithm, _divisionAlgorithm);
+            _levelGrid = LevelGridFactory.CreateLevelElementGrid(_width, _height, _maxDoorLength, _layout);
         }
 
         /// <summary>
@@ -166,30 +176,10 @@ namespace Tds.GameScripts
 
             for (int i = 0; i < providers.Length; ++i)
             {
-                providers[i] = definitions[i].CreateProvider();
+                providers[i] = definitions[i].CreateProvider(gameObject);
             }
 
             return providers;
-        }
-
-        private DungeonLayout BuildLevel()
-        {
-            // scale the length of the dungeon with the level
-            var gameStateObject = GameObject.FindGameObjectWithTag(GameTags.GameState);
-
-            if (gameStateObject != null && _traversalAlgorithm._maxLength != -1)
-            {
-                var levelScale = gameStateObject.GetComponent<GameStateBehaviour>()._levelScale;
-                _traversalAlgorithm._maxLength += _traversalAlgorithm._maxLength
-                                                * levelScale
-                                                * _dungeonLengthLevelScale;
-
-                _traversalAlgorithm._maxLength = Mathf.Min(_traversalAlgorithm._maxLength, _maxDungeonLength);
-            }
-
-            var layout = BuildLevelLayout(_width, _height, _traversalAlgorithm, _divisionAlgorithm);
-            _levelGrid = BuildLevelGrid(_width, _height, layout);
-            return layout;
         }
 
         /// <summary>
@@ -273,37 +263,6 @@ namespace Tds.GameScripts
         }
 
         /// <summary>
-        /// Build a 2d grid of level elements of the given dimensions and the traversal path
-        /// </summary>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="pathRoot"></param>
-        /// <returns></returns>
-        public Grid2D<LevelElement> BuildLevelGrid(int width, int height, DungeonLayout layout)
-        {
-            // fill the grid with tiles
-            var grid = new Grid2D<LevelElement>(width, height,
-                () => new LevelElement()
-                {
-                    _id = LevelElementDefinitions.None,
-                    // pre-select a randomized value so the sprite variations can easily pick a random sprite / color 
-                    _randomRoll = UnityEngine.Random.Range(0, 256 * 256)
-                });
-
-            DrawDungeonNodes(layout, grid);
-            DrawDungeonDoorways(layout, grid);
-
-            // draw an outline around the "rooms" (rects) in the level that do not have an outline
-            DrawMisingRoomBorders(layout, grid);
-
-            // draw the exit
-            var exitPosition = layout.End.Rect.center;
-            grid[(int)exitPosition.x, (int)exitPosition.y]._id = LevelElementDefinitions.ExitIndex;
-
-            return grid;
-        }
-
-        /// <summary>
         /// Draw the outline of the level
         /// </summary>
         public void OnDrawGizmos()
@@ -317,154 +276,5 @@ namespace Tds.GameScripts
             }    
         }
 
-        private void DrawDungeonNodes(DungeonLayout dungeon, Grid2D<LevelElement> grid)
-        {
-            foreach (var node in dungeon.Nodes)
-            {
-                var rect = node.Rect;
-                var xOffset = rect.position.x;
-                var yOffset = rect.position.y;
-
-                for (var x = 1; x < rect.width; ++x)
-                {
-                    for (var y = 1; y < rect.height; ++y)
-                    {
-                        grid[x + xOffset, y + yOffset]._id = LevelElementDefinitions.FloorTileIndex;
-                    }
-                }
-
-                // Draw some borders around the bottom and left part of the rect. We draw a wall on
-                // two sides only so we draw a wall one thick in every room. A separate step
-                // is required to draw the other walls iff necessary because children may surround this border
-                var p1 = rect.position;
-                var p2 = rect.position + new Vector2Int(rect.width, 0);
-                var p3 = rect.position + new Vector2Int(0, rect.height);
-
-                grid.TraceLine(p1, p2, (x, y, g) => grid[x, y]._id = LevelElementDefinitions.HorizontalWallIndex);
-                grid.TraceLine(p1 + Vector2Int.up, p3, (x, y, g) => grid[x, y]._id = LevelElementDefinitions.VerticalWallIndex);
-            }
-
-        }
-
-        /// <summary>
-        /// Draws all intersection doorways (and changes the intersection0
-        /// </summary>
-        /// <param name="dungeon"></param>
-        /// <param name="grid"></param>
-        private void DrawDungeonDoorways(DungeonLayout dungeon, Grid2D<LevelElement> grid)
-        {
-            var edgesDrawn = new HashSet<DungeonEdge>();
-
-            foreach (var node in dungeon.Nodes)
-            {
-                // recursively draw the level element for each child
-                if (node.Edges != null)
-                {
-                    foreach (var edge in node.Edges)
-                    {
-                        if (!edgesDrawn.Contains(edge))
-                        {
-                            edgesDrawn.Add(edge);
-                            DrawDoorWay(edge.NodeIntersection, grid);
-                        }
-                    }
-                }
-            }
-        }
-
-        /// <summary>
-        /// Draws the doorway and modifies the intersection to fit the actual door drawn
-        /// </summary>
-        /// <param name="intersection"></param>
-        /// <param name="grid"></param>
-        private void DrawDoorWay(Vector2Int[] intersection, Grid2D<LevelElement> grid)
-        {
-            var x1 = intersection[0].x;
-            var x2 = intersection[1].x;
-
-            var y1 = intersection[0].y;
-            var y2 = intersection[1].y;
-
-            if (y1 == y2)
-            {
-                var wallLength = x2 - x1;
-                var doorLength = Mathf.Min(_maxDoorLength, UnityEngine.Random.Range(1, wallLength - 2));
-                var doorStart = UnityEngine.Random.Range(1, wallLength - (doorLength + 1));
-
-                intersection[0] = new Vector2Int(x1 + doorStart, y1);
-                intersection[1] = new Vector2Int(x1 + doorStart + doorLength, y2);
-
-                for (var i = 0; i < doorLength; ++i)
-                {
-                    grid[x1 + doorStart + i, y1]._id = LevelElementDefinitions.FloorTileIndex;
-                }
-            } 
-            else
-            {
-                var wallLength = y2 - y1;
-                var doorLength = Mathf.Min(_maxDoorLength, UnityEngine.Random.Range(1, wallLength - 2));
-                var doorStart = UnityEngine.Random.Range(1, wallLength - (doorLength + 1));
-
-                intersection[0] = new Vector2Int(x1, y1 + doorStart);
-                intersection[1] = new Vector2Int(x2, y1 + doorStart + doorLength);
-
-                for (var i = 0; i < doorLength; ++i)
-                {
-                    grid[x1, y1 + doorStart + i]._id = LevelElementDefinitions.FloorTileIndex;
-                }
-            }
-        }
-     
-        /// <summary>
-        /// Last step of creating a grid, fill out the 
-        /// </summary>
-        /// <param name="node"></param>
-        /// <param name="grid"></param>
-        //private void TraceRoomBorders(TraversalNode node, Grid2D<LevelElement> grid)
-        private void DrawMisingRoomBorders(DungeonLayout layout, Grid2D<LevelElement> grid)
-        {
-            foreach( var node in layout.Nodes)
-            { 
-                var rect = node.Rect;
-                var x1 = rect.min.x;
-                var x2 = rect.max.x;
-
-                var y1 = rect.min.y;
-                var y2 = rect.max.y;
-
-                // if we're at the top of the grid, slightly tweak the offset and adjust the condition for
-                // drawing a wall
-                var isAboveGrid = (y2 >= grid.Height);
-                var offset = isAboveGrid  ? -1 : 0;
-                var condition = isAboveGrid ? LevelElementDefinitions.FloorTileIndex : LevelElementDefinitions.None;
-
-                // trace the top left to the top right
-                for (var x = x1; x <= x2; x++)
-                {
-                    var y = y2 + offset;
-
-                    if (grid.IsOnGrid(x, y) && grid[x, y]._id == condition)
-                    {
-                        grid[x, y]._id = LevelElementDefinitions.HorizontalWallIndex;
-                    }
-                }
-
-                var isRightOfGrid = (x2 >= grid.Width);
-                offset = isRightOfGrid ? -1 : 0;
-                condition = isRightOfGrid ? LevelElementDefinitions.FloorTileIndex : LevelElementDefinitions.None;
-
-                // trace the top right to the bottom right
-                for (var y = y1; y < y2; y++)
-                {
-                    var x = x2 + offset;
-
-                    if (grid.IsOnGrid(x, y) && grid[x, y]._id == condition)
-                    {
-                        grid[x, y]._id = LevelElementDefinitions.VerticalWallIndex;
-                    }
-                }
-                 
-            }
-        }
     }
 }

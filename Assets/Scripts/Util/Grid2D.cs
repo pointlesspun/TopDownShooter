@@ -15,9 +15,29 @@ namespace Tds.Util
     /// <typeparam name="T"></typeparam>
     public class Grid2D<T> 
     {
+        public static readonly Vector2Int[] NeighbourOffsets =
+        {
+            Vector2Int.up,
+            Vector2Int.up + Vector2Int.right,
+            Vector2Int.right,
+            Vector2Int.down + Vector2Int.right,
+            Vector2Int.down,
+            Vector2Int.down + Vector2Int.left,
+            Vector2Int.left,
+            Vector2Int.up + Vector2Int.left
+        };
+
         private T[] _data;
         public int Width { get; private set; }
         public int Height { get; private set; }
+
+        public RectInt Bounds
+        {
+            get
+            {
+                return new RectInt(0, 0, Width, Height);
+            }
+        }
 
         public T this[int x, int y]
         {
@@ -75,6 +95,11 @@ namespace Tds.Util
             return x >= 0 && x < Width && y >= 0 && y < Height;
         }
 
+        public bool IsOnGrid(Vector2Int position)
+        {
+            return position.x >= 0 && position.x < Width && position.y >= 0 && position.y < Height;
+        }
+
         /// <summary>
         /// Returns the intersection of the given rect with the grid, clamped by the grid's bounding box
         /// </summary>
@@ -111,6 +136,85 @@ namespace Tds.Util
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Applies the action to each neighbour of the position. The 'neighbour'
+        /// is defined as each element at position + Neigbouroffsets[i] which
+        /// is on the grid.
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="action"></param>
+        public void ForEachNeigbours(Vector2Int position, Action<T> action)
+        {
+            foreach ( var offset in NeighbourOffsets)
+            {
+                var neighbourPosition = offset + position;
+                if ( IsOnGrid(neighbourPosition))
+                {
+                    action(this[neighbourPosition.x, neighbourPosition.y]);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Finds the approximate nearests element near the center matching the predicate. Note the search is in a diamond
+        /// pattern around the center and not a circular one
+        /// </summary>
+        /// <param name="center">The point acting as the center of the search.</param>
+        /// <param name="bounds">Bounds to restrict the search to</param>
+        /// <param name="predicate">Predicate to match the items </param>
+        /// <param name="randomizeStartLocation">If true the start point of iteration will chosen randomly, thus 
+        /// randomizing the result in case of equal solutions</param>
+        /// <returns></returns>
+        public T FindNearestAround(Vector2Int center,
+                                    RectInt bounds,
+                                    Func<T, float, bool> predicate,
+                                    bool randomizeStartLocation = false)
+        {
+            var bestDistance = float.MaxValue;
+            var bestElement = default(T);
+            var hasAnyElementInArea = true;
+            var period = 0;
+
+            while (hasAnyElementInArea) 
+            {
+                var max = Mathf.Max(1, period * 4);
+                var startIndex = randomizeStartLocation ? UnityEngine.Random.Range(0, max) : 0;
+                hasAnyElementInArea = false;
+
+                for ( var i = 0; i < max; ++i)
+                {
+                    var n = (i + startIndex) % max;
+
+                    var yOffset = MathUtil.TriangleWave(n + period*2, period*2) - period;
+                    var xOffset = MathUtil.TriangleWave(n + period*1, period*2) - period;
+                    var testPoint = new Vector2Int(xOffset, yOffset) + center;  
+
+                    if (IsOnGrid(testPoint) && bounds.Contains(testPoint))
+                    {
+                        var distance = (center - testPoint).magnitude;
+                        var element = this[testPoint.x, testPoint.y];
+
+                        hasAnyElementInArea = true;
+
+                        if (distance < bestDistance && predicate(element, distance))
+                        {
+                            bestElement = element;
+                            bestDistance = distance;
+                        }
+                    }
+                }
+
+                if ( bestElement != null)
+                {
+                    break;
+                }
+
+                period++;
+            }
+
+            return bestElement;
         }
 
         /// <summary>

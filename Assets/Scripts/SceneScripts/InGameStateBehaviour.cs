@@ -9,6 +9,8 @@ namespace Tds.SceneScripts
     using UnityEngine.SceneManagement;
 
     using Tds.GameScripts;
+    using Tds.DungeonGeneration;
+    using Tds.Util;
 
     /// <summary>
     /// Expressed the behavior of the state when in game. Will track the state of the player.
@@ -31,40 +33,29 @@ namespace Tds.SceneScripts
         /// will load the title screen
         /// </summary>
         private GameObject _player;
-        private GameObject _levelGridObject;
-        private GameObject _directorObject;
-
-        private LevelGrid _levelGrid;
+       
+        private LevelBehaviour _level;
         private Director  _director;
-        
+        private GameStateBehaviour _gameState;
+
         public void Start()
         {
             // link all the object dependencies
             _player = GameObject.FindGameObjectWithTag(GameTags.Player);
-            _levelGridObject = GameObject.FindGameObjectWithTag(GameTags.LevelLayout);
-            _directorObject = GameObject.FindGameObjectWithTag(GameTags.Director);
 
-            if (_levelGridObject != null && _player != null)
+            _level = CommonExtensions.RetrieveComponent<LevelBehaviour>(GameTags.LevelLayout);
+            _director = CommonExtensions.RetrieveComponent<Director>(GameTags.Director, true);
+            _gameState = CommonExtensions.RetrieveComponent<GameStateBehaviour>(GameTags.GameState, true);
+
+            _level.BuildGrid(_gameState == null ? 1 : _gameState._levelScale);
+            _player.transform.position = _level.StartPosition;
+
+            if (_director != null)
             {
-                _levelGrid = _levelGridObject.GetComponent<LevelGrid>();
-
-                if (_levelGrid != null)
-                {
-                    _player.transform.position = _levelGrid.StartPosition;
-
-                    if (_directorObject != null)
-                    {
-                        _director = _directorObject.GetComponent<Director>();
-
-                        if (_director != null)
-                        {
-                            _director.SetDungeonLayout(_levelGrid._layout, _levelGrid._levelOffset);
-                        }
-                    }
-                }
-            }
+                _director.SetDungeonLayout(_level._layout, _level._levelOffset);
+            }        
         }
-
+        
         public void Update()
         {
             if (_player == null || !_player.activeInHierarchy)
@@ -72,9 +63,9 @@ namespace Tds.SceneScripts
                 // game over...
                 SceneManager.LoadScene(_titleScreenScene);
             }
-            else if (_levelGrid != null)
+            else if (_level != null)
             {
-                _levelGrid.UpdateFocus(_player.transform.position);
+                _level.UpdateFocus(_player.transform.position);
             }
         }
 
