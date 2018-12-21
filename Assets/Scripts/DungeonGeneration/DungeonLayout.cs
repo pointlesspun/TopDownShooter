@@ -8,28 +8,49 @@ namespace Tds.DungeonGeneration
 {
     using System.Collections.Generic;
     using Tds.PathFinder;
+    using Tds.Util;
     using UnityEngine;
 
     /// <summary>
     /// Algorithm which randomly traverses through a dungeon (list of dungeon nodes),
     /// creating a smaller dungeon with guaranteed path
     /// </summary>
-    public class DungeonLayout : ISearchSpace<DungeonNode, Vector2>
+    public class DungeonLayout 
     {
         // to do replace with quadtree
         private List<DungeonNode> _nodes;
 
+        /// <summary>
+        /// Collection of nodes, use for debug purposes only
+        /// </summary>
         public IEnumerable<DungeonNode> Nodes
         {
-            get { return _nodes;  }
+            get { return _nodes; }
         }
 
+        /// <summary>
+        /// Number of nodes in this layout
+        /// </summary>
+        public int NodeCount
+        {
+            get
+            {
+                return _nodes.Count;
+            }
+        }
+
+        /// <summary>
+        /// Start node of the layout (player spawn node)
+        /// </summary>
         public DungeonNode Start
         {
             get;
             set;
         }
 
+        /// <summary>
+        /// End node of the layout (should contain the exit)
+        /// </summary>
         public DungeonNode End
         {
             get;
@@ -60,7 +81,7 @@ namespace Tds.DungeonGeneration
 
         public DungeonNode GetRandomElement()
         {
-            return _nodes[UnityEngine.Random.Range(0, _nodes.Count)];
+            return _nodes[Random.Range(0, _nodes.Count)];
         }
 
         public DungeonNode AddNode(DungeonNode node)
@@ -68,37 +89,7 @@ namespace Tds.DungeonGeneration
             _nodes.Add(node);
             return node;
         }
-
-        public Vector2 GetInterpolatedLocation(DungeonNode from, DungeonNode to, float value, Vector2 fallbackLocation)
-        {
-            var edge = from.GetEdgeTo(to);
-
-            if (edge != null)
-            {
-                return edge.NodeIntersection.Interpolation(value); 
-            }
-
-            return fallbackLocation;
-        }
-
-        public void GetWaypoints(DungeonNode from, DungeonNode to, Vector2[] waypoints, Vector2 offset, bool randomize = false)
-        {
-            var edge = from.GetEdgeTo(to);
-            var cross = edge.NodeIntersection.Cross(randomize ? Random.value : 0.5f);
-
-            if (from.ContainsPoint(cross.to))
-            {
-                waypoints[0] = cross.to + offset;
-                waypoints[1] = cross.from - (cross.to - cross.from) + offset;
-            }
-            else
-            {
-                waypoints[0] = cross.from - (cross.to - cross.from) + offset;
-                waypoints[1] = cross.to + offset;
-            }
-        }
-
-
+        
         public DungeonNode FindNearestSolution(Vector2 position, float maxDistance = -1)
         {
             DungeonNode result = null;

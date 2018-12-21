@@ -8,8 +8,18 @@ namespace Tds.DungeonGeneration
 {
     using UnityEngine;
 
+    /// <summary>
+    /// Extension class to draw gizmos for a dungeon layout
+    /// </summary>
     public static class DungeonDebugUtil
     {
+        /// <summary>
+        /// Extension method to draw a dungeon layout
+        /// </summary>
+        /// <param name="layout">Layout to draw</param>
+        /// <param name="colors">Colors for the gizmos</param>
+        /// <param name="drawStartAndEnd">Draw the start and end node</param>
+        /// <param name="levelOffset">Offset of the level in the world</param>
         public static void DrawLayout(this DungeonLayout layout, Color[] colors, bool drawStartAndEnd, Vector2 levelOffset)
         {
             var gizmoColorIndex = 0;

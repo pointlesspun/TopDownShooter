@@ -18,13 +18,17 @@ namespace Tds.CommonBehaviours
         public float _deadZone = 1.0f;
 
         /// <summary>
-        /// Object to follow
+        /// Object to follow, if set to null the follow target will default to a gameobject with the player tag
         /// </summary>
         private GameObject _target;
 
+
         public void Start()
         {
-            _target = GameObject.FindGameObjectWithTag(GameTags.Player);
+            if (_target == null)
+            {
+                _target = GameObject.FindGameObjectWithTag(GameTags.Player);
+            }
         }
 
         public void Update()

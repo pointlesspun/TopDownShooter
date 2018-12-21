@@ -50,11 +50,13 @@ namespace Tds.DungeonGeneration
             if (_useTextInput)
             {
                 var input = _textInput.Split('\n');
-                var grid = DungeonGenerationUtil.CreateFrom(input, _textInputRectWidth, _textInputRectHeight);
+                var grid = LevelGridFactory.CreateFrom(input, _textInputRectWidth, _textInputRectHeight);
                 var nodes = grid.Values.Where(v => v != null);
-                Layout = new DungeonLayout(nodes);
-                Layout.Start = GetAndValidateNode(_startCoordinate, grid, "Error getting start node"); 
-                Layout.End = GetAndValidateNode(_endCoordinate, grid, "Error getting end node");
+                Layout = new DungeonLayout(nodes)
+                {
+                    Start = GetAndValidateNode(_startCoordinate, grid, "Error getting start node"),
+                    End = GetAndValidateNode(_endCoordinate, grid, "Error getting end node")
+                };
             }
             else
             {

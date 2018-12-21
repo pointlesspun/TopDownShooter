@@ -7,8 +7,6 @@
 namespace Tds.DungeonPathfinding
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
 
     using Tds.PathFinder;
     using Tds.DungeonGeneration;
@@ -52,8 +50,7 @@ namespace Tds.DungeonPathfinding
             });
 
 
-            return BestFistSearch<DungeonNode>.Instantiate(poolSize, lengthWeight, goalDistanceWeight, nextNodeDistanceWeight, distanceFunction, neighbourFunction);
-          
+            return BestFistSearch<DungeonNode>.Instantiate(poolSize, lengthWeight, goalDistanceWeight, nextNodeDistanceWeight, distanceFunction, neighbourFunction);          
         }
 
         private float CostFunction(DungeonNode from, DungeonNode to, DungeonNode goal, float pathLength)

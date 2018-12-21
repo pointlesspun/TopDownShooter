@@ -10,6 +10,9 @@ namespace Tds.DungeonGeneration
 
     using Tds.Util;
 
+    /// <summary>
+    /// Direction of the edge. Mainly for completeness purposes as all edges in the current application are bidirectional.
+    /// </summary>
     public enum EdgeDirection
     {
         UniDirectional,
@@ -30,18 +33,27 @@ namespace Tds.DungeonGeneration
             set;
         }
 
+        /// <summary>
+        /// From node
+        /// </summary>
         public DungeonNode From
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// The other node
+        /// </summary>
         public DungeonNode To
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Direction of the edge
+        /// </summary>
         public EdgeDirection Direction
         {
             get;

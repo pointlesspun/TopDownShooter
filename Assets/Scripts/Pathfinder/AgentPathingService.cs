@@ -156,7 +156,7 @@ namespace Tds.PathFinder
             state.pathfindingTicket = -1;
             state.state = PathingState.FollowingPath;
 
-            GetNextWaypoints(state, context);
+            GetNextWaypoints(state, context, true);
         }
 
         public static void UpdateFollowingPath<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
@@ -244,7 +244,7 @@ namespace Tds.PathFinder
                 var nextNode = agentState.pathNodes[index + 1];
 
                 // node may be null - in which case we've reached the end of the path
-                if (node != null && nextNode != null)
+                if (node != null && nextNode != null && node != nextNode)
                 {
                     context.searchSpace.GetWaypoints(node, nextNode, agentState.waypoints, context.settings.worldOffset, randomize);
                 }

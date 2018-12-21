@@ -56,6 +56,8 @@ namespace Tds.DungeonGeneration
         /// </summary>
         public float _stopChanceDepthFactor = 0;
 
+        
+
         /// <summary>
         /// Subdivides the given root node in binary pieces according to the settings in this class
         /// </summary>
@@ -63,6 +65,7 @@ namespace Tds.DungeonGeneration
         /// <returns></returns>
         public DungeonLayout Subdivide(RectInt size, Axis startingAxis = Axis.None)
         {
+         
             var initialRandomState = UnityEngine.Random.state;
 
             if (_seed >= 0)

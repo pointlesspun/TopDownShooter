@@ -111,7 +111,7 @@ namespace Tds.DungeonPathfinding
         {
             return new AgentPathingContext<DungeonNode>()
             {
-                searchSpace = GetComponent<DungeonLayoutDebugBehaviour>().Layout,
+                searchSpace = new DungeonLayoutSearchSpace() { Layout = GetComponent<DungeonLayoutDebugBehaviour>().Layout },
                 service = GetComponent<PathfindingServiceBehaviour>().PathfindingService,
                 settings = GetComponent<PathfindingServiceBehaviour>()._pathfindingSettings,
                 time = Time.realtimeSinceStartup

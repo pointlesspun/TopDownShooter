@@ -11,6 +11,57 @@ namespace Tds.DungeonGeneration
 
     public static class LevelGridFactory
     {
+
+        /// <summary>
+        /// Create a dungeon from a string where a space will be a void 
+        /// and a # a node. All nodes with top / bottom / left / right neighbour will be connected.
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        public static Grid2D<DungeonNode> CreateFrom(string[] input, int nodeWidth = 1, int nodeHeight = 1)
+        {
+            Vector2Int[] offsetSet = { new Vector2Int(0, 1), new Vector2Int(1, 0), new Vector2Int(0, -1), new Vector2Int(-1, 0) };
+            var result = new Grid2D<DungeonNode>(input[0].Length, input.Length, () => null);
+
+            for (int y = 0; y < input.Length; ++y)
+            {
+                for (int x = 0; x < input[y].Length; x++)
+                {
+                    if (input[y][x] == '#')
+                    {
+                        var yPosition = result.Height - (y + 1);
+                        result[x, yPosition] = new DungeonNode(new RectInt(x * nodeWidth, yPosition * nodeHeight, nodeWidth, nodeHeight));
+                    }
+                }
+            }
+
+            for (int y = 0; y < result.Height; ++y)
+            {
+                for (int x = 0; x < result.Width; x++)
+                {
+                    var node = result[x, y];
+
+                    if (node != null)
+                    {
+                        foreach (var offset in offsetSet)
+                        {
+                            if (result.IsOnGrid(x + offset.x, y + offset.y))
+                            {
+                                var other = result[x + offset.x, y + offset.y];
+
+                                if (other != null && other.GetEdgeTo(node) == null)
+                                {
+                                    DungeonNode.Connect(node, other);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+
         /// <summary>
         /// Creates a default level element
         /// </summary>
@@ -89,8 +140,18 @@ namespace Tds.DungeonGeneration
                     {
                         if (!edgesDrawn.Contains(edge))
                         {
+                            var doorwayIntersection = DrawDoorWay(grid, edge.NodeIntersection, maxDoorLength);
+
+                            if (doorwayIntersection.from.x == doorwayIntersection.to.x)
+                            {
+                                edge.NodeIntersection = doorwayIntersection.Translate(0, -0.5f);
+                            }
+                            else
+                            {
+                                edge.NodeIntersection = doorwayIntersection.Translate(-0.5f, 0);
+                            }
+
                             edgesDrawn.Add(edge);
-                            DrawDoorWay(grid, edge, maxDoorLength);
                         }
                     }
                 }
@@ -102,46 +163,18 @@ namespace Tds.DungeonGeneration
         /// </summary>
         /// <param name="intersection"></param>
         /// <param name="grid"></param>
-        public static void DrawDoorWay(Grid2D<LevelElement> grid, DungeonEdge edge, int maxDoorLength)
+        public static Line2D DrawDoorWay(Grid2D<LevelElement> grid, Line2D nodeIntersection, int maxDoorLength)
         {
-            var intersection = edge.NodeIntersection;
+            var intersection = nodeIntersection
+                                        .Randomized(1, maxDoorLength, 1, 1)
+                                        .Snap();
 
-            var x1 = intersection.from.x;
-            var x2 = intersection.to.x;
-
-            var y1 = intersection.from.y;
-            var y2 = intersection.to.y;
-
-            if (y1 == y2)
+            grid.TraceLine(intersection.from, intersection.to, (x, y, g) =>
             {
-                var wallLength = x2 - x1;
-                var doorLength = Mathf.Min(maxDoorLength, Random.Range(1, wallLength - 2));
-                var doorStart = Random.Range(1, wallLength - (doorLength + 1));
+                grid[x, y]._id = LevelElementDefinitions.FloorTileIndex;
+            });
 
-                intersection.from = new Vector2(Mathf.FloorToInt(x1 + doorStart) - 0.5f, y1);
-                intersection.to = new Vector2(Mathf.FloorToInt(x1 + doorStart + doorLength) - 0.5f, y2);
-
-                for (var i = 0; i < doorLength; ++i)
-                {
-                    grid[Mathf.FloorToInt(x1 + doorStart + i), Mathf.FloorToInt(y1)]._id = LevelElementDefinitions.FloorTileIndex;
-                }
-            }
-            else
-            {
-                var wallLength = y2 - y1;
-                var doorLength = Mathf.Min(maxDoorLength, UnityEngine.Random.Range(1, wallLength - 2));
-                var doorStart = Random.Range(1, wallLength - (doorLength + 1));
-
-                intersection.from = new Vector2(x1, Mathf.FloorToInt(y1 + doorStart) - 0.5f);
-                intersection.to = new Vector2(x2, Mathf.FloorToInt(y1 + doorStart + doorLength) - 0.5f);
-
-                for (var i = 0; i < doorLength; ++i)
-                {
-                    grid[Mathf.FloorToInt(x1), Mathf.FloorToInt(y1 + doorStart + i)]._id = LevelElementDefinitions.FloorTileIndex;
-                }
-            }
-
-            edge.NodeIntersection = intersection;
+            return intersection;
         }
 
         /// <summary>

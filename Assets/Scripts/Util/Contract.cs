@@ -49,5 +49,22 @@ namespace Tds.Util
 #endif
             }
         }
+
+        /// <summary>
+        /// Checks if the given object is not null
+        /// </summary>
+        /// <param name="obj"></param>
+        /// <param name="message"></param>
+        public static void RequiresNotNull(object obj, string message)
+        {
+            if (obj == null)
+            {
+                Debug.LogError("Provided object cannot be null. " + message);
+#if UNITY_EDITOR
+                UnityEditor.EditorApplication.isPlaying = false;
+                throw new InvalidProgramException("Failed requirement: " + message);
+#endif
+            }
+        }
     }
 }

@@ -74,10 +74,10 @@ namespace Tds.DungeonPathfinding
             };
         }
 
-        public void UpdateAgentPathing(AgentPathingState<DungeonNode> pathfindingState, DungeonLayout layout)
+        public void UpdateAgentPathing(AgentPathingState<DungeonNode> pathfindingState, DungeonLayoutSearchSpace searchSpace)
         {
             _context.time = Time.time;
-            _context.searchSpace = layout;
+            _context.searchSpace = searchSpace; 
 
             AgentPathingService.UpdateState(pathfindingState, _context);
         }

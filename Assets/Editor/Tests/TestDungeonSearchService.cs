@@ -129,7 +129,7 @@ public class TestDungeonSearchService
             "##",
         };
 
-        var grid = DungeonGenerationUtil.CreateFrom(input);
+        var grid = LevelGridFactory.CreateFrom(input);
         var service = new SearchService<DungeonNode>().Initialize(1, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
 
         var id1 = service.BeginSearch(grid[0,0], grid[1, 1]);
@@ -159,7 +159,7 @@ public class TestDungeonSearchService
             "##",
         };
 
-        var grid = DungeonGenerationUtil.CreateFrom(input);
+        var grid = LevelGridFactory.CreateFrom(input);
         var service = new SearchService<DungeonNode>().Initialize(1, 1, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
 
         service.MaxAgeCompletedSearch = 2;

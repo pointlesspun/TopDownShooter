@@ -30,7 +30,7 @@ namespace Tds.CommonBehaviours
         /// Cached renderers which make up this game object so we can color them if the 
         /// gameobject takes damage.
         /// </summary>        
-        private List<SpriteRendererColorInformation> _renderers = new List<SpriteRendererColorInformation>();
+        private readonly List<SpriteRendererColorInformation> _renderers = new List<SpriteRendererColorInformation>();
 
         public virtual void Start()
         {

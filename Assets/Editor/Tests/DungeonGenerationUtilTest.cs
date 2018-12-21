@@ -15,7 +15,7 @@ public class DungeonGenerationUtilTest
             " #",
             "##"
         };
-        var result = DungeonGenerationUtil.CreateFrom(input, 2, 2);
+        var result = LevelGridFactory.CreateFrom(input, 2, 2);
 
         Assert.IsTrue(result.Width == 2);
         Assert.IsTrue(result.Height == 2);

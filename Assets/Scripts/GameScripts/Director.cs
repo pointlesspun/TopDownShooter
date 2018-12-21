@@ -51,6 +51,11 @@ namespace Tds.GameScripts
         private DungeonLayout _layout;
 
         /// <summary>
+        /// Search space over the layout
+        /// </summary>
+        private DungeonLayoutSearchSpace _searchSpace;
+
+        /// <summary>
         /// Mandatory behaviour containing the pathfinding settings
         /// </summary>
         private PathfindingServiceBehaviour  _pathfindingBehaviour;
@@ -80,6 +85,7 @@ namespace Tds.GameScripts
         {
             _offset = offset;
             _layout = layout;
+            _searchSpace = new DungeonLayoutSearchSpace() { Layout = _layout };
 
             foreach (var node in layout.Nodes)
             {
@@ -178,7 +184,7 @@ namespace Tds.GameScripts
 
                                 // define the monster's pathfinding 
                                 monster.GetComponent<MonsterBehaviour>().UpdatePathingContext =
-                                    (context) => _pathfindingBehaviour.UpdateAgentPathing(context, _layout);
+                                    (context) => _pathfindingBehaviour.UpdateAgentPathing(context, _searchSpace);
                             }
 
                             _closedSet.Add(n);

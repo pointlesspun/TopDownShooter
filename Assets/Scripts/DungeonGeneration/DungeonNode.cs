@@ -14,10 +14,31 @@ namespace Tds.DungeonGeneration
 
     using Tds.Util;
 
+    /// <summary>
+    /// Node of a dungeon. 
+    /// </summary>
     public class DungeonNode 
     {
+        // debug id
+        private static int _idCounter = 0;
+
+        /// <summary>
+        /// Edges connecting this node to other nodes
+        /// </summary>
         private List<DungeonEdge> _edges;
 
+        /// <summary>
+        /// Debug id of this node
+        /// </summary>
+        public int Id
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// Human readable name of this node
+        /// </summary>
         public string Name
         {
             get;
@@ -41,26 +62,41 @@ namespace Tds.DungeonGeneration
             get { return _edges;  }
         } 
 
+        /// <summary>
+        /// Width of this node (convenience method for Rect.width)
+        /// </summary>
         public int Width
         {
             get { return Rect.width; }
         }
 
+        /// <summary>
+        /// Height of this node (convenience method for Rect.height)
+        /// </summary>
         public int Height
         {
             get { return Rect.height; }
         }
 
+        /// <summary>
+        /// Min of this node (convenience method for Rect.min)
+        /// </summary>
         public Vector2Int Min
         {
             get { return Rect.min; }
         }
 
+        /// <summary>
+        /// Max of this node (convenience method for Rect.max)
+        /// </summary>
         public Vector2Int Max
         {
             get { return Rect.max; }
         }
 
+        /// <summary>
+        /// Convenience mthod to iterate over all neighbours - use for debug purposes only
+        /// </summary>
         public IEnumerable<DungeonNode> Neighbours
         {
             get
@@ -72,11 +108,13 @@ namespace Tds.DungeonGeneration
         public DungeonNode(RectInt dimensions )
         {
             Rect = dimensions;
+            Id = _idCounter++;
         }
 
         public DungeonNode(int x, int y, int w, int h)
         {
             Rect = new RectInt(x,y,w,h);
+            Id = _idCounter++;
         }
 
         public DungeonNode[] DivideOverXAxis(int height)
