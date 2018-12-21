@@ -84,40 +84,40 @@ public class RectUtilTest
         var r2 = new RectInt(Vector2Int.right * 2, Vector2Int.one * 2);
         var touchPoints = RectUtil.GetIntersection(r1, r2);
 
-        Assert.IsTrue(touchPoints[0].x == 2);
-        Assert.IsTrue(touchPoints[1].x == 2);
-        Assert.IsTrue(touchPoints[0].y == 0);
-        Assert.IsTrue(touchPoints[1].y == 2);
+        Assert.IsTrue(touchPoints.from.x == 2);
+        Assert.IsTrue(touchPoints.to.x == 2);
+        Assert.IsTrue(touchPoints.from.y == 0);
+        Assert.IsTrue(touchPoints.to.y == 2);
 
         // right & down
         r1 = new RectInt(Vector2Int.zero, Vector2Int.one * 2);
         r2 = new RectInt(Vector2Int.right * 2 + Vector2Int.down, Vector2Int.one * 2);
         touchPoints = RectUtil.GetIntersection(r1, r2);
 
-        Assert.IsTrue(touchPoints[0].x == 2);
-        Assert.IsTrue(touchPoints[1].x == 2);
-        Assert.IsTrue(touchPoints[0].y == 0);
-        Assert.IsTrue(touchPoints[1].y == 1);
+        Assert.IsTrue(touchPoints.from.x == 2);
+        Assert.IsTrue(touchPoints.to.x == 2);
+        Assert.IsTrue(touchPoints.from.y == 0);
+        Assert.IsTrue(touchPoints.to.y == 1);
 
         // bottom & left
         r1 = new RectInt(Vector2Int.zero, Vector2Int.one * 2);
         r2 = new RectInt(Vector2Int.left + Vector2Int.down * 2, Vector2Int.one * 2);
         touchPoints = RectUtil.GetIntersection(r1, r2);
 
-        Assert.IsTrue(touchPoints[0].x == 0);
-        Assert.IsTrue(touchPoints[1].x == 1);
-        Assert.IsTrue(touchPoints[0].y == 0);
-        Assert.IsTrue(touchPoints[1].y == 0);
+        Assert.IsTrue(touchPoints.from.x == 0);
+        Assert.IsTrue(touchPoints.to.x == 1);
+        Assert.IsTrue(touchPoints.from.y == 0);
+        Assert.IsTrue(touchPoints.to.y == 0);
 
         // top
         r1 = new RectInt(Vector2Int.zero, Vector2Int.one * 2);
         r2 = new RectInt(Vector2Int.zero + Vector2Int.up * 2, Vector2Int.one * 2);
         touchPoints = RectUtil.GetIntersection(r1, r2);
 
-        Assert.IsTrue(touchPoints[0].x == 0);
-        Assert.IsTrue(touchPoints[1].x == 2);
-        Assert.IsTrue(touchPoints[0].y == 2);
-        Assert.IsTrue(touchPoints[1].y == 2);
+        Assert.IsTrue(touchPoints.from.x == 0);
+        Assert.IsTrue(touchPoints.to.x == 2);
+        Assert.IsTrue(touchPoints.from.y == 2);
+        Assert.IsTrue(touchPoints.to.y == 2);
 
     }
 }

@@ -233,7 +233,11 @@ namespace Tds.DungeonGeneration
                             {
                                 // obtain up a visual from the pool and place it in the new position
                                 element._poolObject = _spriteProviders[element._id].Obtain(element._randomRoll);
-                                element._poolObject._obj.transform.position = _levelOffset + new Vector3(gridX * _tileWidth, gridY * _tileHeight, 0);
+
+                                if (element._poolObject != null)
+                                {
+                                    element._poolObject._obj.transform.position = _levelOffset + new Vector3(gridX * _tileWidth, gridY * _tileHeight, 0);
+                                }
 
                                 _elementCache.Add(element);
                             }

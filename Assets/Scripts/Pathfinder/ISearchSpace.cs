@@ -33,6 +33,14 @@ namespace Tds.PathFinder
         TLocation GetInterpolatedLocation(TElement from, TElement to, float value, TLocation fallbackLocation);
 
         /// <summary>
+        /// Creates waypoints from the 'from' node to the 'to' node.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <param name="waypoints"></param>
+        void GetWaypoints(TElement from, TElement to, TLocation[] waypoints, TLocation offset, bool randomize);
+
+        /// <summary>
         /// Utility function returning a random element from the searchspace
         /// </summary>
         /// <returns></returns>

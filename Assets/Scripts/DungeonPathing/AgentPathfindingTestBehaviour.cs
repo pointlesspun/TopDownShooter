@@ -137,31 +137,7 @@ namespace Tds.DungeonPathfinding
             {
                 for (int i = 0; i < _agentCount; ++i)
                 {
-                    // update the current agent location and target location
-                    _agents[i].agentLocation = _currentPosition[i];
-                    _agents[i].targetLocation = _target.transform.position;
-
-                    AgentPathingService.UpdateState(_agents[i], _context);
-
-                    if (_agents[i].state == PathingState.FollowingPath)
-                    {
-                        // move the agent
-                        var distanceToWaypoint = (_currentPosition[i] - _agents[i].waypoint).magnitude;
-                        _currentPosition[i] += (_agents[i].waypoint - _currentPosition[i]).normalized
-                                                        * Mathf.Min(distanceToWaypoint, _agentSpeeds[i]);
-
-                        // if the current waypoint is the end point, clamp the position of the agent to the 
-                        // last dungeon node to prevent it from clipping throuhg the wall
-                        if ((_agents[i].waypoint - _agents[i].targetStartLocation).sqrMagnitude < 0.1f)
-                        {
-                            var lastNode = _agents[i].pathNodes[_agents[i].waypointIndex];
-
-                            if (lastNode != null)
-                            {
-                                _currentPosition[i] = RectUtil.Clamp(lastNode.Rect, _currentPosition[i], 0.1f, 0.1f);
-                            }
-                        }
-                    }
+                    UpdateAgent(_agents[i], _agentSpeeds[i], ref _currentPosition[i]);
                 }
 
                 _context.service.Update(_serviceIterations);
@@ -181,7 +157,43 @@ namespace Tds.DungeonPathfinding
 
             for (int i = 0; _currentPosition != null && i < _currentPosition.Length; ++i)
             {
+                // not great for the performance
+                /*Gizmos.color = Color.white;
+                Gizmos.DrawWireSphere(_agents[i].waypoints[0], _gizmoSize * 0.5f);
+                Gizmos.DrawWireSphere(_agents[i].waypoints[1], _gizmoSize * 0.5f);*/
+
                 Gizmos.DrawSphere(_currentPosition[i], _gizmoSize);
+            }
+        }
+
+        private void UpdateAgent(AgentPathingState<DungeonNode> agentState, float agentSpeed, ref Vector2 agentPosition)
+        {
+            // update the current agent location and target location
+            agentState.agentLocation = agentPosition;
+            agentState.targetLocation = _target.transform.position;
+
+            AgentPathingService.UpdateState(agentState, _context);
+
+            if (agentState.state == PathingState.FollowingPath)
+            {
+                // move the agent
+                var agentWaypointPosition = agentState.waypoints[agentState.waypointIndex];
+
+                var distanceToWaypoint = (agentPosition - agentWaypointPosition).magnitude;
+                agentPosition += (agentWaypointPosition - agentPosition).normalized
+                                                * Mathf.Min(distanceToWaypoint, agentSpeed);
+
+                // if the current waypoint is the end point, clamp the position of the agent to the 
+                // last dungeon node to prevent it from clipping throuhg the wall
+                if ((agentWaypointPosition - agentState.targetStartLocation).sqrMagnitude < 0.1f)
+                {
+                    var lastNode = agentState.pathNodes[agentState.pathNodeIndex];
+
+                    if (lastNode != null)
+                    {
+                        agentPosition = RectUtil.Clamp(lastNode.Rect, agentPosition, 0.1f, 0.1f);
+                    }
+                }
             }
         }
     }

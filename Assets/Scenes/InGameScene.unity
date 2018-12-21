@@ -220,7 +220,7 @@ MonoBehaviour:
   _pathfindingSettings:
     targetDistanceThreshold: 2
     pathValidatyCheckTimeout: 0.25
-    waypointDistance: 0.25
+    waypointDistance: 0.75
     worldOffset: {x: 0, y: 0}
   _iterationCount: 16
   _algorithmCount: 4

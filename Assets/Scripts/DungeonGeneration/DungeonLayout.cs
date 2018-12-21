@@ -75,11 +75,29 @@ namespace Tds.DungeonGeneration
 
             if (edge != null)
             {
-                return edge.GetIntersectionPoint(value); 
+                return edge.NodeIntersection.Interpolation(value); 
             }
 
             return fallbackLocation;
         }
+
+        public void GetWaypoints(DungeonNode from, DungeonNode to, Vector2[] waypoints, Vector2 offset, bool randomize = false)
+        {
+            var edge = from.GetEdgeTo(to);
+            var cross = edge.NodeIntersection.Cross(randomize ? Random.value : 0.5f);
+
+            if (from.ContainsPoint(cross.to))
+            {
+                waypoints[0] = cross.to + offset;
+                waypoints[1] = cross.from - (cross.to - cross.from) + offset;
+            }
+            else
+            {
+                waypoints[0] = cross.from - (cross.to - cross.from) + offset;
+                waypoints[1] = cross.to + offset;
+            }
+        }
+
 
         public DungeonNode FindNearestSolution(Vector2 position, float maxDistance = -1)
         {

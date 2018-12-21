@@ -22,16 +22,13 @@ namespace Tds.DungeonGeneration
 
                 foreach (var edge in node.Edges)
                 {
-                    var centerOffset = edge.NodeIntersection[1] - edge.NodeIntersection[0];
+                    var intersectionCenter = edge.NodeIntersection.Interpolation(0.5f);
 
-                    centerOffset.x /= 2;
-                    centerOffset.y /= 2;
-
-                    var intersectionCenter = new Vector2(edge.NodeIntersection[0].x + centerOffset.x,
-                                                                    edge.NodeIntersection[0].y + centerOffset.y);
                     Gizmos.color = Color.black;
-
                     Gizmos.DrawLine(node.Rect.center + levelOffset, intersectionCenter + levelOffset);
+
+                    Gizmos.color = Color.white;
+                    Gizmos.DrawLine(edge.NodeIntersection.from + levelOffset, edge.NodeIntersection.to + levelOffset);
                 }
             }
 

@@ -79,20 +79,28 @@ namespace Tds.PathFinder
         public T[] pathNodes;
 
         /// <summary>
-        /// Current waypoint the agent is moving to when in the tracing state 
-        /// </summary>
-        public Vector2 waypoint;
-
-        /// <summary>
         /// Current waypoint index in the nodes
         /// </summary>
-        public int waypointIndex;       
+        public int pathNodeIndex;
+
+        /// <summary>
+        /// Current waypoint the agent is moving to when in the tracing state 
+        /// </summary>
+        public Vector2[] waypoints;
+
+        /// <summary>
+        /// Current index in the waypoints
+        /// </summary>
+        public int waypointIndex;
 
         public AgentPathingState()
         {
             state = PathingState.Idle;
             pathfindingTicket = -1;
             lastTicketRequest = 0;
+            // need two points at the moment one in front of the doorway and one after the doorway
+            // this is just a crutch until detailed pathfinding is in place
+            waypoints = new Vector2[2];
         }
 
         /// <summary>

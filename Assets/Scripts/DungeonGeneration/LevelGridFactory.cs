@@ -90,7 +90,7 @@ namespace Tds.DungeonGeneration
                         if (!edgesDrawn.Contains(edge))
                         {
                             edgesDrawn.Add(edge);
-                            DrawDoorWay(grid, edge.NodeIntersection, maxDoorLength);
+                            DrawDoorWay(grid, edge, maxDoorLength);
                         }
                     }
                 }
@@ -102,42 +102,46 @@ namespace Tds.DungeonGeneration
         /// </summary>
         /// <param name="intersection"></param>
         /// <param name="grid"></param>
-        public static void DrawDoorWay(Grid2D<LevelElement> grid, Vector2Int[] intersection, int maxDoorLength)
+        public static void DrawDoorWay(Grid2D<LevelElement> grid, DungeonEdge edge, int maxDoorLength)
         {
-            var x1 = intersection[0].x;
-            var x2 = intersection[1].x;
+            var intersection = edge.NodeIntersection;
 
-            var y1 = intersection[0].y;
-            var y2 = intersection[1].y;
+            var x1 = intersection.from.x;
+            var x2 = intersection.to.x;
+
+            var y1 = intersection.from.y;
+            var y2 = intersection.to.y;
 
             if (y1 == y2)
             {
                 var wallLength = x2 - x1;
-                var doorLength = Mathf.Min(maxDoorLength, UnityEngine.Random.Range(1, wallLength - 2));
-                var doorStart = UnityEngine.Random.Range(1, wallLength - (doorLength + 1));
+                var doorLength = Mathf.Min(maxDoorLength, Random.Range(1, wallLength - 2));
+                var doorStart = Random.Range(1, wallLength - (doorLength + 1));
 
-                intersection[0] = new Vector2Int(x1 + doorStart, y1);
-                intersection[1] = new Vector2Int(x1 + doorStart + doorLength, y2);
+                intersection.from = new Vector2(Mathf.FloorToInt(x1 + doorStart) - 0.5f, y1);
+                intersection.to = new Vector2(Mathf.FloorToInt(x1 + doorStart + doorLength) - 0.5f, y2);
 
                 for (var i = 0; i < doorLength; ++i)
                 {
-                    grid[x1 + doorStart + i, y1]._id = LevelElementDefinitions.FloorTileIndex;
+                    grid[Mathf.FloorToInt(x1 + doorStart + i), Mathf.FloorToInt(y1)]._id = LevelElementDefinitions.FloorTileIndex;
                 }
             }
             else
             {
                 var wallLength = y2 - y1;
                 var doorLength = Mathf.Min(maxDoorLength, UnityEngine.Random.Range(1, wallLength - 2));
-                var doorStart = UnityEngine.Random.Range(1, wallLength - (doorLength + 1));
+                var doorStart = Random.Range(1, wallLength - (doorLength + 1));
 
-                intersection[0] = new Vector2Int(x1, y1 + doorStart);
-                intersection[1] = new Vector2Int(x2, y1 + doorStart + doorLength);
+                intersection.from = new Vector2(x1, Mathf.FloorToInt(y1 + doorStart) - 0.5f);
+                intersection.to = new Vector2(x2, Mathf.FloorToInt(y1 + doorStart + doorLength) - 0.5f);
 
                 for (var i = 0; i < doorLength; ++i)
                 {
-                    grid[x1, y1 + doorStart + i]._id = LevelElementDefinitions.FloorTileIndex;
+                    grid[Mathf.FloorToInt(x1), Mathf.FloorToInt(y1 + doorStart + i)]._id = LevelElementDefinitions.FloorTileIndex;
                 }
             }
+
+            edge.NodeIntersection = intersection;
         }
 
         /// <summary>

@@ -24,10 +24,10 @@ namespace Tds.DungeonGeneration
         /// <summary>
         /// Between the nodes
         /// </summary>
-        public Vector2Int[] NodeIntersection
+        public Line2D NodeIntersection
         {
             get;
-            private set;
+            set;
         }
 
         public DungeonNode From
@@ -73,7 +73,7 @@ namespace Tds.DungeonGeneration
         {
             get
             {
-                return Vector2Int.Distance(NodeIntersection[0], NodeIntersection[1]);
+                return NodeIntersection.Length;
             }
         }
 
@@ -84,7 +84,7 @@ namespace Tds.DungeonGeneration
         {
             get
             {
-                return GetIntersectionPoint(0.5f);
+                return NodeIntersection.Interpolation(0.5f);
             }
         }
 
@@ -95,14 +95,8 @@ namespace Tds.DungeonGeneration
         {
             get
             {
-                return GetIntersectionPoint(Random.value);
+                return NodeIntersection.Interpolation(Random.value);
             }
-        }
-
-        public Vector2 GetIntersectionPoint(float interpolation)
-        {
-            Vector2 direction = NodeIntersection[1] - NodeIntersection[0];
-            return NodeIntersection[0] + direction * interpolation;
-        }
+        }        
     }
 }

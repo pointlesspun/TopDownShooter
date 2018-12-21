@@ -54,6 +54,10 @@ namespace Tds.DungeonGeneration
             return fallbackLocation;
         }
 
+        public void GetWaypoints(LevelElement from, LevelElement to, Vector2[] waypoints, Vector2 offset, bool randomize)
+        {
+        }
+        
         public LevelElement GetRandomElement()
         {
             var node = _layout.GetRandomElement();

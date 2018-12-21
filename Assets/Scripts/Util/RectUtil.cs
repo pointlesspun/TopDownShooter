@@ -44,7 +44,7 @@ namespace Tds.Util
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static Vector2Int[] GetIntersection(RectInt a, RectInt b)
+        public static Line2D GetIntersection(RectInt a, RectInt b)
         {
             var x1 = Mathf.Max(a.min.x, b.min.x);
             var x2 = Mathf.Min(a.max.x, b.max.x);
@@ -52,10 +52,10 @@ namespace Tds.Util
             var y1 = Mathf.Max(a.min.y, b.min.y);
             var y2 = Mathf.Min(a.max.y, b.max.y);
 
-            return new Vector2Int[]
+            return new Line2D()
             {
-                new Vector2Int(x1, y1),
-                new Vector2Int(x2, y2),
+                from = new Vector2(x1, y1),
+                to = new Vector2(x2, y2),
             };
         }
 

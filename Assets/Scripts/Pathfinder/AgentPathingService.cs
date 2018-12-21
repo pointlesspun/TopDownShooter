@@ -84,6 +84,7 @@ namespace Tds.PathFinder
             state.pathfindingTicket = -1;
             state.agentNode = null;
             state.targetNode = null;
+            state.waypointIndex = 0;
         }
 
         /// <summary>
@@ -151,10 +152,11 @@ namespace Tds.PathFinder
         public static void InitializePathFollowingState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
         {
             state.stateStartTime = context.time;
-            state.waypointIndex = 0;
+            state.pathNodeIndex = 0;
             state.pathfindingTicket = -1;
-            state.waypoint = GetNextWaypointPosition(0, state.pathNodes, state.targetStartLocation - context.settings.worldOffset, context.searchSpace);
             state.state = PathingState.FollowingPath;
+
+            GetNextWaypoints(state, context);
         }
 
         public static void UpdateFollowingPath<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
@@ -175,30 +177,33 @@ namespace Tds.PathFinder
                 else
                 { 
                     // is the agent within range of the current waypoint
-                    if (IsDistanceInRange(state.waypoint + context.settings.worldOffset, state.agentLocation, context.settings.waypointDistance))
+                    if (IsDistanceInRange(state.waypoints[state.waypointIndex], state.agentLocation, context.settings.waypointDistance))
                     {
-                        T lastNode = state.pathNodes[state.pathNodes.Length - 1];
-                        // go to the next waypoint
-                        state.waypointIndex = Mathf.Min(state.waypointIndex + 1, state.pathNodes.Length);
+                        state.waypointIndex++;
 
-                        // check if the previous node in the list was the 'closest' node (targetNode)
-                        if ((state.waypointIndex == state.pathNodes.Length -1
-                            || state.pathNodes[state.waypointIndex] ==  null) && lastNode != state.targetNode)
+                        if (state.waypointIndex == state.waypoints.Length)
                         {
-                            // agent's buffer was too small to contain the full path, continue pathfinding from the current position
-                            InitializePathfindingState(state, context);
-                        }
-                        else
-                        {
-                            state.waypoint = GetNextWaypointPosition(state.waypointIndex, 
-                                                                        state.pathNodes,
-                                                                            state.targetStartLocation - context.settings.worldOffset,
-                                                                            context.searchSpace,
-                                                                            true);
+                            T lastNode = state.pathNodes[state.pathNodes.Length - 1];
+
+                            // go to the next waypoint
+                            state.pathNodeIndex = Mathf.Min(state.pathNodeIndex + 1, state.pathNodes.Length);
+
+                            // check if the previous node in the list was the 'closest' node (targetNode)
+                            if ((state.pathNodeIndex == state.pathNodes.Length - 1
+                                || state.pathNodes[state.pathNodeIndex] == null) && lastNode != state.targetNode)
+                            {
+                                // agent's buffer was too small to contain the full path, continue pathfinding from the current position
+                                InitializePathfindingState(state, context);
+
+                            }
+                            else
+                            {
+                                GetNextWaypoints(state, context, true);
+                            }
                         }
                     }
 
-                    state.movementDirection = (state.waypoint + context.settings.worldOffset) - state.agentLocation;
+                    state.movementDirection = state.waypoints[state.waypointIndex] - state.agentLocation;
                 }
             }
         }
@@ -225,24 +230,25 @@ namespace Tds.PathFinder
         /// <param name="nodes"></param>
         /// <param name="endPoint"></param>
         /// <returns></returns>
-        public static Vector2 GetNextWaypointPosition<T>(int index, 
-                                                        T[] nodes, 
-                                                        Vector2 endPoint,
-                                                        ISearchSpace<T, Vector2> searchSpace,
-                                                        bool randomize = false) where T : class
+        public static void GetNextWaypoints<T>(AgentPathingState<T> agentState, AgentPathingContext<T> context,
+                                                                                        bool randomize = false) where T : class
         {
-            if (index < nodes.Length - 1)
+            var index = agentState.pathNodeIndex;
+
+            agentState.waypoints[0] = agentState.targetStartLocation;
+            agentState.waypointIndex = 0;
+
+            if (index < agentState.pathNodes.Length - 1)
             {
-                var node = nodes[index];
+                var node = agentState.pathNodes[index];
+                var nextNode = agentState.pathNodes[index + 1];
 
                 // node may be null - in which case we've reached the end of the path
-                if (node != null)
+                if (node != null && nextNode != null)
                 {
-                    return searchSpace.GetInterpolatedLocation(node, nodes[index + 1], randomize ? Random.value : 0.5f, endPoint);
+                    context.searchSpace.GetWaypoints(node, nextNode, agentState.waypoints, context.settings.worldOffset, randomize);
                 }
             }
-
-            return endPoint;
         }
     }
 }

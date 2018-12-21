@@ -27,7 +27,7 @@ namespace Tds.Util
             Vector2Int.up + Vector2Int.left
         };
 
-        private T[] _data;
+        private readonly T[] _data;
         public int Width { get; private set; }
         public int Height { get; private set; }
 
