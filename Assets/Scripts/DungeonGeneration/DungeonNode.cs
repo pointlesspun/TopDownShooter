@@ -17,7 +17,7 @@ namespace Tds.DungeonGeneration
     /// <summary>
     /// Node of a dungeon. 
     /// </summary>
-    public class DungeonNode 
+    public class DungeonNode : IRectangle
     {
         // debug id
         private static int _idCounter = 0;
@@ -48,7 +48,7 @@ namespace Tds.DungeonGeneration
         /// <summary>
         /// Dimensions of this node
         /// </summary>
-        public RectInt Rect
+        public Rect Bounds
         {
             get;
             private set;
@@ -65,33 +65,33 @@ namespace Tds.DungeonGeneration
         /// <summary>
         /// Width of this node (convenience method for Rect.width)
         /// </summary>
-        public int Width
+        public float Width
         {
-            get { return Rect.width; }
+            get { return Bounds.width; }
         }
 
         /// <summary>
         /// Height of this node (convenience method for Rect.height)
         /// </summary>
-        public int Height
+        public float Height
         {
-            get { return Rect.height; }
+            get { return Bounds.height; }
         }
 
         /// <summary>
         /// Min of this node (convenience method for Rect.min)
         /// </summary>
-        public Vector2Int Min
+        public Vector2 Min
         {
-            get { return Rect.min; }
+            get { return Bounds.min; }
         }
 
         /// <summary>
         /// Max of this node (convenience method for Rect.max)
         /// </summary>
-        public Vector2Int Max
+        public Vector2 Max
         {
-            get { return Rect.max; }
+            get { return Bounds.max; }
         }
 
         /// <summary>
@@ -105,15 +105,15 @@ namespace Tds.DungeonGeneration
             }
         }
 
-        public DungeonNode(RectInt dimensions )
+        public DungeonNode(Rect dimensions )
         {
-            Rect = dimensions;
+            Bounds = dimensions;
             Id = _idCounter++;
         }
 
         public DungeonNode(int x, int y, int w, int h)
         {
-            Rect = new RectInt(x,y,w,h);
+            Bounds = new Rect(x,y,w,h);
             Id = _idCounter++;
         }
 
@@ -121,9 +121,9 @@ namespace Tds.DungeonGeneration
         {
             var result = new DungeonNode[2];
 
-            result[0] = new DungeonNode( new RectInt(Rect.position, new Vector2Int(Rect.width, height)));
-            result[1] = new DungeonNode(new RectInt(Rect.position + Vector2Int.up * height,
-                                                        new Vector2Int(Rect.width, Rect.height - height)));
+            result[0] = new DungeonNode( new Rect(Bounds.position, new Vector2(Bounds.width, height)));
+            result[1] = new DungeonNode(new Rect(Bounds.position + Vector2.up * height,
+                                                        new Vector2(Bounds.width, Bounds.height - height)));
 
             return result;
         }
@@ -132,9 +132,9 @@ namespace Tds.DungeonGeneration
         {
             var result = new DungeonNode[2];
 
-            result[0] = new DungeonNode(new RectInt(Rect.position, new Vector2Int(width, Rect.height)));
-            result[1] = new DungeonNode(new RectInt(Rect.position + Vector2Int.right * width,
-                                                        new Vector2Int(Rect.width - width, Rect.height)));
+            result[0] = new DungeonNode(new Rect(Bounds.position, new Vector2(width, Bounds.height)));
+            result[1] = new DungeonNode(new Rect(Bounds.position + Vector2.right * width,
+                                                        new Vector2(Bounds.width - width, Bounds.height)));
 
 
             return result;
@@ -186,7 +186,7 @@ namespace Tds.DungeonGeneration
 
         public float Distance(Vector2 point)
         {
-            return (point - RectUtil.Clamp(Rect, point)).sqrMagnitude;
+            return (point - RectUtil.Clamp(Bounds, point)).sqrMagnitude;
         
         } 
 
@@ -197,13 +197,13 @@ namespace Tds.DungeonGeneration
 
         public bool ContainsPoint(Vector2 point)
         {
-            return point.x >= Rect.min.x && point.x < Rect.max.x
-                && point.y >= Rect.min.y && point.y < Rect.max.y;
+            return point.x >= Bounds.min.x && point.x < Bounds.max.x
+                && point.y >= Bounds.min.y && point.y < Bounds.max.y;
         }
 
         public float Distance(DungeonNode other)
         {
-            return (Rect.center - other.Rect.center).magnitude;
+            return (Bounds.center - other.Bounds.center).magnitude;
         }
 
         public DungeonNode SelectRandomNeighbour( Func<DungeonEdge, DungeonNode, bool> predicate)

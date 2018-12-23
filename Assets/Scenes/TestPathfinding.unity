@@ -226,10 +226,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _serviceIterations: 16
-  _agentCount: 2048
+  _agentCount: 8192
   _target: {fileID: 1481756741}
-  _tracerUpdateSpeed: 2
-  _gizmoSize: 1.5
+  _tracerUpdateSpeed: 5
+  _gizmoSize: 1
   _agentSearchBuffer: 16
 --- !u!114 &1481756743
 MonoBehaviour:
@@ -265,14 +265,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b13ad1838e3f91c4aba4e0fa16e7447c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _width: 500
-  _height: 500
+  _width: 200
+  _height: 200
   _textInput: 
   _useTextInput: 0
   _textInputRectWidth: 10
   _textInputRectHeight: 10
   _startCoordinate: {x: 0, y: 0}
   _endCoordinate: {x: 0, y: 0}
+  _showLookup: 0
+  _lookupMaxDepth: -1
   _subdivisionAlgorithm:
     _minRectWidth: 12
     _minRectHeight: 12
@@ -287,6 +289,7 @@ MonoBehaviour:
     _maxLength: 5000
     _seed: -1
     _requiredIntersectionLength: 3
+  _drawPaths: 1
   _gizmoColors:
   - {r: 1, g: 1, b: 1, a: 1}
   - {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
@@ -302,7 +305,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1481756741}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 218, y: 151.6, z: 0}
+  m_LocalPosition: {x: 131.1, y: 66.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

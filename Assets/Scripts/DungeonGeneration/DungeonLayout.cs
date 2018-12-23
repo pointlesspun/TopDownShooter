@@ -6,8 +6,9 @@
 
 namespace Tds.DungeonGeneration
 {
+    using System;
     using System.Collections.Generic;
-    using Tds.PathFinder;
+    using System.Linq;
     using Tds.Util;
     using UnityEngine;
 
@@ -18,14 +19,20 @@ namespace Tds.DungeonGeneration
     public class DungeonLayout 
     {
         // to do replace with quadtree
-        private List<DungeonNode> _nodes;
+        private DungeonNode[] _nodes;
 
+        private SpatialBinaryTree<DungeonNode> _lookup;
+
+        
         /// <summary>
         /// Collection of nodes, use for debug purposes only
         /// </summary>
         public IEnumerable<DungeonNode> Nodes
         {
-            get { return _nodes; }
+            get
+            {
+                return _nodes;
+            }
         }
 
         /// <summary>
@@ -35,7 +42,7 @@ namespace Tds.DungeonGeneration
         {
             get
             {
-                return _nodes.Count;
+                return _nodes.Length;
             }
         }
 
@@ -57,19 +64,17 @@ namespace Tds.DungeonGeneration
             set;
         }
 
-        public DungeonLayout()
+        public DungeonLayout(params DungeonNode[] inputNodes)
         {
-            _nodes = new List<DungeonNode>();
+            _nodes = new DungeonNode[inputNodes.Length];
+            Array.Copy(inputNodes, _nodes, inputNodes.Length);
+            _lookup = new SpatialBinaryTree<DungeonNode>(_nodes);
         }
 
-        public DungeonLayout(params DungeonNode[] nodes)
+        public DungeonLayout(IEnumerable<DungeonNode> inputNodes)
         {
-            _nodes = new List<DungeonNode>(nodes);
-        }
-
-        public DungeonLayout(IEnumerable<DungeonNode> nodes)
-        {
-            _nodes = new List<DungeonNode>(nodes);
+            _nodes = inputNodes.ToArray();
+            _lookup = new SpatialBinaryTree<DungeonNode>(_nodes);
         }
 
         public DungeonLayout(IEnumerable<DungeonNode> nodes, DungeonNode start, DungeonNode end) 
@@ -81,38 +86,59 @@ namespace Tds.DungeonGeneration
 
         public DungeonNode GetRandomElement()
         {
-            return _nodes[Random.Range(0, _nodes.Count)];
+            return _nodes[UnityEngine.Random.Range(0, _nodes.Length)];
         }
 
-        public DungeonNode AddNode(DungeonNode node)
+        /// <summary>
+        /// Debug method to traverse all bounds of the node lookup
+        /// </summary>
+        /// <param name="operand"></param>
+        /// <param name="node"></param>
+        public void TraverseThroughLookup( Func<Rect, int, bool> operand, int depth, SpatialBinaryNode node = null)
         {
-            _nodes.Add(node);
-            return node;
+            if (node == null)
+            {
+                TraverseThroughLookup(operand, 0, _lookup.root);
+            } 
+            else
+            {
+                if (operand(node.bounds, depth))
+                {
+                    if (node.left != null)
+                    {
+                        TraverseThroughLookup(operand, depth+1, node.left);
+                    }
+
+                    if (node.right != null)
+                    {
+                        TraverseThroughLookup(operand, depth + 1, node.right);
+                    }
+                }
+            }
         }
-        
+
         public DungeonNode FindNearestSolution(Vector2 position, float maxDistance = -1)
         {
-            DungeonNode result = null;
-            float bestDistance = float.MaxValue;
+            var current = _lookup.root;
 
-            foreach (var node in _nodes)
+            while ( current.left != null )
             {
-                if (node.ContainsPoint(position))
+                if (current.bounds.Contains(position))
                 {
-                    return node;
+                    current = current.left.bounds.Contains(position) ? current.left : current.right;
                 }
-
-                var distance = node.Distance(position);
-
-                if (distance < bestDistance && (maxDistance == -1 || distance < maxDistance))
+                else
                 {
-                    bestDistance = distance;
-                    result = node;
+                    var leftClosestPoint = RectUtil.Clamp(current.left.bounds, position);
+                    var rightClosestPoint = RectUtil.Clamp(current.right.bounds, position);
+
+                    current = (leftClosestPoint - position).sqrMagnitude < (rightClosestPoint - position).sqrMagnitude
+                            ? current.left
+                            : current.right;
                 }
             }
 
-            return result;
+            return _nodes[current.index];
         }
-
     }
 }

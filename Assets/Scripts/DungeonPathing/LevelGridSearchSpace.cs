@@ -33,9 +33,9 @@ namespace Tds.DungeonGeneration
 
             if (node != null)
             {
-                var clampedLocation = RectUtil.Clamp(node.Rect, location, 0.1f, 0.1f);
+                var clampedLocation = RectUtil.Clamp(node.Bounds, location, 0.1f, 0.1f);
                 return Grid.FindNearestAround(new Vector2Int(Mathf.FloorToInt(clampedLocation.x), Mathf.FloorToInt(clampedLocation.y)),
-                                            node.Rect,
+                                               node.Bounds.ToRectInt(),
                                             (element, distance) => element._id == LevelElementDefinitions.FloorTileIndex,
                                             true);
             }
@@ -64,16 +64,16 @@ namespace Tds.DungeonGeneration
 
             if (node != null)
             {
-                var xStart = Random.Range(0, node.Rect.width);
-                var yStart = Random.Range(0, node.Rect.height);
+                var xStart = Random.Range(0, node.Bounds.width);
+                var yStart = Random.Range(0, node.Bounds.height);
 
                 for (var x = 0; x < node.Width; x++)
                 {
                     for (var y = 0; y < node.Height; y++)
                     {
-                        var xPrime = (x + xStart) % node.Rect.width;
-                        var yPrime = (y + yStart) % node.Rect.height;
-                        var element = Grid[xPrime, yPrime];
+                        var xPrime = (x + xStart) % node.Bounds.width;
+                        var yPrime = (y + yStart) % node.Bounds.height;
+                        var element = Grid[Mathf.FloorToInt(xPrime), Mathf.FloorToInt(yPrime)];
 
                         if (element._id == LevelElementDefinitions.FloorTileIndex)
                         {

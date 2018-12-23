@@ -20,32 +20,36 @@ namespace Tds.DungeonGeneration
         /// <param name="colors">Colors for the gizmos</param>
         /// <param name="drawStartAndEnd">Draw the start and end node</param>
         /// <param name="levelOffset">Offset of the level in the world</param>
-        public static void DrawLayout(this DungeonLayout layout, Color[] colors, bool drawStartAndEnd, Vector2 levelOffset)
+        public static void DrawLayout(this DungeonLayout layout, Color[] colors, bool drawStartAndEnd, Vector2 levelOffset, 
+                                    bool drawPaths = true)
         {
             var gizmoColorIndex = 0;
 
             foreach (var node in layout.Nodes)
             {
                 Gizmos.color = colors[gizmoColorIndex % colors.Length];
-                Gizmos.DrawCube(node.Rect.center + levelOffset, new Vector3(node.Width, node.Height, 0));
+                Gizmos.DrawCube(node.Bounds.center + levelOffset, new Vector3(node.Width, node.Height, 0));
                 gizmoColorIndex++;
 
-                foreach (var edge in node.Edges)
+                if (drawPaths)
                 {
-                    var intersectionCenter = edge.NodeIntersection.Interpolation(0.5f);
+                    foreach (var edge in node.Edges)
+                    {
+                        var intersectionCenter = edge.NodeIntersection.Interpolation(0.5f);
 
-                    Gizmos.color = Color.black;
-                    Gizmos.DrawLine(node.Rect.center + levelOffset, intersectionCenter + levelOffset);
+                        Gizmos.color = Color.black;
+                        Gizmos.DrawLine(node.Bounds.center + levelOffset, intersectionCenter + levelOffset);
 
-                    Gizmos.color = Color.white;
-                    Gizmos.DrawLine(edge.NodeIntersection.from + levelOffset, edge.NodeIntersection.to + levelOffset);
+                        Gizmos.color = Color.white;
+                        Gizmos.DrawLine(edge.NodeIntersection.from + levelOffset, edge.NodeIntersection.to + levelOffset);
+                    }
                 }
             }
 
             if (drawStartAndEnd && layout.Start != null)
             {
-                Gizmos.DrawIcon(layout.Start.Rect.center + levelOffset, "start.png", true);
-                Gizmos.DrawIcon(layout.End.Rect.center + levelOffset, "flag.png", true);
+                Gizmos.DrawIcon(layout.Start.Bounds.center + levelOffset, "start.png", true);
+                Gizmos.DrawIcon(layout.End.Bounds.center + levelOffset, "flag.png", true);
             }
         }
     }

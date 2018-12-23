@@ -14,7 +14,7 @@ public class DungeonTraversalTest
     [Test]
     public void TestOneNodeExample_ExpectOneNodeTraversalDungeon()
     {
-        var dungeon = new DungeonLayout(new List<DungeonNode>() { new DungeonNode(new RectInt(0, 0, 1, 1)) });
+        var dungeon = new DungeonLayout(new List<DungeonNode>() { new DungeonNode(new Rect(0, 0, 1, 1)) });
         var traversalAlgorithm = new DungeonTraversal()
         {
             _maxDepth = 1
@@ -35,8 +35,8 @@ public class DungeonTraversalTest
     [Test]
     public void TestTwoNodeExample_ExpectTwoNodeTraversalDungeon()
     {
-        var nodeA = new DungeonNode(new RectInt(0, 0, 1, 1)) { Name = "nodeA"};
-        var nodeB = new DungeonNode(new RectInt(1, 0, 1, 1)) { Name = "nodeB" };
+        var nodeA = new DungeonNode(new Rect(0, 0, 1, 1)) { Name = "nodeA"};
+        var nodeB = new DungeonNode(new Rect(1, 0, 1, 1)) { Name = "nodeB" };
 
         DungeonNode.Connect(nodeA, nodeB);
 
@@ -70,9 +70,9 @@ public class DungeonTraversalTest
     [Test]
     public void TestThreeNodeExample_ExpectTwoNodeTraversalDungeon()
     {
-        var nodeA = new DungeonNode(new RectInt(0, 0, 1, 1)) { Name = "nodeA" };
-        var nodeB = new DungeonNode(new RectInt(1, 0, 1, 1)) { Name = "nodeB" };
-        var nodeC = new DungeonNode(new RectInt(3, 0, 1, 1)) { Name = "nodeC" };
+        var nodeA = new DungeonNode(new Rect(0, 0, 1, 1)) { Name = "nodeA" };
+        var nodeB = new DungeonNode(new Rect(1, 0, 1, 1)) { Name = "nodeB" };
+        var nodeC = new DungeonNode(new Rect(3, 0, 1, 1)) { Name = "nodeC" };
 
         DungeonNode.Connect(nodeA, nodeB);
         DungeonNode.Connect(nodeB, nodeC);

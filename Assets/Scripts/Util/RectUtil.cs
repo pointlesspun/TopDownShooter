@@ -15,7 +15,7 @@ namespace Tds.Util
         /// <param name="rectA"></param>
         /// <param name="rectB"></param>
         /// <returns></returns>
-        public static bool AreDisconnected(RectInt rectA, RectInt rectB)
+        public static bool AreDisconnected(Rect rectA, Rect rectB)
         {
             var a = (rectA.min.x + rectA.width) - rectB.min.x;
             var b = (rectB.min.x + rectB.width) - rectA.min.x;
@@ -44,7 +44,7 @@ namespace Tds.Util
         /// <param name="a"></param>
         /// <param name="b"></param>
         /// <returns></returns>
-        public static Line2D GetIntersection(RectInt a, RectInt b)
+        public static Line2D GetIntersection(Rect a, Rect b)
         {
             var x1 = Mathf.Max(a.min.x, b.min.x);
             var x2 = Mathf.Min(a.max.x, b.max.x);
@@ -67,7 +67,7 @@ namespace Tds.Util
         /// <param name="deltaWidth"></param>
         /// <param name="deltaHeight"></param>
         /// <returns></returns>
-        public static Vector2 Clamp(RectInt rect, Vector2 point, float deltaWidth = 0, float deltaHeight = 0)
+        public static Vector2 Clamp(Rect rect, Vector2 point, float deltaWidth = 0, float deltaHeight = 0)
         {
             return new Vector2(Mathf.Clamp(point.x, rect.min.x + deltaWidth, rect.max.x - deltaWidth),
                                                         Mathf.Clamp(point.y, rect.min.y + deltaWidth, rect.max.y - deltaWidth));
@@ -87,6 +87,34 @@ namespace Tds.Util
                 min = new Vector2(Mathf.Min(p1.x, p2.x) - radius, Mathf.Min(p1.y, p2.y) - radius),
                 max = new Vector2(Mathf.Max(p1.x, p2.x) + radius, Mathf.Max(p1.y, p2.y) + radius)
             };
+        }
+
+        /// <summary>
+        /// Returns the union between two rects.
+        /// </summary>
+        /// <param name="r1"></param>
+        /// <param name="r2"></param>
+        /// <returns></returns>
+        public static Rect Union(this Rect r1, Rect r2)
+        {
+            return new Rect()
+            {
+                xMin = Mathf.Min(r1.xMin, r2.xMin),
+                yMin = Mathf.Min(r1.yMin, r2.yMin),
+                xMax = Mathf.Max(r1.xMax, r2.xMax),
+                yMax = Mathf.Max(r1.yMax, r2.yMax),
+            };
+        }
+
+        /// <summary>
+        /// Convert the Rect to an RectInt rounding the values to the nearest int
+        /// </summary>
+        /// <param name="r"></param>
+        /// <returns></returns>
+        public static RectInt ToRectInt(this Rect r)
+        {
+            return new RectInt(Mathf.RoundToInt(r.xMin), Mathf.RoundToInt(r.yMin), 
+                    Mathf.RoundToInt(r.width), Mathf.RoundToInt(r.height));
         }
     }
 }

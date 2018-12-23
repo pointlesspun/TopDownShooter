@@ -101,7 +101,7 @@ namespace Tds.DungeonPathfinding
                     for (int i = 0; i < _agentCount; ++i)
                     {
                         AgentPathingService.InitializeIdleState(_agents[i], _context);
-                        _currentPosition[i] = _context.searchSpace.GetRandomElement().Rect.center;
+                        _currentPosition[i] = _context.searchSpace.GetRandomElement().Bounds.center;
                     }
                 }
             }
@@ -191,7 +191,7 @@ namespace Tds.DungeonPathfinding
 
                     if (lastNode != null)
                     {
-                        agentPosition = RectUtil.Clamp(lastNode.Rect, agentPosition, 0.1f, 0.1f);
+                        agentPosition = RectUtil.Clamp(lastNode.Bounds, agentPosition, 0.1f, 0.1f);
                     }
                 }
             }

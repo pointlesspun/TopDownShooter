@@ -77,7 +77,7 @@ namespace Tds.DungeonGeneration
                 UnityEngine.Random.InitState(_seed);
             }
 
-            var pathEnd = BuildPath(startNode == null ? source.GetRandomElement() : startNode, new HashSet<DungeonNode>());
+            var pathEnd = BuildPath(startNode ?? source.GetRandomElement(), new HashSet<DungeonNode>());
             var pathStart = pathEnd;
 
             while (pathStart.Parent != null)
@@ -90,35 +90,31 @@ namespace Tds.DungeonGeneration
                 UnityEngine.Random.state = initiailRandomState;
             }
 
-            return CreateDungeonLayout( pathStart, pathEnd
-                                       , new DungeonNode(pathStart.DungeonElement.Rect) {  Name = pathStart.DungeonElement.Name }
-                                       , new DungeonLayout());
+            var nodes  = CreateDungeonLayout( pathStart, 
+                                       new DungeonNode(pathStart.DungeonElement.Bounds) {  Name = pathStart.DungeonElement.Name },
+                                       new List<DungeonNode>());
+
+            return new DungeonLayout(nodes, nodes[0], nodes[nodes.Count - 1]);
         }
-        
-        private DungeonLayout CreateDungeonLayout(PathNode parentPathNode, PathNode endNode,
-                                                    DungeonNode parentDungeonNode, DungeonLayout dungeon )
+
+        private List<DungeonNode> CreateDungeonLayout(PathNode parentPathNode,
+                                                    DungeonNode parentDungeonNode, List<DungeonNode> nodes )
         {
-            if (dungeon.Start == null)
-            {
-                dungeon.Start = parentDungeonNode;
-            }
-
-            if ( endNode == parentPathNode )
-            {
-                dungeon.End = parentDungeonNode;
-            }
-
-            dungeon.AddNode(parentDungeonNode);
+            nodes.Add(parentDungeonNode);
 
             foreach (var child in parentPathNode.Children)
             {
-                var childDungeonNode = new DungeonNode(child.DungeonElement.Rect) { Name = child.DungeonElement.Name };
+                var childDungeonNode = new DungeonNode(child.DungeonElement.Bounds)
+                {
+                    Name = child.DungeonElement.Name
+                };
+
                 DungeonNode.Connect(parentDungeonNode, childDungeonNode);
 
-                CreateDungeonLayout(child, endNode, childDungeonNode, dungeon);
+                CreateDungeonLayout(child, childDungeonNode, nodes);
             }
 
-            return dungeon;
+            return nodes;
         }
 
         /// <summary>

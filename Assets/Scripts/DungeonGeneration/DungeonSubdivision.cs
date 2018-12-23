@@ -63,7 +63,7 @@ namespace Tds.DungeonGeneration
         /// </summary>
         /// <param name="root"></param>
         /// <returns></returns>
-        public DungeonLayout Subdivide(RectInt size, Axis startingAxis = Axis.None)
+        public DungeonLayout Subdivide(Rect size, Axis startingAxis = Axis.None)
         {
          
             var initialRandomState = UnityEngine.Random.state;
@@ -160,11 +160,11 @@ namespace Tds.DungeonGeneration
         {
             if (divisionAxis == Axis.Y)
             {
-                return node.DivideOverYAxis(UnityEngine.Random.Range(_minRectWidth, node.Width - _minRectWidth));
+                return node.DivideOverYAxis(UnityEngine.Random.Range(_minRectWidth, ((int)node.Width) - _minRectWidth));
             }
             else if (divisionAxis == Axis.X)
             {
-                return node.DivideOverXAxis(UnityEngine.Random.Range(_minRectHeight, node.Height - _minRectHeight));
+                return node.DivideOverXAxis(UnityEngine.Random.Range(_minRectHeight, ((int)node.Height) - _minRectHeight));
             }
 
             throw new InvalidProgramException("Cannot divide Dungeon node over z axis");
@@ -175,7 +175,7 @@ namespace Tds.DungeonGeneration
             foreach (var other in otherNodes)
             {
                 // if the two nodes share an intersection, connect them to each other
-                if (!RectUtil.AreDisconnected(node.Rect, other.Rect))
+                if (!RectUtil.AreDisconnected(node.Bounds, other.Bounds))
                 {
                     var newEdge = new DungeonEdge(node, other, EdgeDirection.BiDirectional);
 

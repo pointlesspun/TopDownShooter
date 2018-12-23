@@ -134,7 +134,7 @@ namespace Tds.GameScripts
         /// <param name="offset"></param>
         public void AddTriggerFor(DungeonNode node)
         {
-            RectInt rect = node.Rect;
+            Rect rect = node.Bounds;
             var triggerObject = new GameObject("trigger for " + rect);
 
             var collider = triggerObject.AddComponent<BoxCollider2D>();
@@ -176,7 +176,7 @@ namespace Tds.GameScripts
                                 var monster = Instantiate(_monsterPrefab);
 
                                 // setup the monster's position
-                                monster.transform.position = n.Rect.center;
+                                monster.transform.position = n.Bounds.center;
                                 monster.transform.position += _offset + _spawnOffsets[Random.Range(0, _spawnOffsets.Length)]
                                                                      * Random.Range(1, 3);
 

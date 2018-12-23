@@ -120,7 +120,7 @@ namespace Tds.DungeonGeneration
             get
             {
                 return _layout != null 
-                    ? new Vector3(_layout.Start.Rect.center.x, _layout.Start.Rect.center.y, 0) + _levelOffset 
+                    ? new Vector3(_layout.Start.Bounds.center.x, _layout.Start.Bounds.center.y, 0) + _levelOffset 
                     : Vector3.zero;
             }
         }
@@ -260,7 +260,7 @@ namespace Tds.DungeonGeneration
         public DungeonLayout BuildLevelLayout(int width, int height, DungeonTraversal traverselAlgoirithm,
                                                      DungeonSubdivision divisionAlgorithm)
         {
-            var levelRect = new RectInt(0, 0, width, height);
+            var levelRect = new Rect(0, 0, width, height);
             var levelSubdivisions = _divisionAlgorithm.Subdivide(levelRect);
                 
             return _traversalAlgorithm.Traverse(levelSubdivisions);

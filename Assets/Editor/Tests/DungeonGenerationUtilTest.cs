@@ -24,18 +24,18 @@ public class DungeonGenerationUtilTest
         Assert.IsTrue(result[1, 0] != null);
         Assert.IsTrue(result[1, 1] != null);
 
-        Assert.IsTrue(result[0, 0].Rect.min == Vector2Int.zero );
-        Assert.IsTrue(result[1, 0].Rect.min == Vector2Int.right * 2);
-        Assert.IsTrue(result[1, 1].Rect.min == Vector2Int.one * 2);
+        Assert.IsTrue(result[0, 0].Bounds.min == Vector2Int.zero );
+        Assert.IsTrue(result[1, 0].Bounds.min == Vector2Int.right * 2);
+        Assert.IsTrue(result[1, 1].Bounds.min == Vector2Int.one * 2);
 
-        Assert.IsTrue(result[0, 0].Rect.width == 2);
-        Assert.IsTrue(result[0, 0].Rect.height == 2);
+        Assert.IsTrue(result[0, 0].Bounds.width == 2);
+        Assert.IsTrue(result[0, 0].Bounds.height == 2);
 
-        Assert.IsTrue(result[1, 0].Rect.width == 2);
-        Assert.IsTrue(result[1, 0].Rect.height == 2);
+        Assert.IsTrue(result[1, 0].Bounds.width == 2);
+        Assert.IsTrue(result[1, 0].Bounds.height == 2);
 
-        Assert.IsTrue(result[1, 1].Rect.width == 2);
-        Assert.IsTrue(result[1, 1].Rect.height == 2);
+        Assert.IsTrue(result[1, 1].Bounds.width == 2);
+        Assert.IsTrue(result[1, 1].Bounds.height == 2);
 
 
         Assert.IsTrue(result[0, 0].Neighbours.Count() == 1);

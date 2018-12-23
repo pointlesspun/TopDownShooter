@@ -47,14 +47,14 @@ namespace Tds.DungeonPathfinding
             {
                 _pathfinder.GetOpenList().ForEach(n =>
                 {
-                    Vector3 position = n.Rect.center;
+                    Vector3 position = n.Bounds.center;
 
                     Gizmos.DrawIcon(position, "question mark.png", true);
                 });
 
                 _pathfinder.GetClosedList().ForEach(n =>
                 {
-                    Gizmos.DrawIcon(n.Rect.center, "footsteps.png", true);
+                    Gizmos.DrawIcon(n.Bounds.center, "footsteps.png", true);
                 });
             }
         }

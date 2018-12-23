@@ -30,7 +30,7 @@ namespace Tds.DungeonGeneration
                     if (input[y][x] == '#')
                     {
                         var yPosition = result.Height - (y + 1);
-                        result[x, yPosition] = new DungeonNode(new RectInt(x * nodeWidth, yPosition * nodeHeight, nodeWidth, nodeHeight));
+                        result[x, yPosition] = new DungeonNode(new Rect(x * nodeWidth, yPosition * nodeHeight, nodeWidth, nodeHeight));
                     }
                 }
             }
@@ -87,7 +87,7 @@ namespace Tds.DungeonGeneration
             AddMisingRoomBorders(grid, layout);
 
             // draw the exit
-            var exitPosition = layout.End.Rect.center;
+            var exitPosition = layout.End.Bounds.center;
             grid[(int)exitPosition.x, (int)exitPosition.y]._id = LevelElementDefinitions.ExitIndex;
 
             return grid;
@@ -97,7 +97,7 @@ namespace Tds.DungeonGeneration
         {
             foreach (var node in layout.Nodes)
             {
-                var rect = node.Rect;
+                var rect = node.Bounds.ToRectInt();
                 var xOffset = rect.position.x;
                 var yOffset = rect.position.y;
 
@@ -186,7 +186,7 @@ namespace Tds.DungeonGeneration
         {
             foreach (var node in layout.Nodes)
             {
-                var rect = node.Rect;
+                var rect = node.Bounds.ToRectInt();
                 var x1 = rect.min.x;
                 var x2 = rect.max.x;
 

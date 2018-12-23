@@ -14,10 +14,10 @@ public class DungeonSubdivisionTest
     public void TestDivisionWithMinRect_ExpectNoDivision()
     {
         var algorithm = new DungeonSubdivision();
-        var result = algorithm.Subdivide(new RectInt(0, 0, algorithm._minRectWidth, algorithm._minRectHeight));
+        var result = algorithm.Subdivide(new Rect(0, 0, algorithm._minRectWidth, algorithm._minRectHeight));
 
         Assert.IsTrue(result.Nodes.Count() == 1);
-        Assert.IsTrue(result.Nodes.ElementAt(0).Rect.Equals(new RectInt(0, 0, algorithm._minRectWidth, algorithm._minRectHeight)));
+        Assert.IsTrue(result.Nodes.ElementAt(0).Bounds.Equals(new Rect(0, 0, algorithm._minRectWidth, algorithm._minRectHeight)));
         Assert.IsTrue(result.Nodes.ElementAt(0).Edges == null);
     }
 
@@ -33,7 +33,7 @@ public class DungeonSubdivisionTest
             _maxDepth = 1
         };
 
-        var result = algorithm.Subdivide(new RectInt(0, 0, algorithm._minRectWidth*2, algorithm._minRectHeight*2), UnityEngine.Animations.Axis.X);
+        var result = algorithm.Subdivide(new Rect(0, 0, algorithm._minRectWidth*2, algorithm._minRectHeight*2), UnityEngine.Animations.Axis.X);
         var nodes = result.Nodes.ToList();
 
         Assert.IsTrue(nodes.Count == 2);
@@ -59,7 +59,7 @@ public class DungeonSubdivisionTest
             _maxDepth = 2
         };
 
-        var result = algorithm.Subdivide(new RectInt(0, 0, algorithm._minRectWidth * 2, algorithm._minRectHeight * 2), UnityEngine.Animations.Axis.X);
+        var result = algorithm.Subdivide(new Rect(0, 0, algorithm._minRectWidth * 2, algorithm._minRectHeight * 2), UnityEngine.Animations.Axis.X);
         var nodes = result.Nodes.ToList();
 
         nodes.Sort((n1, n2) => n1.Min.x.CompareTo(n2.Min.x));

@@ -33,7 +33,7 @@ namespace Tds.Util
         private List<PooledObject<T>> _availableObjects = new List<PooledObject<T>>();
         private HashSet<PooledObject<T>> _objectsInUse = new HashSet<PooledObject<T>>();
 
-        private int _poolId;
+        private readonly int _poolId;
 
         public ObjectPool(int id)
         {

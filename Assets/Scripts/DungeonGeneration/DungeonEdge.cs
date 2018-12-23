@@ -65,7 +65,7 @@ namespace Tds.DungeonGeneration
             From = from;
             To = to;
             Direction = direction;
-            NodeIntersection = RectUtil.GetIntersection(from.Rect, to.Rect);
+            NodeIntersection = RectUtil.GetIntersection(from.Bounds, to.Bounds);
         }
 
         /// <summary>

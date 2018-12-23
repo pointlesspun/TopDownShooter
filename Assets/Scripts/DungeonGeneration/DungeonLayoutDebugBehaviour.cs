@@ -35,10 +35,17 @@ namespace Tds.DungeonGeneration
         public Vector2Int _startCoordinate = Vector2Int.zero;
         public Vector2Int _endCoordinate = Vector2Int.zero;
 
+        public bool _showLookup = false;
+        public int _lookupMaxDepth = 1;
+        
 
         public DungeonSubdivision _subdivisionAlgorithm = new DungeonSubdivision();
         public bool _useTraversal = false;
-        public DungeonTraversal _traversalAlgorithm = new DungeonTraversal(); 
+        public DungeonTraversal _traversalAlgorithm = new DungeonTraversal();
+        public bool _drawPaths = true;
+
+
+
 
         /// <summary>
         /// Colors used to color the dungeon nodes
@@ -60,7 +67,7 @@ namespace Tds.DungeonGeneration
             }
             else
             {
-                Layout = _subdivisionAlgorithm.Subdivide(new RectInt(0, 0, _width, _height));
+                Layout = _subdivisionAlgorithm.Subdivide(new Rect(0, 0, _width, _height));
             }
 
             if (_useTraversal)
@@ -97,7 +104,24 @@ namespace Tds.DungeonGeneration
         {
             if (Layout != null)
             {
-                Layout.DrawLayout(_gizmoColors, _useTraversal, Vector2.zero);
+                Layout.DrawLayout(_gizmoColors, _useTraversal, Vector2.zero, _drawPaths);
+
+                if (_showLookup)
+                {
+                    
+                    Layout.TraverseThroughLookup((r, depth) =>
+                    {
+                        //Gizmos.color = depth % 2 == 0 ? Color.black : Color.white;
+
+                        Gizmos.color = new Color(0.8f, 0.8f, 0.8f, 0.4f);
+                        Gizmos.DrawCube(r.center, r.size);
+
+                        Gizmos.color = Color.white;
+                        Gizmos.DrawWireCube(r.center, r.size);
+
+                        return depth < _lookupMaxDepth || _lookupMaxDepth < 0;
+                    }, 0);
+                }
             }
         }
     }
