@@ -6,6 +6,7 @@
 namespace Tds.Util
 {
     using System;
+    using System.Collections.Generic;
     using UnityEngine;
 
     /// <summary>
@@ -19,6 +20,7 @@ namespace Tds.Util
         /// </summary>
         /// <param name="test"></param>
         /// <param name="message"></param>
+        [System.Diagnostics.Conditional("DEBUG")]
         public static void Requires( bool test, string message)
         {
             if (!test)
@@ -38,6 +40,7 @@ namespace Tds.Util
         /// <typeparam name="T"></typeparam>
         /// <param name="gameObject"></param>
         /// <param name="message"></param>
+        [System.Diagnostics.Conditional("DEBUG")]
         public static void RequiresComponent<T>( GameObject gameObject, string message)
         {
             if ( gameObject.GetComponent<T>() == null)
@@ -55,6 +58,7 @@ namespace Tds.Util
         /// </summary>
         /// <param name="obj"></param>
         /// <param name="message"></param>
+        [System.Diagnostics.Conditional("DEBUG")]
         public static void RequiresNotNull(object obj, string message)
         {
             if (obj == null)
@@ -64,6 +68,24 @@ namespace Tds.Util
                 UnityEditor.EditorApplication.isPlaying = false;
                 throw new InvalidProgramException("Failed requirement: " + message);
 #endif
+            }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        public static void RequiresForAllSequential<T>(IEnumerable<T> enumeration, Func<int, T, T, bool> assertion )
+        {
+            var previous = default(T);
+            var index = 0;
+
+            foreach ( var value in enumeration )
+            {
+                if ( index > 0 )
+                {
+                    Requires(assertion(index, previous, value), "Sequence requirement failed at "  + (index - 1)  + " and " + index);
+                }
+
+                previous = value;
+                index++;
             }
         }
     }

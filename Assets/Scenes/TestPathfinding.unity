@@ -228,9 +228,9 @@ MonoBehaviour:
   _serviceIterations: 16
   _agentCount: 8192
   _target: {fileID: 1481756741}
-  _tracerUpdateSpeed: 5
+  _tracerUpdateSpeed: 2
   _gizmoSize: 1
-  _agentSearchBuffer: 16
+  _agentSearchBuffer: 32
 --- !u!114 &1481756743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -274,7 +274,7 @@ MonoBehaviour:
   _startCoordinate: {x: 0, y: 0}
   _endCoordinate: {x: 0, y: 0}
   _showLookup: 0
-  _lookupMaxDepth: -1
+  _lookupMaxDepth: 2
   _subdivisionAlgorithm:
     _minRectWidth: 12
     _minRectHeight: 12
@@ -286,7 +286,7 @@ MonoBehaviour:
   _useTraversal: 1
   _traversalAlgorithm:
     _maxDepth: -1
-    _maxLength: 5000
+    _maxLength: 2000
     _seed: -1
     _requiredIntersectionLength: 3
   _drawPaths: 1
@@ -305,7 +305,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1481756741}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 131.1, y: 66.2, z: 0}
+  m_LocalPosition: {x: -12, y: 119.3, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}

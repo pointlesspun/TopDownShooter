@@ -45,5 +45,13 @@ namespace Tds.PathFinder
         /// </summary>
         /// <returns></returns>
         TElement GetRandomElement();
+
+        /// <summary>
+        /// Verifies if these two elements are neighbours
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
+        bool AreNeighbours(TElement from, TElement to);
     }
 }

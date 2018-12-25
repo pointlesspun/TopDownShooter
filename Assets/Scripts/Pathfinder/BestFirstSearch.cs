@@ -251,7 +251,7 @@ namespace Tds.PathFinder
 
                 Array.Reverse(store, 0, Math.Min(store.Length, itemCount));
 
-                // insert an "end of path" if there is room
+                // insert an "end of path" if there is room by adding a null element
                 if (itemCount < store.Length)
                 {
                     store[itemCount] = null;

@@ -45,7 +45,7 @@ public class TestDungeonSearchService
         Assert.IsTrue(service.ScheduledSearches.Count() == 1);
         Assert.IsTrue(service.SearchesInProgress.Count() == 0);
         Assert.IsTrue(service.CompletedSearches.Count() == 0);
-        Assert.IsTrue(service.RetrieveResult(id, nodeA, nodeD, store) == null);
+        Assert.IsTrue(service.RetrieveResult(id, nodeA, nodeD, store, null) == null);
 
         service.Update(1);
 
@@ -53,7 +53,7 @@ public class TestDungeonSearchService
         Assert.IsTrue(service.ScheduledSearches.Count() == 0);
         Assert.IsTrue(service.SearchesInProgress.Count() == 1);
         Assert.IsTrue(service.CompletedSearches.Count() == 0);
-        Assert.IsTrue(service.RetrieveResult(id, nodeA, nodeD, store) == null);
+        Assert.IsTrue(service.RetrieveResult(id, nodeA, nodeD, store, null) == null);
 
         service.Update(-1);
 
@@ -61,7 +61,7 @@ public class TestDungeonSearchService
         Assert.IsTrue(service.ScheduledSearches.Count() == 0);
         Assert.IsTrue(service.SearchesInProgress.Count() == 0);
         Assert.IsTrue(service.CompletedSearches.Count() == 1);
-        Assert.IsTrue(service.RetrieveResult(id, nodeA, nodeD, store) == store);
+        Assert.IsTrue(service.RetrieveResult(id, nodeA, nodeD, store, null) == store);
 
         Assert.IsTrue(store[0] == nodeA);
         Assert.IsTrue(store[1] == nodeC);
@@ -96,15 +96,15 @@ public class TestDungeonSearchService
         Assert.IsTrue(id2 >= 0);
 
         Assert.IsTrue(service.ScheduledSearches.Count() == 1);
-        Assert.IsTrue(service.RetrieveResult(id1, nodeA, nodeD, store1) == null);
+        Assert.IsTrue(service.RetrieveResult(id1, nodeA, nodeD, store1, null) == null);
 
         service.Update(-1);
 
         Assert.IsTrue(service.TimeStamp == 1);
         Assert.IsTrue(service.ScheduledSearches.Count() == 0);
         Assert.IsTrue(service.CompletedSearches.Count() == 1);
-        Assert.IsTrue(service.RetrieveResult(id1, nodeA, nodeD, store1) == store1);
-        Assert.IsTrue(service.RetrieveResult(id2, nodeD, nodeA, store2) == store2);
+        Assert.IsTrue(service.RetrieveResult(id1, nodeA, nodeD, store1, null) == store1);
+        Assert.IsTrue(service.RetrieveResult(id2, nodeD, nodeA, store2, null) == store2);
         
         Assert.IsTrue(store1[0] == nodeA);
         Assert.IsTrue(store1[1] == nodeC);
@@ -139,7 +139,7 @@ public class TestDungeonSearchService
         var store1 = new DungeonNode[8];
 
         Assert.IsTrue(service.CompletedSearches.Count() == 1);
-        Assert.IsTrue(service.RetrieveResult(id1, grid[0, 0], grid[1, 1], store1) == store1);
+        Assert.IsTrue(service.RetrieveResult(id1, grid[0, 0], grid[1, 1], store1, null) == store1);
         
         var id2 = service.BeginSearch(grid[1, 1], grid[0, 0]);
         Assert.IsTrue(id1 == id2);
@@ -177,7 +177,7 @@ public class TestDungeonSearchService
         var store1 = new DungeonNode[8];
 
         Assert.IsTrue(service.CompletedSearches.Count() == 1);
-        Assert.IsTrue(service.RetrieveResult(id2, grid[1, 0], grid[0, 0], store1) == null);
+        Assert.IsTrue(service.RetrieveResult(id2, grid[1, 0], grid[0, 0], store1, null) == null);
 
         // still no search should be available
         id2 = service.BeginSearch(grid[1, 0], grid[0, 0]);

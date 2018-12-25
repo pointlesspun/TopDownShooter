@@ -144,12 +144,21 @@ namespace Tds.PathFinder
                     searchResultNode.Value.IsComplete = false;
                     searchResultNode.Value.FromNode = from;
                     searchResultNode.Value.ToNode = to;
+
+                    for (int i = 0; i < searchResultNode.Value.Nodes.Length; ++i)
+                    {
+                        searchResultNode.Value.Nodes[i] = null;
+                    }
                 }
             }
 
             return result == null ? -1 : result.Value.Id;
         }
 
+        /// <summary>
+        /// Stop the search with the given id (ticket)
+        /// </summary>
+        /// <param name="id"></param>
         public void CancelSearch(int id)
         {
             var node = _scheduledSearches.FirstOrDefault(x => x.Id == id);
@@ -169,7 +178,7 @@ namespace Tds.PathFinder
         /// <param name="to">to node</param>
         /// <param name="store">the store to put the result in</param>
         /// <returns>Store if a result is found, null otherwise</returns>
-        public T[] RetrieveResult(int id, T from, T to, T[] store)
+        public T[] RetrieveResult(int id, T from, T to, T[] store, ISearchSpace<T, Vector2> searchSpace )
         {
             var completedSearch = _completedSearches.FirstOrDefault(x => x.Id == id);
 
@@ -181,16 +190,9 @@ namespace Tds.PathFinder
                 }
                 else
                 {
-                    var length = Mathf.Min(store.Length, completedSearch.Value.Length);
-
-                    if (completedSearch.Value.Length <= store.Length && completedSearch.Value.Nodes[completedSearch.Value.Length - 1] == null)
-                    {
-                        length--;
-                    } 
-
-                    Array.Copy(completedSearch.Value.Nodes, store, length);
-                    Array.Reverse(store, 0, length);
+                    completedSearch.Value.ReverseCopyNodes(store);
                 }
+
 
                 return store;
             }
@@ -235,7 +237,8 @@ namespace Tds.PathFinder
                 {
                     if (_searchAlgorithms[i].Iterate(maxIterations) <= 0)
                     {
-                        var searchResult = searchesInProgress.FirstOrDefault(x => x.IsMatch(_searchAlgorithms[i].Start, _searchAlgorithms[i].End));
+                        var searchResult = searchesInProgress.FirstOrDefault(x => x.IsMatch(_searchAlgorithms[i].Start,
+                                                                                            _searchAlgorithms[i].End));
 
                         searchResult.Value.IsComplete = true;
                         searchResult.Value.TimeStamp = TimeStamp;

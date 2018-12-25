@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class TestSpatialTreeConstruction
 {
-    private class TestRectangle : IRectangle
+    private class TestRectangle : IBounds
     {
         public Rect Bounds
         {
@@ -23,6 +23,11 @@ public class TestSpatialTreeConstruction
         {
             Bounds = new Rect(x,y,width,height);
         }
+
+        public override string ToString()
+        {
+            return Bounds.ToString();
+        }
     }
 
     /// <summary>
@@ -34,7 +39,7 @@ public class TestSpatialTreeConstruction
         TestRectangle[] data = { new TestRectangle(0, 0, 1, 1), new TestRectangle(1, 0, 1, 1) };
 
         Rect rect = Rect.zero;
-        var result = SpatialTreeConstruction<TestRectangle>.FindHorizontalPivot(data, 0, data.Length, ref rect);
+        var result = SpatialBinaryTree<TestRectangle>.FindHorizontalPivot(data, 0, data.Length, ref rect);
 
         Assert.IsTrue(result == 1);
         Assert.IsTrue(rect.xMin == 0 && rect.yMin == 0 && rect.width == 2 && rect.height == 1);
@@ -50,7 +55,7 @@ public class TestSpatialTreeConstruction
                                     new TestRectangle(2, 0, 1, 1), new TestRectangle(3, 0, 1, 1)};
 
         Rect rect = Rect.zero;
-        var result = SpatialTreeConstruction<TestRectangle>.FindHorizontalPivot(data, 0, data.Length, ref rect);
+        var result = SpatialBinaryTree<TestRectangle>.FindHorizontalPivot(data, 0, data.Length, ref rect);
 
         Assert.IsTrue(result == 2);
         Assert.IsTrue(rect.xMin == 0 && rect.yMin == 0 && rect.width == 4 && rect.height == 1);
@@ -66,7 +71,7 @@ public class TestSpatialTreeConstruction
                                     new TestRectangle(2, 0, 1, 1), new TestRectangle(0, 1, 3, 1)};
 
         Rect rect = Rect.zero;
-        var result = SpatialTreeConstruction<TestRectangle>.FindHorizontalPivot(data, 0, data.Length, ref rect);
+        var result = SpatialBinaryTree<TestRectangle>.FindHorizontalPivot(data, 0, data.Length, ref rect);
 
         Assert.IsTrue(result == -1);
         Assert.IsTrue(rect.xMin == 0 && rect.yMin == 0 && rect.width == 3 && rect.height == 2);
@@ -82,7 +87,7 @@ public class TestSpatialTreeConstruction
                                     new TestRectangle(1, 0, 1, 1), new TestRectangle(2, 0, 1, 1)};
 
         Rect rect = Rect.zero;
-        var result = SpatialTreeConstruction<TestRectangle>.FindHorizontalPivot(data, 0, data.Length, ref rect);
+        var result = SpatialBinaryTree<TestRectangle>.FindHorizontalPivot(data, 0, data.Length, ref rect);
 
         Assert.IsTrue(result == 3);
         Assert.IsTrue(rect.xMin == 0 && rect.yMin == 0 && rect.width == 3 && rect.height == 2);
@@ -100,7 +105,7 @@ public class TestSpatialTreeConstruction
                                    new TestRectangle(1, 0, 1, 1)};
 
         Rect rect = Rect.zero;
-        var result = SpatialTreeConstruction<TestRectangle>.FindHorizontalPivot(data, 0, data.Length, ref rect);
+        var result = SpatialBinaryTree<TestRectangle>.FindHorizontalPivot(data, 0, data.Length, ref rect);
 
         Assert.IsTrue(result == 3);
         Assert.IsTrue(rect.xMin == 0 && rect.yMin == 0 && rect.width == 3 && rect.height == 2);
@@ -154,7 +159,7 @@ public class TestSpatialTreeConstruction
     {
         TestRectangle[] data = { new TestRectangle(0, 0, 1, 1), new TestRectangle(1, 0, 1, 1),
                                    new TestRectangle(0, 1, 1, 1), new TestRectangle(1, 1, 1, 1) };
-        var tree = new SpatialBinaryTree<TestRectangle>(data);
+        var tree = new SpatialBinaryTree<TestRectangle>(data, UnityEngine.Animations.Axis.Y);
 
         Assert.IsTrue(tree.data == data);
         Assert.IsTrue(tree.root.index == 0);
@@ -230,7 +235,7 @@ public class TestSpatialTreeConstruction
     public void TestCreateSpatialTreeFromNonDivisibleSet_ExpectTreeRootContainingAllTheSamples()
     {
         TestRectangle[] data = { new TestRectangle(0, 0, 2, 1), new TestRectangle(2, 0, 1, 2),
-                                   new TestRectangle(0, 1, 0, 2), new TestRectangle(1, 2, 2, 1) };
+                                   new TestRectangle(0, 1, 1, 2), new TestRectangle(1, 2, 2, 1) };
         var tree = new SpatialBinaryTree<TestRectangle>(data);
 
         Assert.IsTrue(tree.data == data);
@@ -242,6 +247,9 @@ public class TestSpatialTreeConstruction
         Assert.IsTrue(tree.root.right == null);
     }
 
+    /// <summary>
+    /// Test case from the game which exposed a problem with the pivot, couldn't find a better name...
+    /// </summary>
     [Test]
     public void TestReproCase()
     {
@@ -249,7 +257,7 @@ public class TestSpatialTreeConstruction
                                    new TestRectangle(1, 1, 2, 1), new TestRectangle(2, 0, 1, 1),
                                     new TestRectangle(3, 0, 1, 1), new TestRectangle(3, 1, 1, 1)};
 
-        var tree = new SpatialBinaryTree<TestRectangle>(data);
+        var tree = new SpatialBinaryTree<TestRectangle>(data, UnityEngine.Animations.Axis.Y);
 
         Assert.IsTrue(tree.root.index == 0);
         Assert.IsTrue(tree.root.length == 6);

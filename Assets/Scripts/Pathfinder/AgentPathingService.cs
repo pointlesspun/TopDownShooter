@@ -6,6 +6,7 @@
 
 namespace Tds.PathFinder
 {
+    using Tds.Util;
     using UnityEngine;
 
     /// <summary>
@@ -21,7 +22,7 @@ namespace Tds.PathFinder
         /// <param name="service">Service which finds a path through a dungeon</param>
         /// <param name="searchSpace">Layout of the dungeon (searchspace)</param>
         /// <param name="time">Current time</param>
-        public static void UpdateState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
+        public static void UpdateState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class, IBounds
         {
             switch (state.state)
             {
@@ -64,7 +65,7 @@ namespace Tds.PathFinder
         /// <param name="state"></param>
         /// <param name="settings"></param>
         /// <param name="time"></param>
-        public static void UpdateIdleState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
+        public static void UpdateIdleState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class, IBounds
         {
             if (!IsDistanceInRange(state.targetLocation, state.agentLocation, context.settings.waypointDistance))
             {
@@ -77,7 +78,7 @@ namespace Tds.PathFinder
         /// </summary>
         /// <param name="state"></param>
         /// <param name="time"></param>
-        public static void InitializePathfindingState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
+        public static void InitializePathfindingState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class, IBounds
         {
             state.stateStartTime = context.time;
             state.state = PathingState.FindingPath;
@@ -93,7 +94,7 @@ namespace Tds.PathFinder
         /// <param name="state"></param>
         /// <param name="service"></param>
         /// <param name="time"></param>
-        public static void CancelPathfinding<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
+        public static void CancelPathfinding<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class, IBounds
         {
             if ( state.pathfindingTicket != -1 )
             {
@@ -111,24 +112,27 @@ namespace Tds.PathFinder
         /// <param name="service"></param>
         /// <param name="searchSpace"></param>
         /// <param name="time"></param>
-        public static void UpdatePathfindingState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
+        public static void UpdatePathfindingState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class, IBounds
         {
             // does the state have an outstanding ticket to find a path
             if (state.pathfindingTicket < 0)
             {
                 // prevent re-spamming the search service. If no ticket was found, wait a random amount of time
-                if ((context.time - state.lastTicketRequest) > 0.25f + 0.25f * Random.value)
+                if ((context.time - state.lastTimeoutCheck) > 0.25f + 0.25f * Random.value)
                 {
                     // has a path been defined ?
                     if (state.agentNode == null)
                     {
                         state.agentNode = context.searchSpace.FindNearestSolution(state.agentLocation - context.settings.worldOffset, -1);
                         state.targetNode = context.searchSpace.FindNearestSolution(state.targetLocation - context.settings.worldOffset, -1);
+
+                        state.isTargetNodeApproximation =  !state.targetNode.Bounds.Contains(state.targetStartLocation);
+
                         state.targetStartLocation = state.targetLocation;
                     }
 
                     state.pathfindingTicket = context.service.BeginSearch(state.agentNode, state.targetNode);
-                    state.lastTicketRequest = context.time;
+                    state.lastTimeoutCheck = context.time;
                 }
             }
 
@@ -136,10 +140,11 @@ namespace Tds.PathFinder
             if (state.pathfindingTicket >= 0)
             {
                 // check if a result is available
-                if (context.service.RetrieveResult(state.pathfindingTicket, state.agentNode, state.targetNode, state.pathNodes) != null)
+                if (context.service.RetrieveResult(state.pathfindingTicket, state.agentNode, 
+                                                            state.targetNode, state.pathNodes, context.searchSpace) != null)
                 {
                     InitializePathFollowingState(state, context);
-                    state.lastTicketRequest = context.time;
+                    state.lastTimeoutCheck = context.time;
                 }
             }
         }
@@ -149,21 +154,57 @@ namespace Tds.PathFinder
         /// </summary>
         /// <param name="state"></param>
         /// <param name="time"></param>
-        public static void InitializePathFollowingState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
+        public static void InitializePathFollowingState<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class, IBounds
         {
             state.stateStartTime = context.time;
             state.pathNodeIndex = 0;
             state.pathfindingTicket = -1;
             state.state = PathingState.FollowingPath;
+            state.lastTimeoutCheck = context.time;
+
+            Contract.RequiresForAllSequential(state.pathNodes,
+                (index, n1, n2) => n1 == null || n2 == null || context.searchSpace.AreNeighbours(n1, n2));
 
             GetNextWaypoints(state, context, true);
         }
 
-        public static void UpdateFollowingPath<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class
+        /// <summary>
+        /// Heuristic to determine whether or not the agent should restart pathfinding if the agent is in the 
+        /// pathfollowing state
+        /// </summary>
+        /// <param name="state"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private static bool ShouldRestartPathfinding<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class, IBounds
         {
-            // has target moved beyond a certain range ?
-            if ((context.time - state.stateStartTime) > context.settings.pathValidatyCheckTimeout
-                && !IsDistanceInRange(state.targetLocation, state.targetStartLocation, context.settings.targetDistanceThreshold))
+            if ( state.state == PathingState.FollowingPath )
+            {
+                // only check so often
+                if ((context.time - state.lastTimeoutCheck) > context.settings.pathValidatyCheckTimeout)
+                {
+                    state.lastTimeoutCheck = context.time;
+
+                    if (state.isTargetNodeApproximation)
+                    {
+                        // make a guess if the target has moved away base on the context
+                        return !IsDistanceInRange(state.targetLocation,
+                                    state.targetStartLocation, context.settings.targetDistanceThreshold);
+                    }
+                    else
+                    {
+                        // need to restart if the target has left its current node
+                        return !state.targetNode.Bounds.Contains(state.targetLocation);
+                    }
+                }
+            }
+
+            return false;
+        }
+
+        public static void UpdateFollowingPath<T>(AgentPathingState<T> state, AgentPathingContext<T> context) where T : class, IBounds
+        {
+            // has target moved beyond a certain range and do we need to reset the pathfinding?
+            if (ShouldRestartPathfinding(state, context))
             {
                 InitializePathfindingState(state, context);
             }
@@ -183,6 +224,7 @@ namespace Tds.PathFinder
 
                         if (state.waypointIndex == state.waypoints.Length)
                         {
+                            // proceed to the next node
                             T lastNode = state.pathNodes[state.pathNodes.Length - 1];
 
                             // go to the next waypoint
@@ -192,12 +234,14 @@ namespace Tds.PathFinder
                             if ((state.pathNodeIndex == state.pathNodes.Length - 1
                                 || state.pathNodes[state.pathNodeIndex] == null) && lastNode != state.targetNode)
                             {
-                                // agent's buffer was too small to contain the full path, continue pathfinding from the current position
+                                // agent's buffer was too small to contain the full path, 
+                                // continue pathfinding from the current position
                                 InitializePathfindingState(state, context);
 
                             }
                             else
                             {
+                                // No more waypoints retrieve the next set.
                                 GetNextWaypoints(state, context, true);
                             }
                         }
@@ -231,7 +275,7 @@ namespace Tds.PathFinder
         /// <param name="endPoint"></param>
         /// <returns></returns>
         public static void GetNextWaypoints<T>(AgentPathingState<T> agentState, AgentPathingContext<T> context,
-                                                                                        bool randomize = false) where T : class
+                                                                                        bool randomize = false) where T : class, IBounds
         {
             var index = agentState.pathNodeIndex;
 

@@ -62,6 +62,8 @@ namespace Tds.PathFinder
         /// </summary>
         public T targetNode;
 
+        public bool isTargetNodeApproximation;
+
         /// <summary>
         /// Ticket id in pathfinding service
         /// </summary>
@@ -71,7 +73,7 @@ namespace Tds.PathFinder
         /// Last time this agent requested a pathfinding. Used to prevent spamming
         /// the pathfinding service.
         /// </summary>
-        public float lastTicketRequest;
+        public float lastTimeoutCheck;
        
         /// <summary>
         /// List of nodes making up the current path
@@ -97,7 +99,7 @@ namespace Tds.PathFinder
         {
             state = PathingState.Idle;
             pathfindingTicket = -1;
-            lastTicketRequest = 0;
+            lastTimeoutCheck = 0;
             // need two points at the moment one in front of the doorway and one after the doorway
             // this is just a crutch until detailed pathfinding is in place
             waypoints = new Vector2[2];

@@ -24,6 +24,11 @@ namespace Tds.DungeonPathfinding
             set;
         }
 
+        public bool AreNeighbours(DungeonNode from, DungeonNode to)
+        {
+            return from.GetEdgeTo(to) != null;
+        }
+
         public DungeonNode FindNearestSolution(Vector2 location, float maxDistance)
         {
             return Layout.FindNearestSolution(location, maxDistance);

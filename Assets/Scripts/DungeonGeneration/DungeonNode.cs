@@ -17,7 +17,7 @@ namespace Tds.DungeonGeneration
     /// <summary>
     /// Node of a dungeon. 
     /// </summary>
-    public class DungeonNode : IRectangle
+    public class DungeonNode : IBounds
     {
         // debug id
         private static int _idCounter = 0;

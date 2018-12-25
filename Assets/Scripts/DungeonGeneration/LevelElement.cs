@@ -12,7 +12,7 @@ namespace Tds.DungeonGeneration
     /// <summary>
     /// Element describing a piece of the level
     /// </summary>
-    public class LevelElement
+    public class LevelElement : IBounds
     {
         // cached unity object representing this element
         public PooledObject<GameObject> _poolObject;
@@ -24,6 +24,14 @@ namespace Tds.DungeonGeneration
         public int _randomRoll;
 
         public Vector2Int _position;
+
+        public Rect Bounds
+        {
+            get
+            {
+                return new Rect(_position, Vector2.one);
+            }
+        }
 
         public float Distance(LevelElement other)
         {

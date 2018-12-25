@@ -85,5 +85,10 @@ namespace Tds.DungeonGeneration
 
             return null;
         }
+
+        public bool AreNeighbours(LevelElement from, LevelElement to)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
