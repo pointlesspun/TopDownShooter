@@ -13,6 +13,27 @@ namespace Tds.PathFinder
     
     using Tds.Util;
 
+    public class SearchRecord<T> where T : class
+    {
+        /// <summary>
+        /// Parameters defining a search 
+        /// </summary>
+        public SearchParameters<T> searchParameters;
+
+        /// <summary>
+        /// Number of entities having a reference to the parameters
+        /// </summary>
+        public int referenceCount;
+
+        /// <summary>
+        /// Collection this record belongs to
+        /// </summary>
+        public LinkedList<SearchRecord<T>> collection;
+
+
+        public int searchIndex; 
+    }
+
     /// <summary>
     /// Service which encapsulates one or more BestFistSearch algorithms, allowing agents to share 
     /// searches and search results rather than having to instantiate a searchalgorithm themselves/
@@ -20,27 +41,35 @@ namespace Tds.PathFinder
     /// <typeparam name="T"></typeparam>
     public class SearchService<T> where T : class
     {
+        /// <summary>
+        /// Algorithms used for the actual search 
+        /// </summary>
         private BestFistSearch<T>[] _searchAlgorithms;
+
+        /// <summary>
+        /// Lookup for search records by id
+        /// </summary>
+        private readonly Dictionary<int, SearchRecord<T>> _recordLookup = new Dictionary<int, SearchRecord<T>>();
 
         /// <summary>
         /// Buffered searchparameters. 
         /// </summary>
-        private LinkedList<SearchParameters<T>> _availableSearches;
+        private LinkedList<SearchRecord<T>> _availableSearches;
 
         /// <summary>
         /// Searches which are currently waiting to be started
         /// </summary>
-        private LinkedList<SearchParameters<T>> _scheduledSearches;
+        private LinkedList<SearchRecord<T>> _scheduledSearches;
 
         /// <summary>
         /// Searches currently in progress
         /// </summary>
-        private LinkedList<SearchParameters<T>> _searchesInProgress;
+        private LinkedList<SearchRecord<T>> _searchesInProgress;
 
         /// <summary>
         /// Searches completed
         /// </summary>
-        private LinkedList<SearchParameters<T>> _completedSearches;
+        private LinkedList<SearchRecord<T>> _completedSearches;
 
         /// <summary>
         ///  Assumption is a gameplay clock with 20 updates / seconds, so
@@ -50,9 +79,20 @@ namespace Tds.PathFinder
         {
             get;
             set;
-        } 
+        }
 
-        public IEnumerable<SearchParameters<T>> ScheduledSearches
+        /// <summary>
+        /// Returns the searches available. Use for debugging / testing purposes only.
+        /// </summary>
+        public IEnumerable<SearchRecord<T>> AvailableSearches
+        {
+            get
+            {
+                return _availableSearches;
+            }
+        }
+
+        public IEnumerable<SearchRecord<T>> ScheduledSearches
         {
             get
             {
@@ -60,7 +100,7 @@ namespace Tds.PathFinder
             }
         }
 
-        public IEnumerable<SearchParameters<T>> SearchesInProgress
+        public IEnumerable<SearchRecord<T>> SearchesInProgress
         {
             get
             {
@@ -68,7 +108,7 @@ namespace Tds.PathFinder
             }
         }
         
-        public IEnumerable<SearchParameters<T>> CompletedSearches
+        public IEnumerable<SearchRecord<T>> CompletedSearches
         {
             get
             {
@@ -111,18 +151,26 @@ namespace Tds.PathFinder
 
             var id = 0;
 
-            _availableSearches = new LinkedList<SearchParameters<T>>();
-            _scheduledSearches = new LinkedList<SearchParameters<T>>();
-            _searchesInProgress = new LinkedList<SearchParameters<T>>();
-            _completedSearches = new LinkedList<SearchParameters<T>>();
+            _availableSearches = new LinkedList<SearchRecord<T>>();
+            _scheduledSearches = new LinkedList<SearchRecord<T>>();
+            _searchesInProgress = new LinkedList<SearchRecord<T>>();
+            _completedSearches = new LinkedList<SearchRecord<T>>();
                         
             for (int i = 0; i < searchResultCount; i++)
             {
-                _availableSearches.AddLast( new SearchParameters<T>()
+                var record = new SearchRecord<T>()
                 {
-                    Nodes = new T[estimatedSearchDepth],
-                    Id = id++
-                });
+                    searchParameters = new SearchParameters<T>()
+                    {
+                        Nodes = new T[estimatedSearchDepth],
+                        Id = id++
+                    },
+                    referenceCount = 0,
+                    collection = _availableSearches
+                };
+
+                _recordLookup[record.searchParameters.Id] = record;
+                _availableSearches.AddLast(record);
             }
 
             TimeStamp = 0;
@@ -130,29 +178,60 @@ namespace Tds.PathFinder
             return this;
         }
 
-        public int BeginSearch(T from, T to)
+        /// <summary>
+        /// Clears all outstanding searches and resets the TimeStamp
+        /// </summary>
+        public void Clear()
+        {
+            foreach (var searchAlgorithm in _searchAlgorithms)
+            {
+                searchAlgorithm.EndSearch();
+            }
+
+            MoveSearches(_scheduledSearches, _availableSearches);
+            MoveSearches(_searchesInProgress, _availableSearches);
+            MoveSearches(_completedSearches, _availableSearches);
+            TimeStamp = 0;
+        }
+
+        /// <summary>
+        /// Start a new search from a from-element to a to-element
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns>The id of the search or a negative number if no search is available</returns>
+        public int BeginSearch(T from, T to, int debugId)
         {
             var result = FindExistingSearch(from, to);
 
             if (result == null)
             {
-                var searchResultNode = ObtainSearchResult();
+                result = ObtainSearchResult();
 
-                if (searchResultNode != null)
+                if (result != null)
                 {
-                    result = searchResultNode;
-                    searchResultNode.Value.IsComplete = false;
-                    searchResultNode.Value.FromNode = from;
-                    searchResultNode.Value.ToNode = to;
+                    result.Value.referenceCount = 1;
 
-                    for (int i = 0; i < searchResultNode.Value.Nodes.Length; ++i)
+                    var parameters = result.Value.searchParameters;
+                    
+                    parameters.IsComplete = false;
+                    parameters.FromNode = from;
+                    parameters.ToNode = to;
+                    parameters.Length = 0;
+
+                    // clear all elements 
+                    for (int i = 0; i < parameters.Nodes.Length; ++i)
                     {
-                        searchResultNode.Value.Nodes[i] = null;
+                        parameters.Nodes[i] = null;
                     }
                 }
             }
+            else
+            {
+                result.Value.referenceCount++;
+            }
 
-            return result == null ? -1 : result.Value.Id;
+            return result == null ? -1 : result.Value.searchParameters.Id;
         }
 
         /// <summary>
@@ -161,12 +240,24 @@ namespace Tds.PathFinder
         /// <param name="id"></param>
         public void CancelSearch(int id)
         {
-            var node = _scheduledSearches.FirstOrDefault(x => x.Id == id);
+            var record = id >= 0 ? _recordLookup[id] : null;
 
-            if ( node != null)
+            // can this search be canceled
+            if ( record != null && (record.collection != _availableSearches))
             {
-                _scheduledSearches.Remove(node);
-                _availableSearches.AddLast(node);
+                record.referenceCount--;
+
+                if (record.referenceCount == 0)
+                {
+                    if (record.collection == _searchesInProgress)
+                    {
+                        _searchAlgorithms[record.searchIndex].EndSearch();
+                    }
+
+                    record.collection.Remove(record);
+                    _availableSearches.AddLast(record);
+                    record.collection = _availableSearches;
+                }
             } 
         }
 
@@ -180,24 +271,41 @@ namespace Tds.PathFinder
         /// <returns>Store if a result is found, null otherwise</returns>
         public T[] RetrieveResult(int id, T from, T to, T[] store, ISearchSpace<T, Vector2> searchSpace )
         {
-            var completedSearch = _completedSearches.FirstOrDefault(x => x.Id == id);
+            var completedSearch = id >= 0 ? _recordLookup[id] : null;
 
-            if ( completedSearch != null && completedSearch.Value.IsMatch(from, to))
+            if ( completedSearch != null 
+                    && completedSearch.collection == _completedSearches 
+                    && completedSearch.searchParameters.IsMatch(from, to))
             {
-                if (from == completedSearch.Value.FromNode)
+                var search = completedSearch.searchParameters;
+                if (from == search.FromNode)
                 {
-                    Array.Copy(completedSearch.Value.Nodes, store, Mathf.Min(store.Length, completedSearch.Value.Nodes.Length));
+                    Array.Copy(search.Nodes, store, Mathf.Min(store.Length, search.Nodes.Length));
                 }
                 else
                 {
-                    completedSearch.Value.ReverseCopyNodes(store);
+                    search.ReverseCopyNodes(store);
                 }
-
 
                 return store;
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Debug method to see if the given ticket is still valid, ie: it should exist
+        /// in any of the active searches and the from and to node should match
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
+        public bool ValidateTicket(int id, T from, T to)
+        {
+            return _scheduledSearches.Any(x => x.searchParameters.Id == id && x.searchParameters.IsMatch(from, to))
+                || _searchesInProgress.Any(x => x.searchParameters.Id == id && x.searchParameters.IsMatch(from, to))
+                || _completedSearches.Any(x => x.searchParameters.Id == id && x.searchParameters.IsMatch(from, to));
         }
 
         /// <summary>
@@ -212,8 +320,8 @@ namespace Tds.PathFinder
         }
 
         private void TryStartNewSearches(BestFistSearch<T>[] searchers,
-                                                LinkedList<SearchParameters<T>> planned,
-                                                LinkedList<SearchParameters<T>> inProgress) {
+                                                LinkedList<SearchRecord<T>> planned,
+                                                LinkedList<SearchRecord<T>> inProgress) {
 
             while (inProgress.Count < searchers.Length && planned.Count > 0)
             {
@@ -221,15 +329,26 @@ namespace Tds.PathFinder
                 planned.RemoveFirst();
                 inProgress.AddLast(nextSearchParameters);
 
-                searchers.First(s => s.Start == null)
-                    .BeginSearch(nextSearchParameters.Value.FromNode, nextSearchParameters.Value.ToNode);
+                nextSearchParameters.Value.collection = inProgress;
+
+                for( int i = 0; i < searchers.Length; ++i)
+                {
+                    if (searchers[i].Start == null)
+                    {
+                        searchers[i].BeginSearch(nextSearchParameters.Value.searchParameters.FromNode,
+                                                       nextSearchParameters.Value.searchParameters.ToNode);
+                        nextSearchParameters.Value.searchIndex = i;
+                        break;
+                    }
+                }
+                
             }
         }
 
         private void UpdateSearchesInProgress(int maxIterations, 
                                                 BestFistSearch<T>[] searchers,
-                                                LinkedList<SearchParameters<T>> searchesInProgress,
-                                                LinkedList<SearchParameters<T>> completedSearches)
+                                                LinkedList<SearchRecord<T>> searchesInProgress,
+                                                LinkedList<SearchRecord<T>> completedSearches)
         {
             for (int i = 0; i < searchers.Length; ++i)
             {
@@ -237,25 +356,38 @@ namespace Tds.PathFinder
                 {
                     if (_searchAlgorithms[i].Iterate(maxIterations) <= 0)
                     {
-                        var searchResult = searchesInProgress.FirstOrDefault(x => x.IsMatch(_searchAlgorithms[i].Start,
-                                                                                            _searchAlgorithms[i].End));
+                        var searchResult = searchesInProgress.FirstOrDefault(
+                            x => x.searchParameters.IsMatch(_searchAlgorithms[i].Start, _searchAlgorithms[i].End)).Value;
+                        var parameters = searchResult.searchParameters;
 
-                        searchResult.Value.IsComplete = true;
-                        searchResult.Value.TimeStamp = TimeStamp;
+                        parameters.IsComplete = true;
+                        parameters.TimeStamp = TimeStamp;
 
-                        searchResult.Value.Length = searchers[i].GetBestPath(searchResult.Value.Nodes);                        
+                        parameters.Length = searchers[i].GetBestPath(parameters.Nodes);                        
                         searchers[i].EndSearch();
 
                         searchesInProgress.Remove(searchResult);
                         completedSearches.AddLast(searchResult);
+                        searchResult.collection = completedSearches;
                     }
                 }
             }
         }
 
-        private LinkedListNode<SearchParameters<T>> ObtainSearchResult()
+        private void MoveSearches(LinkedList<SearchRecord<T>> from, LinkedList<SearchRecord<T>> to)
         {
-            LinkedListNode<SearchParameters<T>> result = null;
+            while (from.Count > 0)
+            {
+                var record = from.First;
+
+                from.RemoveFirst();
+                to.AddFirst(record);
+            }
+        }
+
+        private LinkedListNode<SearchRecord<T>> ObtainSearchResult()
+        {
+            LinkedListNode<SearchRecord<T>> result = null;
             var source = _availableSearches;
 
             result = _availableSearches.First;
@@ -263,25 +395,31 @@ namespace Tds.PathFinder
             if (result == null)
             {
                 source = _completedSearches;
-                result = _completedSearches.FirstOrDefault(x => TimeStamp - x.TimeStamp > MaxAgeCompletedSearch);
+                result = _completedSearches.FirstOrDefault(x => TimeStamp - x.searchParameters.TimeStamp > MaxAgeCompletedSearch);
+
+                if ( result != null)
+                {
+                    //Debug.Log("obtained from completed " + result.Value.searchParameters.TimeStamp + " / " + TimeStamp);
+                }
             }
 
             if (result != null)
             {
                 source.Remove(result);
                 _scheduledSearches.AddLast(result);
+                result.Value.collection = _scheduledSearches;
             }
 
             return result;
         }
 
-        private LinkedListNode<SearchParameters<T>> FindExistingSearch(T from, T to)
+        private LinkedListNode<SearchRecord<T>> FindExistingSearch(T from, T to)
         {
-            var result = _scheduledSearches.FirstOrDefault(x => x.IsMatch(from, to));
+            var result = _scheduledSearches.FirstOrDefault(x => x.searchParameters.IsMatch(from, to));
             
             if ( result == null )
             {
-                result = _completedSearches.FirstOrDefault(x => x.IsMatch(from, to));
+                result = _completedSearches.FirstOrDefault(x => x.searchParameters.IsMatch(from, to));
             }
 
             return result;

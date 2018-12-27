@@ -4,7 +4,7 @@ using Tds.DungeonGeneration;
 using Tds.DungeonPathfinding;
 using Tds.PathFinder;
 
-public class TestDungeonSearchService
+public class SearchServiceTest
 {
     /// <summary>
     /// Test initialization, expect all datastructures to be there and ready
@@ -37,7 +37,7 @@ public class TestDungeonSearchService
 
         var service = new SearchService<DungeonNode>().Initialize(2, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
 
-        var id = service.BeginSearch(nodeA, nodeD);
+        var id = service.BeginSearch(nodeA, nodeD, 0);
         var store = new DungeonNode[8];
 
         Assert.IsTrue(id >= 0);
@@ -87,8 +87,8 @@ public class TestDungeonSearchService
 
         var service = new SearchService<DungeonNode>().Initialize(2, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
 
-        var id1 = service.BeginSearch(nodeA, nodeD);
-        var id2 = service.BeginSearch(nodeD, nodeA);
+        var id1 = service.BeginSearch(nodeA, nodeD, 0);
+        var id2 = service.BeginSearch(nodeD, nodeA, 0);
         var store1 = new DungeonNode[8];
         var store2 = new DungeonNode[8];
 
@@ -132,7 +132,7 @@ public class TestDungeonSearchService
         var grid = LevelGridFactory.CreateFrom(input);
         var service = new SearchService<DungeonNode>().Initialize(1, 4, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
 
-        var id1 = service.BeginSearch(grid[0,0], grid[1, 1]);
+        var id1 = service.BeginSearch(grid[0,0], grid[1, 1], 0);
         Assert.IsTrue(service.ScheduledSearches.Count() == 1);
 
         service.Update(-1);
@@ -141,7 +141,7 @@ public class TestDungeonSearchService
         Assert.IsTrue(service.CompletedSearches.Count() == 1);
         Assert.IsTrue(service.RetrieveResult(id1, grid[0, 0], grid[1, 1], store1, null) == store1);
         
-        var id2 = service.BeginSearch(grid[1, 1], grid[0, 0]);
+        var id2 = service.BeginSearch(grid[1, 1], grid[0, 0], 0);
         Assert.IsTrue(id1 == id2);
         Assert.IsTrue(service.ScheduledSearches.Count() == 0);
     }
@@ -164,8 +164,8 @@ public class TestDungeonSearchService
 
         service.MaxAgeCompletedSearch = 2;
 
-        var id1 = service.BeginSearch(grid[0, 0], grid[1, 1]);
-        var id2 = service.BeginSearch(grid[1, 0], grid[0, 0]);
+        var id1 = service.BeginSearch(grid[0, 0], grid[1, 1], 0);
+        var id2 = service.BeginSearch(grid[1, 0], grid[0, 0], 0);
 
         Assert.IsTrue(id1 == 0);
         Assert.IsTrue(service.ScheduledSearches.Count() == 1);
@@ -180,24 +180,202 @@ public class TestDungeonSearchService
         Assert.IsTrue(service.RetrieveResult(id2, grid[1, 0], grid[0, 0], store1, null) == null);
 
         // still no search should be available
-        id2 = service.BeginSearch(grid[1, 0], grid[0, 0]);
+        id2 = service.BeginSearch(grid[1, 0], grid[0, 0], 0);
         Assert.IsTrue(id2 == -1);
 
         // age of search should be 1, max age is 2 ... 
         service.Update(-1);
         
         // still no search should be available
-        id2 = service.BeginSearch(grid[1, 0], grid[0, 0]);
+        id2 = service.BeginSearch(grid[1, 0], grid[0, 0], 0);
         Assert.IsTrue(id2 == -1);
 
         // age of search should be 2, max age is 2 ... so a search should become available now
         service.Update(-1);
 
-        id2 = service.BeginSearch(grid[1, 0], grid[0, 0]);
+        id2 = service.BeginSearch(grid[1, 0], grid[0, 0], 0);
         Assert.IsTrue(id2 == 0);
         Assert.IsTrue(service.ScheduledSearches.Count() == 1);
         Assert.IsTrue(service.CompletedSearches.Count() == 0);
+    }
+
+    /// <summary>
+    /// Start a search, then cancel it. The search should revert back
+    /// from 'scheduled' to 'available'.
+    /// </summary>
+    [Test]
+    public void TestCancelSearch_ShouldBeAbleToCancelScheduledSearch()
+    {
+        string[] input =
+        {
+            " #",
+            "##",
+        };
+
+        var grid = LevelGridFactory.CreateFrom(input);
+        var service = new SearchService<DungeonNode>().Initialize(1, 1, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+
+        service.MaxAgeCompletedSearch = 2;
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 1);
+        Assert.IsTrue(service.SearchesInProgress.Count() == 0);
+
+        var id1 = service.BeginSearch(grid[0, 0], grid[1, 1], 0);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 0);
+        Assert.IsTrue(service.ScheduledSearches.Count() == 1);
+
+        service.CancelSearch(id1);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 1);
+        Assert.IsTrue(service.ScheduledSearches.Count() == 0);
+    }
+
+    /// <summary>
+    /// Start a search, then cancel it. The search should revert back
+    /// from 'scheduled' to 'available'.
+    /// </summary>
+    [Test]
+    public void TestCancelSearch_ShouldNotBeAbleToCancelScheduledSearchWhenThereAreMoreThan0References()
+    {
+        string[] input =
+        {
+            " #",
+            "##",
+        };
+
+        var grid = LevelGridFactory.CreateFrom(input);
+        var service = new SearchService<DungeonNode>().Initialize(1, 1, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+
+        service.MaxAgeCompletedSearch = 2;
+
+        var id1 = service.BeginSearch(grid[0, 0], grid[1, 1], 0);
+        var id2 = service.BeginSearch(grid[0, 0], grid[1, 1], 0);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 0);
+        Assert.IsTrue(service.ScheduledSearches.Count() == 1);
+
+        service.CancelSearch(id1);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 0);
+        Assert.IsTrue(service.ScheduledSearches.Count() == 1);
+
+        service.CancelSearch(id2);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 1);
+        Assert.IsTrue(service.ScheduledSearches.Count() == 0);
 
     }
+
+    /// <summary>
+    /// Start a search, then cancel it. The search should revert back
+    /// from 'in progress' to 'available'.
+    /// </summary>
+    [Test]
+    public void TestCancelSearch_ShouldBeAbleToCancelSearchInProgress()
+    {
+        string[] input =
+        {
+            " #",
+            "##",
+        };
+
+        var grid = LevelGridFactory.CreateFrom(input);
+        var service = new SearchService<DungeonNode>().Initialize(1, 1, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+
+        service.MaxAgeCompletedSearch = 2;
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 1);
+        Assert.IsTrue(service.SearchesInProgress.Count() == 0);
+
+        var id1 = service.BeginSearch(grid[0, 0], grid[1, 1], 0);
+
+        service.Update(1);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 0);
+        Assert.IsTrue(service.SearchesInProgress.Count() == 1);
+
+        service.CancelSearch(id1);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 1);
+        Assert.IsTrue(service.SearchesInProgress.Count() == 0);
+    }
+
+    /// <summary>
+    /// Start a search, then cancel it. The search should revert back
+    /// from 'completed' to 'available'.
+    /// </summary>
+    [Test]
+    public void TestCancelSearch_ShouldBeAbleToCancelCompletedSearches()
+    {
+        string[] input =
+        {
+            " #",
+            "##",
+        };
+
+        var grid = LevelGridFactory.CreateFrom(input);
+        var service = new SearchService<DungeonNode>().Initialize(1, 1, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+
+        service.MaxAgeCompletedSearch = 2;
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 1);
+        Assert.IsTrue(service.CompletedSearches.Count() == 0);
+
+        var id1 = service.BeginSearch(grid[0, 0], grid[1, 1], 0);
+
+        service.Update(-1);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 0);
+        Assert.IsTrue(service.CompletedSearches.Count() == 1);
+
+        service.CancelSearch(id1);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 1);
+        Assert.IsTrue(service.CompletedSearches.Count() == 0);
+    }
+
+    /// <summary>
+    /// Start a search, then cancel it. The search should revert back
+    /// from 'completed' to 'available'.
+    /// </summary>
+    [Test]
+    public void TestCancelAndRestartSearch_ShouldBeAbleToCancelCompletedSearches()
+    {
+        string[] input =
+        {
+            " ##",
+            "## ",
+        };
+
+        var grid = LevelGridFactory.CreateFrom(input);
+        var service = new SearchService<DungeonNode>().Initialize(1, 1, 4, () => DungeonSearch.CreatePathfinder(16, 1, 1, 1));
+
+        service.MaxAgeCompletedSearch = 2;
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 1);
+        Assert.IsTrue(service.CompletedSearches.Count() == 0);
+
+        var id1 = service.BeginSearch(grid[0, 0], grid[1, 1], 0);
+
+        service.Update(1);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 0);
+        Assert.IsTrue(service.SearchesInProgress.Count() == 1);
+
+        service.CancelSearch(id1);
+        id1 = service.BeginSearch(grid[2, 1], grid[0, 0], 0);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 0);
+        Assert.IsTrue(service.ScheduledSearches.Count() == 1);
+
+        service.Update(-1);
+
+        Assert.IsTrue(service.AvailableSearches.Count() == 0);
+        Assert.IsTrue(service.CompletedSearches.Count() == 1);
+
+    }
+
+
 }
 

@@ -10,6 +10,7 @@ namespace Tds.DungeonPathfinding
     using Tds.Util;
     using Tds.PathFinder;
     using Tds.DungeonGeneration;
+    using System.Linq;
 
     /// <summary>
     /// Class with a state which allows for tin-editor testing of pathfinding. 
@@ -55,6 +56,11 @@ namespace Tds.DungeonPathfinding
         /// </summary>
         public int _agentSearchBuffer = 128;
 
+        public int _availableSearchBuffers = 0;
+        public int _scheduledSearches = 0;
+        public int _searchesInProgress = 0;
+        public int _completedSearches = 0;
+
         /// <summary>
         /// Agents containing the pathing information
         /// </summary>
@@ -95,6 +101,7 @@ namespace Tds.DungeonPathfinding
                 }
 
                 _context = CreatePathingContext();
+                _context.service.Clear();
 
                 if (_context.IsInitialized())
                 {
@@ -135,6 +142,7 @@ namespace Tds.DungeonPathfinding
             }
             else if (_context.IsInitialized() && _target != null)
             {
+
                 for (int i = 0; i < _agentCount; ++i)
                 {
                     UpdateAgent(_agents[i], _agentSpeeds[i], ref _currentPosition[i]);
@@ -142,6 +150,11 @@ namespace Tds.DungeonPathfinding
 
                 _context.service.Update(_serviceIterations);
             }
+
+            _availableSearchBuffers = _context.service.AvailableSearches.Count();
+            _scheduledSearches = _context.service.ScheduledSearches.Count();
+            _searchesInProgress = _context.service.SearchesInProgress.Count();
+            _completedSearches = _context.service.CompletedSearches.Count();
         }
 
         public void OnDrawGizmos()

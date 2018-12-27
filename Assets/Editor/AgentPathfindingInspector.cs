@@ -38,7 +38,6 @@ namespace Tds.DungeonPathfinding
                 {
                     _testBehaviour.ToggleFollowTarget();
                     EditorApplication.update += OnUpdate;
-
                 }
             }
         }

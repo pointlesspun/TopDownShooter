@@ -89,7 +89,7 @@ namespace Tds.PathFinder
         }
 
         /// <summary>
-        /// Cancels any outstanding searches started by the given state
+        /// Cancels any outstanding searches started by the given state and sets the state up for idle
         /// </summary>
         /// <param name="state"></param>
         /// <param name="service"></param>
@@ -98,7 +98,9 @@ namespace Tds.PathFinder
         {
             if ( state.pathfindingTicket != -1 )
             {
+                //Contract.Requires(context.service.ValidateTicket(state.pathfindingTicket, state.agentNode, state.targetNode), "Cannot cancel a ticket which is not owned");
                 context.service.CancelSearch(state.pathfindingTicket);
+                state.pathfindingTicket = -1;
             }
 
             InitializeIdleState(state, context);
@@ -118,7 +120,7 @@ namespace Tds.PathFinder
             if (state.pathfindingTicket < 0)
             {
                 // prevent re-spamming the search service. If no ticket was found, wait a random amount of time
-                if ((context.time - state.lastTimeoutCheck) > 0.25f + 0.25f * Random.value)
+                if ((context.time - state.lastTimeoutCheck) > 0.1f + 0.1f * Random.value)
                 {
                     // has a path been defined ?
                     if (state.agentNode == null)
@@ -131,20 +133,33 @@ namespace Tds.PathFinder
                         state.targetStartLocation = state.targetLocation;
                     }
 
-                    state.pathfindingTicket = context.service.BeginSearch(state.agentNode, state.targetNode);
+                    state.pathfindingTicket = context.service.BeginSearch(state.agentNode, state.targetNode, state.GetHashCode());
                     state.lastTimeoutCheck = context.time;
                 }
             }
 
-            // completed pathfinding ?
+            // started pathfinding ?
             if (state.pathfindingTicket >= 0)
             {
-                // check if a result is available
-                if (context.service.RetrieveResult(state.pathfindingTicket, state.agentNode, 
-                                                            state.targetNode, state.pathNodes, context.searchSpace) != null)
+                // has target moved beyond a certain range and do we need to reset the pathfinding?
+                if (ShouldRestartPathfinding(state, context))
                 {
-                    InitializePathFollowingState(state, context);
-                    state.lastTimeoutCheck = context.time;
+                    CancelPathfinding(state, context);
+                    InitializePathfindingState(state, context);
+                }
+                else
+                {
+                    // Contract.Requires(context.service.ValidateTicket(state.pathfindingTicket, state.agentNode, state.targetNode), "" + state.GetHashCode());
+                    
+                    // check if a result is available
+                    if (context.service.RetrieveResult(state.pathfindingTicket, state.agentNode,
+                                                            state.targetNode, state.pathNodes, context.searchSpace) != null)
+                    {
+                        // clear the ticket as the agent no longer has ownership over the associated search
+                        // (and avoid canceling other agent's search setup)                   
+                        state.pathfindingTicket = -1;
+                        InitializePathFollowingState(state, context);
+                    }
                 }
             }
         }
@@ -158,7 +173,6 @@ namespace Tds.PathFinder
         {
             state.stateStartTime = context.time;
             state.pathNodeIndex = 0;
-            state.pathfindingTicket = -1;
             state.state = PathingState.FollowingPath;
             state.lastTimeoutCheck = context.time;
 
@@ -237,7 +251,6 @@ namespace Tds.PathFinder
                                 // agent's buffer was too small to contain the full path, 
                                 // continue pathfinding from the current position
                                 InitializePathfindingState(state, context);
-
                             }
                             else
                             {
