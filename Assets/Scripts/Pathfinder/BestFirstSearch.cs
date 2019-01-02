@@ -241,7 +241,7 @@ namespace Tds.PathFinder
                     }
                     else
                     {
-                        store.ShiftLeft();
+                        store.ShiftBack();
                         store[store.Length-1] = current._data;
                     }
 
@@ -258,7 +258,7 @@ namespace Tds.PathFinder
                 }
             }
 
-            return itemCount;
+            return Math.Min(store.Length, itemCount);
         }
 
         private void Explore(PathNode<T> current, T target, T goal)

@@ -11,9 +11,31 @@ namespace Tds.PathFinder
     
     public enum PathingState
     {
+        /// <summary>
+        /// Agent has nothing to do
+        /// </summary>
         Idle,
+
+        /// <summary>
+        /// Agent is awaiting for the service to grant a pathfinding ticket
+        /// </summary>
+        AwaitingTicket,
+
+        /// <summary>
+        /// Agent is finding a path towards a target
+        /// </summary>
         FindingPath,
+
+        /// <summary>
+        /// Agent is following the path towards the target
+        /// </summary>
         FollowingPath,
+
+        /// <summary>
+        /// Agent has completed the path and is now directly moving towards the 
+        /// target location
+        /// </summary>
+        FollowingTarget
     }
 
     /// <summary>
@@ -62,6 +84,9 @@ namespace Tds.PathFinder
         /// </summary>
         public T targetNode;
 
+        /// <summary>
+        /// If target location is not in any of the level's node, this flag is set to true
+        /// </summary>
         public bool isTargetNodeApproximation;
 
         /// <summary>
@@ -113,6 +138,42 @@ namespace Tds.PathFinder
         public AgentPathingState(int pathNodeCount) : this()
         {
             pathNodes = new T[pathNodeCount];
+        }
+
+        /// <summary>
+        /// Checks if the current node in the state is the last node available
+        /// </summary>
+        /// <returns></returns>
+        public bool HasReachedLastNode()
+        {
+            return pathNodeIndex == pathNodes.Length - 1 
+                    || pathNodes[pathNodeIndex+1] == null
+                    // this can only happen when there are no pathnodes to begin with
+                    || pathNodes[pathNodeIndex] == null;
+        }
+
+        public int NextNodeIndex
+        {
+            get
+            {
+                return Mathf.Min(pathNodeIndex + 1, pathNodes.Length);
+            }
+        }
+
+        public T CurrentNode
+        {
+            get
+            {
+                return pathNodes[pathNodeIndex];
+            }
+        }
+
+        public Vector2 DirectionToWaypoint
+        {
+            get
+            {
+                return waypoints[waypointIndex] - agentLocation;
+            }
         }
     }
 }

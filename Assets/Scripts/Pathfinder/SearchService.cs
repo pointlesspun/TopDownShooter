@@ -72,16 +72,6 @@ namespace Tds.PathFinder
         private LinkedList<SearchRecord<T>> _completedSearches;
 
         /// <summary>
-        ///  Assumption is a gameplay clock with 20 updates / seconds, so
-        ///  every 0.5 seconds a search is considered 'outdated' and can be re-used
-        /// </summary>
-        public int MaxAgeCompletedSearch
-        {
-            get;
-            set;
-        }
-
-        /// <summary>
         /// Returns the searches available. Use for debugging / testing purposes only.
         /// </summary>
         public IEnumerable<SearchRecord<T>> AvailableSearches
@@ -124,11 +114,6 @@ namespace Tds.PathFinder
         {
             get;
             private set;
-        }
-
-        public SearchService()
-        {
-            MaxAgeCompletedSearch = 30;
         }
 
         /// <summary>
@@ -206,10 +191,15 @@ namespace Tds.PathFinder
 
             if (result == null)
             {
-                result = ObtainSearchResult();
+                result = TryObtainSearchResult();
 
                 if (result != null)
                 {
+                    // if there is a result available
+                    _scheduledSearches.AddLast(result);
+                    result.Value.collection = _scheduledSearches;
+
+                    // Debug.Log(debugId + " obtained refcount = 1");
                     result.Value.referenceCount = 1;
 
                     var parameters = result.Value.searchParameters;
@@ -229,6 +219,8 @@ namespace Tds.PathFinder
             else
             {
                 result.Value.referenceCount++;
+                // Debug.Log(debugId + " uses refcount = " + result.Value.referenceCount + " age : " + (TimeStamp - result.Value.searchParameters.TimeStamp));
+
             }
 
             return result == null ? -1 : result.Value.searchParameters.Id;
@@ -238,7 +230,7 @@ namespace Tds.PathFinder
         /// Stop the search with the given id (ticket)
         /// </summary>
         /// <param name="id"></param>
-        public void CancelSearch(int id)
+        public void ReleaseSearch(int id, int debugId)
         {
             var record = id >= 0 ? _recordLookup[id] : null;
 
@@ -246,6 +238,8 @@ namespace Tds.PathFinder
             if ( record != null && (record.collection != _availableSearches))
             {
                 record.referenceCount--;
+
+                // Debug.Log(debugId + " released search ref count = " + record.referenceCount);
 
                 if (record.referenceCount == 0)
                 {
@@ -361,7 +355,6 @@ namespace Tds.PathFinder
                         var parameters = searchResult.searchParameters;
 
                         parameters.IsComplete = true;
-                        parameters.TimeStamp = TimeStamp;
 
                         parameters.Length = searchers[i].GetBestPath(parameters.Nodes);                        
                         searchers[i].EndSearch();
@@ -385,29 +378,28 @@ namespace Tds.PathFinder
             }
         }
 
-        private LinkedListNode<SearchRecord<T>> ObtainSearchResult()
+        /// <summary>
+        /// Try to obtain a search result to start a search with. 
+        /// </summary>
+        /// <returns>This will return a non null value if a search is available or no longer referenced in
+        /// the completed searches</returns>
+        private LinkedListNode<SearchRecord<T>> TryObtainSearchResult()
         {
             LinkedListNode<SearchRecord<T>> result = null;
             var source = _availableSearches;
 
             result = _availableSearches.First;
 
+            // no available searches, try to get one from the completed service
             if (result == null)
             {
                 source = _completedSearches;
-                result = _completedSearches.FirstOrDefault(x => TimeStamp - x.searchParameters.TimeStamp > MaxAgeCompletedSearch);
-
-                if ( result != null)
-                {
-                    //Debug.Log("obtained from completed " + result.Value.searchParameters.TimeStamp + " / " + TimeStamp);
-                }
+                result = _completedSearches.FirstOrDefault(x => x.referenceCount == 0);
             }
-
-            if (result != null)
+           
+            if ( result != null )
             {
                 source.Remove(result);
-                _scheduledSearches.AddLast(result);
-                result.Value.collection = _scheduledSearches;
             }
 
             return result;

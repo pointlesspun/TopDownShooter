@@ -23,5 +23,10 @@ namespace Tds.PathFinder
         {
             return settings != null && searchSpace != null && service != null;
         }
+
+        public bool IsTimeout(float checkpoint)
+        {
+            return (time - checkpoint) > settings.pathValidatyCheckTimeout;
+        }
     }
 }

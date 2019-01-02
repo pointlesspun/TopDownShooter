@@ -11,6 +11,13 @@ namespace Tds.Util
 
     public static class CommonExtensions
     {
+        /// <summary>
+        /// Finds the first element in the linked list matching the given predicate
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="list"></param>
+        /// <param name="predicate"></param>
+        /// <returns></returns>
         public static LinkedListNode<T> FirstOrDefault<T>( this LinkedList<T> list, Func<T, bool> predicate)  {
 
             var current = list.First;
@@ -28,7 +35,12 @@ namespace Tds.Util
             return default(LinkedListNode<T>);
         }
 
-        public static void ShiftLeft<T>(this T[] array)
+        /// <summary>
+        /// Shift all elements in the array one position backwards
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="array"></param>
+        public static void ShiftBack<T>(this T[] array)
         {
             for ( int i = 0; i < array.Length - 1; ++i)
             {
@@ -36,6 +48,14 @@ namespace Tds.Util
             }
         }
 
+        /// <summary>
+        /// Retrieves an component from the object with the given gametag of type T.
+        /// Eg RetrieveComponent < ScoreComponent >("Player")
+        /// </summary>
+        /// <typeparam name="T">type of the component to retrieve</typeparam>
+        /// <param name="gameObjectTag">Tag of the game object</param>
+        /// <param name="isOptional">If false a contract failure will be raised when the component is not found</param>
+        /// <returns></returns>
         public static T RetrieveComponent<T>(string gameObjectTag, bool isOptional = false) where T  : Component
         {
             var obj = GameObject.FindGameObjectWithTag(gameObjectTag);
@@ -47,6 +67,18 @@ namespace Tds.Util
             }
 
             return obj != null ? obj.GetComponent<T>() : null;
+        }
+
+        /// <summary>
+        /// Checks if the given vectors are within the given distance (non inclusive)
+        /// </summary>
+        /// <param name="v1"></param>
+        /// <param name="v2"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
+        public static bool IsInRange(this Vector2 v1, Vector2 v2, float distance)
+        {
+            return (v1 - v2).sqrMagnitude < distance * distance;
         }
     }
 }

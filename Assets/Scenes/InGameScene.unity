@@ -559,7 +559,7 @@ MonoBehaviour:
     _sortOrder: 0
     _poolSize: 1
     _poolId: 3
-  _viewRadius: 15
+  _viewRadius: 7
   _dungeonLengthLevelScale: 0.5
   _maxDoorLength: 3
   _maxDungeonLength: 500

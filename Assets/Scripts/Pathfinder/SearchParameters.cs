@@ -3,6 +3,8 @@
  * TDS is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License.
  * You should have received a copy of the license along with this work.  If not, see <http://creativecommons.org/licenses/by-sa/4.0/>.
  */
+using UnityEngine;
+
 namespace Tds.PathFinder
 {
     public class SearchParameters<T> where T : class
@@ -37,11 +39,9 @@ namespace Tds.PathFinder
         /// </summary>
         public int Id { get; set; }
 
-        /// <summary>
-        /// Timestamp of when this search changed state, used to determine if the search
-        /// parameters can be reused
-        /// </summary>
-        public int TimeStamp { get; set; }
+        public SearchParameters()
+        {
+        }
 
         /// <summary>
         /// Checks if the from & to match the from and to nodes or vice versa
@@ -69,6 +69,17 @@ namespace Tds.PathFinder
                 if (readIndex < Length)
                 {
                     var index = Length - (readIndex + 1);
+
+                    if ( index < 0 || index >= Nodes.Length )
+                    {
+                        var str = "index ( " + index + " ) is out of bounds, read " + readIndex + ", write " + writeIndex + ", length " + Nodes.Length +"\n";
+                        for (int i = 0; i < Nodes.Length; ++i)
+                        {
+                            str += Nodes[i] + ", ";
+                        }
+                        Debug.LogError(str);
+                    }
+
                     if (Nodes[index] != null)
                     {
                         store[writeIndex] = Nodes[index];

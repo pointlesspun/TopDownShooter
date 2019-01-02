@@ -61,6 +61,8 @@ namespace Tds.DungeonPathfinding
         public int _searchesInProgress = 0;
         public int _completedSearches = 0;
 
+        public bool _drawWaypoints = false;
+
         /// <summary>
         /// Agents containing the pathing information
         /// </summary>
@@ -168,12 +170,20 @@ namespace Tds.DungeonPathfinding
 
             Gizmos.color = Color.black;
 
-            for (int i = 0; _currentPosition != null && i < _currentPosition.Length; ++i)
+            for (int i = 0; _currentPosition != null && _agents != null && i < _currentPosition.Length && i < _agents.Length; ++i)
             {
-                // not great for the performance
-                /*Gizmos.color = Color.white;
-                Gizmos.DrawWireSphere(_agents[i].waypoints[0], _gizmoSize * 0.5f);
-                Gizmos.DrawWireSphere(_agents[i].waypoints[1], _gizmoSize * 0.5f);*/
+                if (_drawWaypoints && _agents[i].waypoints != null)
+                {
+                    Gizmos.color = Color.yellow;
+                    Gizmos.DrawWireSphere(_agents[i].waypoints[1], _gizmoSize * 0.5f);
+
+                    Gizmos.color = Color.white;
+                    Gizmos.DrawWireSphere(_agents[i].waypoints[0], _gizmoSize * 0.5f);
+
+                    Gizmos.color = Color.black;
+                    Gizmos.DrawWireSphere(_agents[i].targetStartLocation, _gizmoSize * 0.5f);
+                    Gizmos.DrawLine(_currentPosition[i], _currentPosition[i] + _agents[i].movementDirection);
+                }
 
                 Gizmos.DrawSphere(_currentPosition[i], _gizmoSize);
             }
@@ -193,7 +203,7 @@ namespace Tds.DungeonPathfinding
                 var agentWaypointPosition = agentState.waypoints[agentState.waypointIndex];
 
                 var distanceToWaypoint = (agentPosition - agentWaypointPosition).magnitude;
-                agentPosition += (agentWaypointPosition - agentPosition).normalized
+                agentPosition += agentState.movementDirection.normalized
                                                 * Mathf.Min(distanceToWaypoint, agentSpeed);
 
                 // if the current waypoint is the end point, clamp the position of the agent to the 
@@ -207,6 +217,15 @@ namespace Tds.DungeonPathfinding
                         agentPosition = RectUtil.Clamp(lastNode.Bounds, agentPosition, 0.1f, 0.1f);
                     }
                 }
+            }
+            else if (agentState.state == PathingState.FollowingTarget)
+            {
+                var distanceToTarget = (agentState.targetLocation - agentPosition).magnitude; 
+
+                agentPosition += agentState.movementDirection.normalized
+                                                * Mathf.Min(distanceToTarget, agentSpeed);
+
+                agentPosition = RectUtil.Clamp(agentState.targetNode.Bounds, agentPosition, 0.1f, 0.1f);
             }
         }
     }
