@@ -8,7 +8,6 @@ namespace Tds.PathFinder
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using Tds.Util;
 
     public class BestFistSearch<T> where T : class
@@ -50,7 +49,6 @@ namespace Tds.PathFinder
         private PathNode<T> _root;
 
         private ObjectPool<PathNode<T>> _nodePool;
-
 
         public static BestFistSearch<T> Instantiate(int poolSize, 
                                                     float lengthWeight, 
